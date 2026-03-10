@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+.idea/
+
+# Environment
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data-Artefakte (grosse Dateien nicht ins Repo)
+data/raw/*
+!data/raw/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/index/*
+!data/index/.gitkeep
+data/eval/*
+!data/eval/.gitkeep
+
+# Run-Artefakte
+runs/naive_rag/*
+!runs/naive_rag/.gitkeep
+runs/eval/*
+!runs/eval/.gitkeep
+
+# Ruff
+.ruff_cache/
+
+# pytest
+.pytest_cache/
+
+# mypy / Pylance
+.mypy_cache/
