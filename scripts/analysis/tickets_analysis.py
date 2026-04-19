@@ -98,31 +98,34 @@ def _first_n_words(text: str, n: int = 12) -> str:
 
 
 def _count_duplicates(values: list[str]) -> tuple[int, int]:
-    """Zählt Einträge, die mindestens zweimal vorkommen.
+    """Zählt nicht-leere Einträge, die (nach strip) mindestens zweimal vorkommen.
 
     Returns:
         (Anzahl doppelter Einträge, Anzahl distincter Werte mehrfach)
     """
-    counter = Counter(values)
+    counter = Counter(v.strip() for v in values if v.strip())
     dup_vals = [(v, c) for v, c in counter.items() if c >= 2]
     return sum(c for _, c in dup_vals), len(dup_vals)
 
 
-def _count_similar(values: list[str], n: int = 12) -> tuple[int, int]:
-    """Zählt Einträge in Gruppen, wo erste n Wörter übereinstimmen,
-    aber die Texte innerhalb der Gruppe nicht alle identisch sind.
+def _count_similar(values: list[str], n: int = 12, min_wc: int = 4) -> tuple[int, int]:
+    """Zählt Einträge in Gruppen mit gleichen ersten n Wörtern (≥ 2 Mitglieder).
+
+    Nur nicht-leere Einträge mit mindestens min_wc Wörtern werden berücksichtigt.
 
     Returns:
         (Anzahl ähnlicher Einträge, Anzahl solcher Gruppen)
     """
     groups: dict[str, list[str]] = defaultdict(list)
     for v in values:
-        groups[_first_n_words(v, n)].append(v)
+        s = v.strip()
+        if s and len(s.split()) >= min_wc:
+            groups[_first_n_words(s, n)].append(s)
 
     count = 0
     num_groups = 0
     for group in groups.values():
-        if len(group) >= 2 and len(set(group)) >= 2:
+        if len(group) >= 2:
             count += len(group)
             num_groups += 1
     return count, num_groups
@@ -179,8 +182,8 @@ def generate_report(rows: list[dict[str, str]]) -> str:
 
     prod_vals = [r["PRODUKTID"] for r in rows]
     kat_vals = [r["KATEGORIE"] for r in rows]
-    n_produkte = len(set(prod_vals))
-    n_kategorien = len({k for k in kat_vals if k and k != "0"})
+    n_produkte = len({p for p in prod_vals if p.strip()})
+    n_kategorien = len({k for k in kat_vals if k.strip()})
 
     lines.append("")
     lines.append(
