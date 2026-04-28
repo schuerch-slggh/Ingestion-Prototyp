@@ -1,4 +1,4 @@
-"""Zentrale Konfiguration für den Naive-RAG-Prototypen.
+"""Zentrale Konfiguration für den RAG-Prototypen.
 
 Alle Pfade, Modellnamen und Parameter werden hier definiert.
 Kein anderes Modul soll Pfade oder Konstanten hart kodieren.
@@ -16,9 +16,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 # ── Datenpfade ───────────────────────────────────────────────
 DATA_DIR = PROJECT_ROOT / "data"
-RAW_DIR = DATA_DIR / "raw"
-INTERIM_DIR = DATA_DIR / "interim"
-PROCESSED_DIR = DATA_DIR / "processed"
+RAW_DIR = DATA_DIR / "bronze"
+INTERIM_DIR = DATA_DIR / "silver"
+PROCESSED_DIR = DATA_DIR / "gold"
 INDEX_DIR = DATA_DIR / "index"
 EVAL_DIR = DATA_DIR / "eval"
 
