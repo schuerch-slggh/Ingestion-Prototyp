@@ -1,15 +1,15 @@
-# Naive RAG – Baseline-Prototyp (Bachelorarbeit)
+# RAG-Prototyp – Bachelorarbeit
 
-Dieses Repository implementiert einen **Naive RAG** (Retrieval-Augmented Generation)
-als wissenschaftliche Baseline für eine Bachelorarbeit. Der Prototyp wird
-später gegen ein **Modular RAG** evaluiert.
+Dieses Repository implementiert einen RAG-Prototypen (Retrieval-Augmented Generation)
+als wissenschaftliches Artefakt für eine Bachelorarbeit. Die Pipeline unterstützt
+vier Varianten (V0–V3), die kumulativ aufeinander aufbauen.
 
 ## Ziel
 
-- Einfacher, reproduzierbarer Naive-RAG-Prototyp
+- Reproduzierbarer RAG-Prototyp mit vier vergleichbaren Varianten
 - Saubere Pipeline: Ingest → Index → Retrieve → Generate → Evaluate
 - Persistente Artefakte für jeden Schritt
-- Vergleichsbasis für spätere Modular-RAG-Variante
+- Variantenspezifische Datenpfade für Vergleichbarkeit
 
 ## Voraussetzungen
 
@@ -41,35 +41,66 @@ cp .env.example .env
 
 ## Pipeline ausführen
 
-Die Pipeline besteht aus vier Skripten, die sequenziell ausgeführt werden:
+Die Pipeline besteht aus vier Skripten in `scripts/Pipeline/`, die sequenziell
+ausgeführt werden:
 
 ```bash
 # 1. Dokumente einlesen und normalisieren
-python scripts/01_ingest.py
+python scripts/Pipeline/01_ingest.py
 
 # 2. Chunks erstellen, Embeddings berechnen, Index aufbauen
-python scripts/02_index.py
+python scripts/Pipeline/02_index.py
 
 # 3. Frage stellen und Antwort generieren
-python scripts/03_query.py "Deine Frage hier"
+python scripts/Pipeline/03_query.py "Deine Frage hier"
 
 # 4. Evaluation durchführen
-python scripts/04_evaluate.py
+python scripts/Pipeline/04_evaluate.py
+```
+
+## Pipeline-Varianten
+
+Die Pipeline unterstützt vier Varianten, die über `--variant` gewählt werden:
+
+| Variante | Beschreibung | Status |
+|----------|--------------|--------|
+| `v0` | Naive Baseline – alle Quellen gleich behandelt | Implementiert |
+| `v1` | Quellenspezifische Aufbereitung pro Dokumenttyp | Geplant |
+| `v2` | Metadaten-Anreicherung & Recency-Prior im Retrieval | Geplant |
+| `v3` | Multimodalität via Vision-Language-Model | Geplant |
+
+**Aktuell ist nur V0 implementiert. V1–V3 folgen in nachfolgenden Arbeitspaketen.**
+
+```bash
+# Variante explizit angeben
+python scripts/Pipeline/02_index.py --variant v0
+python scripts/Pipeline/03_query.py --variant v0 "Deine Frage hier"
+
+# Alternativ über Umgebungsvariable (gilt für alle Skripte)
+VARIANT=v0 python scripts/Pipeline/02_index.py
+```
+
+Jede Variante speichert Artefakte in eigenen Unterordnern:
+
+```
+data/processed/v0/   ← Chunks
+data/index/v0/       ← Vektorindex
+runs/v0/             ← Query-Artefakte
+runs/eval/v0/        ← Evaluationsergebnisse
 ```
 
 ## Verzeichnisstruktur
 
 ```
-data/raw/          ← Originaldaten (PDFs, CSVs, …)
-data/interim/      ← Zwischenergebnisse (extrahierter Text)
-data/processed/    ← Aufbereitete, normalisierte Dokumente
-data/index/        ← Vektorindex / Embeddings
-data/eval/         ← Evaluationsergebnisse
-runs/naive_rag/    ← Lauf-Artefakte des Naive RAG
-runs/eval/         ← Evaluations-Runs
-src/rag/           ← Hauptpaket
-scripts/           ← Einstiegspunkte
-tests/             ← Unit-Tests
+data/bronze/         ← Originaldaten (PDFs, CSVs, …)
+data/interim/        ← Normalisierter Text (variantenunabhängig)
+data/processed/      ← Chunks pro Variante (z. B. processed/v0/)
+data/index/          ← Vektorindex pro Variante (z. B. index/v0/)
+data/eval/           ← Testdatensatz (variantenunabhängig)
+runs/                ← Lauf-Artefakte pro Variante
+src/rag/             ← Hauptpaket
+scripts/Pipeline/    ← Einstiegspunkte (01_ingest, 02_index, …)
+tests/               ← Unit-Tests
 ```
 
 ## Tests
@@ -87,6 +118,5 @@ ruff format .
 
 ## Hinweis
 
-Dies ist bewusst eine **einfache Baseline**. Fortgeschrittene RAG-Features
-(Re-Ranking, hybride Suche, Agentenlogik etc.) sind nicht enthalten und
-werden erst in der Modular-RAG-Variante implementiert.
+Dies ist ein wissenschaftlicher Prototyp. V0 dient als Naive-RAG-Baseline;
+V1–V3 bauen darauf auf und werden in separaten Arbeitspaketen implementiert.

@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 def run_evaluation(
     test_dataset_path: Path,
     output_dir: Path,
+    index_dir: Path | None = None,
 ) -> dict:
     """Führt Queries aus dem Testdatensatz aus und speichert Ergebnisse
     im RAGAS-kompatiblen Format für spätere Evaluation.
@@ -43,7 +44,7 @@ def run_evaluation(
         logger.info(
             "Frage %d/%d: %s", i, len(test_data), question[:80]
         )
-        result = run_query(question)
+        result = run_query(question, index_dir=index_dir)
 
         results.append({
             "question": question,

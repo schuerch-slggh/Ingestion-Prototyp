@@ -9,6 +9,7 @@ Verantwortung:
 
 import logging
 from datetime import datetime, timezone
+from pathlib import Path
 
 from rag.config import EMBEDDING_MODEL, INDEX_DIR, LLM_MODEL, TOP_K
 from rag.generate.llm import call_llm
@@ -20,7 +21,7 @@ from rag.retrieve.retriever import retrieve
 logger = logging.getLogger(__name__)
 
 
-def run_query(query: str) -> dict:
+def run_query(query: str, index_dir: Path | None = None) -> dict:
     """Führt eine vollständige RAG-Query aus.
 
     Gibt ein dict mit query, answer, contexts, retrieved_chunks,
@@ -28,8 +29,10 @@ def run_query(query: str) -> dict:
     """
     logger.info("Pipeline-Query: '%s'", query[:80])
 
+    resolved_index_dir = index_dir if index_dir is not None else INDEX_DIR
+
     # 1. Index laden
-    collection = load_index(INDEX_DIR)
+    collection = load_index(resolved_index_dir)
 
     # 2. Query-Embedding berechnen
     query_embedding = embed_texts([query], EMBEDDING_MODEL)[0]

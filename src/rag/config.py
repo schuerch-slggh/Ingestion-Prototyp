@@ -43,3 +43,21 @@ TOP_K: int = 5
 
 # ── Reproduzierbarkeit ───────────────────────────────────────
 RANDOM_SEED: int = 42
+
+# ── Variante ─────────────────────────────────────────────────
+VARIANT: str = os.getenv("VARIANT", "v0")
+
+
+def get_variant_index_dir(variant: str | None = None) -> Path:
+    """Pfad zum variantenspezifischen Vektorindex."""
+    return INDEX_DIR / (variant or VARIANT)
+
+
+def get_variant_processed_dir(variant: str | None = None) -> Path:
+    """Pfad für variantenspezifische verarbeitete Chunks."""
+    return PROCESSED_DIR / (variant or VARIANT)
+
+
+def get_variant_eval_dir(variant: str | None = None) -> Path:
+    """Pfad für variantenspezifische Evaluationsergebnisse."""
+    return EVAL_DIR / (variant or VARIANT)
