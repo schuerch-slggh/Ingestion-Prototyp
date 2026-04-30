@@ -14,13 +14,16 @@ load_dotenv()
 # ── Projektroot ──────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-# ── Datenpfade ───────────────────────────────────────────────
+# ── Datenaufbereitung (variantenunabhängig) ──────────────────
 DATA_DIR = PROJECT_ROOT / "data"
-RAW_DIR = DATA_DIR / "bronze"
-INTERIM_DIR = DATA_DIR / "silver"
-PROCESSED_DIR = DATA_DIR / "gold"
-INDEX_DIR = DATA_DIR / "index"
-EVAL_DIR = DATA_DIR / "eval"
+RAW_DIR = DATA_DIR / "bronze"        # Rohdaten
+INTERIM_DIR = DATA_DIR / "silver"    # Bereinigt
+GOLD_DIR = DATA_DIR / "gold"         # Einheitliches Zwischenformat (JSONL)
+
+# ── Ingestion-Artefakte (variantenabhängig) ──────────────────
+CHUNKS_DIR = DATA_DIR / "chunks"     # Pro Variante eigene Chunks
+INDEX_DIR = DATA_DIR / "index"       # Pro Variante eigener Vektorindex
+EVAL_DIR = DATA_DIR / "eval"         # Pro Variante eigene Evaluation
 
 # ── Run-Artefakte ────────────────────────────────────────────
 RUNS_DIR = PROJECT_ROOT / "runs"
@@ -54,9 +57,9 @@ def get_variant_index_dir(variant: str | None = None) -> Path:
     return INDEX_DIR / (variant or VARIANT)
 
 
-def get_variant_processed_dir(variant: str | None = None) -> Path:
-    """Pfad für variantenspezifische verarbeitete Chunks."""
-    return PROCESSED_DIR / (variant or VARIANT)
+def get_variant_chunks_dir(variant: str | None = None) -> Path:
+    """Pfad für variantenspezifische Chunks."""
+    return CHUNKS_DIR / (variant or VARIANT)
 
 
 def get_variant_eval_dir(variant: str | None = None) -> Path:

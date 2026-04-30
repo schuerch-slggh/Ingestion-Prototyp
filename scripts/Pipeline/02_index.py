@@ -22,8 +22,8 @@ from rag.config import (
     EMBEDDING_MODEL,
     INTERIM_DIR,
     VARIANT,
+    get_variant_chunks_dir,
     get_variant_index_dir,
-    get_variant_processed_dir,
 )
 from rag.index.embeddings import embed_texts
 from rag.index.vectorstore import create_index
@@ -59,9 +59,9 @@ def main() -> None:
     logger.info("%d Chunks erstellt", len(chunks))
 
     # 2b. Chunks persistieren (variantenspezifisch)
-    processed_dir = get_variant_processed_dir(variant)
-    processed_dir.mkdir(parents=True, exist_ok=True)
-    chunks_path = processed_dir / "chunks.json"
+    chunks_dir = get_variant_chunks_dir(variant)
+    chunks_dir.mkdir(parents=True, exist_ok=True)
+    chunks_path = chunks_dir / "chunks.json"
     chunks_path.write_text(
         json.dumps(chunks, ensure_ascii=False, indent=2),
         encoding="utf-8",

@@ -4,6 +4,16 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-01 – AP-2a.1: Pfadstruktur korrigieren
+
+- `PROCESSED_DIR` umbenannt zu `GOLD_DIR` (Datenaufbereitung, variantenunabhängig)
+- Neuer Pfad `CHUNKS_DIR` für variantenspezifische Chunks (Ingestion)
+- `get_variant_processed_dir()` entfernt, ersetzt durch `get_variant_chunks_dir()`
+- Verwendungsstellen in `00_prepare_forum.py` und `02_index.py` angepasst
+- Klare Trennung zwischen Datenaufbereitung (Kap. 5) und Ingestion (Kap. 6)
+
+---
+
 ## 2026-05-01 – AP-2a: Forum-Datenaufbereitung
 
 - Submodul `src/rag/preparation/` mit Modulen `lookups.py`, `jsonl_writer.py`, `forum.py`

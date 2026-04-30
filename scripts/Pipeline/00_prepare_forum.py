@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from rag.config import INTERIM_DIR, PROCESSED_DIR, RAW_DIR
+from rag.config import GOLD_DIR, INTERIM_DIR, RAW_DIR
 from rag.preparation.forum import clean_to_silver, load_bronze, transform_to_gold
 from rag.preparation.jsonl_writer import write_jsonl
 
@@ -40,7 +40,7 @@ def main() -> None:
 
     suffix = "_sample" if args.sample else ""
     silver_path = INTERIM_DIR / f"forum{suffix}.csv"
-    gold_path = PROCESSED_DIR / f"forum{suffix}.jsonl"
+    gold_path = GOLD_DIR / f"forum{suffix}.jsonl"
 
     logger.info("=== Forum-Aufbereitung gestartet ===")
     logger.info("Quelle: %s", SOURCE)
