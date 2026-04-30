@@ -31,12 +31,13 @@ EVAL_RUNS_DIR = RUNS_DIR / "eval"
 OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
 
 # ── Modelle ──────────────────────────────────────────────────
-EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
-LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-4o-mini")
+EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-large")
+LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-4.1")
+LLM_TEMPERATURE: float = float(os.getenv("LLM_TEMPERATURE", "0.0"))
 
 # ── Chunking ─────────────────────────────────────────────────
-CHUNK_SIZE: int = 512
-CHUNK_OVERLAP: int = 64
+CHUNK_SIZE: int = 800
+CHUNK_OVERLAP: int = 100
 
 # ── Retrieval ────────────────────────────────────────────────
 TOP_K: int = 5

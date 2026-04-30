@@ -9,7 +9,7 @@ import logging
 
 from openai import OpenAI
 
-from rag.config import OPENAI_API_KEY, RANDOM_SEED
+from rag.config import LLM_TEMPERATURE, OPENAI_API_KEY, RANDOM_SEED
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ def call_llm(messages: list[dict], model: str) -> str:
     response = client.chat.completions.create(
         model=model,
         messages=messages,
-        temperature=0.0,
+        temperature=LLM_TEMPERATURE,
         seed=RANDOM_SEED,
     )
 
