@@ -23,6 +23,10 @@ env/
 .DS_Store
 Thumbs.db
 
+# Sensible Daten und interne Dokumente (NDA-relevant)
+data/
+docs/
+
 # Data-Artefakte (grosse Dateien nicht ins Repo)
 data/raw/*
 !data/raw/.gitkeep
