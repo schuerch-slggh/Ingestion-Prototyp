@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/Pipeline/02_index.py --variant v0)",
+      "Bash(python -m pytest tests/ -q)",
+      "Bash(git add *)"
+    ]
+  }
+}
