@@ -4,6 +4,19 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-01 – AP-2a: Forum-Datenaufbereitung
+
+- Submodul `src/rag/preparation/` mit Modulen `lookups.py`, `jsonl_writer.py`, `forum.py`
+- Pipeline-Skript `scripts/Pipeline/00_prepare_forum.py`
+- Bronze→Silver→Gold-Verarbeitung für Forum-Quelle
+- Encoding-Korrektur (Latin-1/UTF-8 Mojibake-Fix), Spaltenfilterung, BBCode/HTML-Entfernung,
+  Modul-Code-Auflösung, Deduplizierung, JSONL-Export
+- 2058 Bronze-Beiträge → 2052 Silver/Gold (6 Duplikate entfernt)
+- Tests für alle drei Verarbeitungsstufen (6/6 bestanden)
+- Quelldatei: `data/bronze/forum/forum.csv` (Trennzeichen: `;`, 26 phpBB-Spalten)
+
+---
+
 ## 2026-04-30 – AP-1.5: Konfigurations-Synchronisation
 
 - EMBEDDING_MODEL Default auf `text-embedding-3-large` (DE-1)
