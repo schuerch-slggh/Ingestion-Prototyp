@@ -14,7 +14,8 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 - Outline als strukturierte Liste in Gold-Schicht (für V1-Chunking)
 - Boilerplate-Filter (isolierte Seitenzahlen, Copyright-Zeilen)
 - Dependency: pymupdf>=1.24 (installiert: 1.27.2)
-- 7 PDFs, 7'570 Seiten, 5'154 Bilder extrahiert (2'231 gefiltert als zu klein)
+- 8 PDFs, 9'082 Seiten, 6'253 Bilder extrahiert (2'782 gefiltert als zu klein)
+  (inkl. SelectLine System Handbuch: 1'512 Seiten, 1'084 Outline-Einträge)
 - Tests 4/4 bestanden
 
 ---
