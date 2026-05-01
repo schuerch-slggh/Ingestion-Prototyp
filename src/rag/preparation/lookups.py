@@ -44,6 +44,77 @@ FORUM_MODULE_LOOKUP: dict[str, str] = {
 }
 
 
+PRODUCT_LOOKUP: dict[str, str] = {
+    "1": "Auftrag",
+    "2": "Rechnungswesen",
+    "3": "Lohn",
+    "4": "Kassabuch",
+    "5": "Leistung",
+    "6": "PC Kasse",
+    "7": "Vertriebsmodul",
+    "8": "Datenorm/Artikelmanager",
+    "9": "WAG Auftrag",
+    "10": "WAG Fibu",
+    "11": "WAG Lohn",
+    "12": "Toolbox",
+    "13": "Systemübergreifend",
+    "14": "Anlagebuchhaltung",
+    "15": "OP-Verwaltung",
+    "16": "Helpdesk",
+    "17": "Internetauftritt",
+    "18": "Verkauf",
+    "19": "Mapkit",
+    "20": "CRM",
+    "21": "SL.mobile",
+    "22": "Plantafel",
+    "23": "/",
+    "24": "Makro SQL",
+    "25": "Power BI",
+    "26": "SL.MDE",
+    "27": "SL.Archiv",
+    "28": "SelectLine Server",
+}
+
+TICKET_STATUS_LOOKUP: dict[str, str] = {
+    "1": "Aufgenommen",
+    "7": "Zu Bearbeiten",
+    "8": "Zu Testen",
+    "12": "SLDE",
+    "13": "Zu Besprechen",
+    "17": "Abgebrochen",
+    "21": "Wiedereröffnet",
+    "1000": "Erledigt",
+}
+
+
+def resolve_product(product_id: str) -> str:
+    """Löst einen PRODUKTID-Code in den Klartext-Produktnamen auf.
+
+    Liegt der Code nicht in der Lookup-Tabelle, wird der Code selbst
+    zurückgegeben und eine Warnung geloggt.
+    """
+    if product_id in PRODUCT_LOOKUP:
+        return PRODUCT_LOOKUP[product_id]
+    logger.warning(
+        "Unbekannte PRODUKTID '%s' – Code wird als Klartext beibehalten", product_id
+    )
+    return product_id
+
+
+def resolve_ticket_status(status_id: str) -> str:
+    """Löst einen STATUSID-Code in den Klartext-Statusnamen auf.
+
+    Liegt der Code nicht in der Lookup-Tabelle, wird der Code selbst
+    zurückgegeben und eine Warnung geloggt.
+    """
+    if status_id in TICKET_STATUS_LOOKUP:
+        return TICKET_STATUS_LOOKUP[status_id]
+    logger.warning(
+        "Unbekannte STATUSID '%s' – Code wird als Klartext beibehalten", status_id
+    )
+    return status_id
+
+
 def resolve_forum_module(forum_id: str) -> str:
     """Löst einen phpBB forum_id-Code in den Klartext-Modulnamen auf.
 

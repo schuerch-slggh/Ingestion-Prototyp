@@ -4,6 +4,22 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-01 – AP-2b: Ticket-Datenaufbereitung
+
+- Modul `src/rag/preparation/dbf_reader.py` (DBF-Lese-Logik aus
+  `scripts/transformation/ticket_dbf_to_csv.py` extrahiert,
+  Pfad-Hartcodierung entfernt, API gibt DataFrame statt CSV zurück)
+- Modul `src/rag/preparation/tickets.py` (load_bronze, clean_to_silver, transform_to_gold)
+- Lookup-Tabellen `PRODUCT_LOOKUP` und `TICKET_STATUS_LOOKUP` in `lookups.py`
+- Pipeline-Skript `scripts/Pipeline/00_prepare_tickets.py`
+- Filter: nur Tickets mit nicht-leerem LOESUNG-Feld (18'609 → 4'691)
+- Gold-Format mit strukturierten Markern (Fehlerbeschreibung:, Lösung:)
+- Tests für DBF-Lese-Logik und alle drei Verarbeitungsstufen (5/5 bestanden)
+- Altes Skript `ticket_dbf_to_csv.py` als Wrapper reduziert
+- 645 E-Mail-Signaturen entfernt, 468 HTML-Felder bereinigt
+
+---
+
 ## 2026-05-01 – AP-2a.1: Pfadstruktur korrigieren
 
 - `PROCESSED_DIR` umbenannt zu `GOLD_DIR` (Datenaufbereitung, variantenunabhängig)
