@@ -4,6 +4,20 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-01 – AP-2d: Modulbeschreibungen-Datenaufbereitung
+
+- Modul `src/rag/preparation/modulbeschreibungen.py` (analog zu handbuecher.py,
+  rglob für Unterordner, source_type="modulbeschreibung")
+- Pipeline-Skript `scripts/Pipeline/00_prepare_modulbeschreibungen.py`
+- Boilerplate-Pattern `BOILERPLATE_PATTERNS` + `remove_boilerplate()` nach
+  `pdf_reader.py` extrahiert (gemeinsam genutzt von handbuecher.py und
+  modulbeschreibungen.py); neues Pattern: `^Seite\s+\d+` (für "Seite X von Y")
+- 63 PDFs in 12 Unterordnern, 1'053 Seiten, 1'542 Bilder extrahiert
+- Outline-Statistik: 3/63 Dokumente mit Outline, 60 ohne → robust behandelt
+- Tests 3/3 bestanden; alle bisherigen Tests weiterhin grün (7/7)
+
+---
+
 ## 2026-05-01 – AP-2c: Handbuch-Datenaufbereitung
 
 - Modul `src/rag/preparation/pdf_reader.py` (PyMuPDF-basiert, generisch

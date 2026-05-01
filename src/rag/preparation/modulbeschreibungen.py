@@ -1,4 +1,9 @@
-"""Handbuch-Datenaufbereitung: Bronze → Silver → Gold."""
+"""Modulbeschreibungen-Datenaufbereitung: Bronze → Silver → Gold.
+
+Die Modulbeschreibungen liegen in Unterordnern von data/bronze/modulbeschreibungen/.
+Im Gegensatz zu den Handbüchern haben die meisten Dokumente keine auswertbare
+Outline (nur ~3 von 63 Dokumenten). Die Pipeline ist robust gegen leere Outlines.
+"""
 
 import json
 import logging
@@ -16,18 +21,18 @@ logger = logging.getLogger(__name__)
 def load_bronze(
     source_dir: Path, sample_size: int | None = None
 ) -> list[dict]:
-    """Lädt alle PDFs aus dem Quellverzeichnis und extrahiert Text, Outline und Bilder.
+    """Lädt alle PDFs aus dem Quellverzeichnis (inkl. Unterordner).
 
-    Bilder werden dabei direkt in GOLD_DIR/images/<doc_id>/ abgelegt.
+    Bilder werden direkt in GOLD_DIR/images/<doc_id>/ abgelegt.
 
     Args:
-        source_dir: Verzeichnis mit den Handbuch-PDFs.
+        source_dir: Wurzelverzeichnis mit den Modulbeschreibungs-PDFs.
         sample_size: Bei Angabe reproduzierbare Stichprobe dieser Anzahl Dokumente.
 
     Returns:
         Liste von Dicts (je PDF ein Dict aus read_pdf).
     """
-    pdf_files = sorted(source_dir.glob("*.pdf"))
+    pdf_files = sorted(source_dir.rglob("*.pdf"))
     if not pdf_files:
         logger.warning("Keine PDFs in %s gefunden.", source_dir)
         return []
@@ -38,7 +43,7 @@ def load_bronze(
         logger.info(
             "Stichprobe: %d von %d PDFs werden verarbeitet.",
             len(pdf_files),
-            len(sorted(source_dir.glob("*.pdf"))),
+            len(sorted(source_dir.rglob("*.pdf"))),
         )
 
     image_output_dir = GOLD_DIR / "images"
@@ -62,8 +67,8 @@ def load_bronze(
 def clean_to_silver(documents: list[dict]) -> pd.DataFrame:
     """Bereinigt Bronze-Dokumente zu Silver.
 
-    Entfernt Boilerplate aus full_text (Seitenzahlen, Copyright-Zeilen).
-    Outline und Bilder werden als JSON-Strings für CSV-Kompatibilität gespeichert.
+    Entfernt Boilerplate aus full_text. Outline wird mitgeführt, auch wenn sie
+    leer ist. Loggt Statistik: Anzahl Dokumente mit/ohne Outline.
 
     Args:
         documents: Liste von Dicts aus load_bronze.
@@ -76,15 +81,19 @@ def clean_to_silver(documents: list[dict]) -> pd.DataFrame:
     rows = []
     total_pages = 0
     total_images = 0
-    outline_depths: list[int] = []
+    docs_with_outline = 0
+    docs_without_outline = 0
 
     for doc in documents:
         cleaned_text = remove_boilerplate(doc["full_text"])
         outline = doc.get("outline", [])
         images = doc.get("images", [])
 
-        max_depth = max((e["level"] for e in outline), default=0)
-        outline_depths.append(max_depth)
+        if outline:
+            docs_with_outline += 1
+        else:
+            docs_without_outline += 1
+
         total_pages += doc["page_count"]
         total_images += len(images)
 
@@ -99,14 +108,16 @@ def clean_to_silver(documents: list[dict]) -> pd.DataFrame:
         })
 
     df = pd.DataFrame(rows)
-    avg_depth = sum(outline_depths) / len(outline_depths) if outline_depths else 0
     logger.info(
-        "Silver bereinigt: %d Dokumente, %d Seiten, %d Bilder, "
-        "Ø Outline-Tiefe %.1f",
+        "Silver bereinigt: %d Dokumente, %d Seiten, %d Bilder",
         len(df),
         total_pages,
         total_images,
-        avg_depth,
+    )
+    logger.info(
+        "Outline-Statistik: %d mit Outline, %d ohne Outline",
+        docs_with_outline,
+        docs_without_outline,
     )
     return df
 
@@ -120,14 +131,13 @@ def transform_to_gold(df: pd.DataFrame) -> list[dict]:
         df: Silver-DataFrame aus clean_to_silver.
 
     Returns:
-        Liste von Gold-Dicts mit dem dokumentierten Schema.
+        Liste von Gold-Dicts mit source_type "modulbeschreibung".
     """
     records = []
     for _, row in df.iterrows():
         outline = json.loads(row["outline_json"])
         images_raw = json.loads(row["images_json"])
 
-        # Absolute Pfade → relativ zum Projektroot
         images = []
         for img in images_raw:
             try:
@@ -139,7 +149,7 @@ def transform_to_gold(df: pd.DataFrame) -> list[dict]:
 
         records.append({
             "doc_id": str(row["doc_id"]),
-            "source_type": "handbuch",
+            "source_type": "modulbeschreibung",
             "metadata": {
                 "filename": str(row["filename"]),
                 "page_count": int(row["page_count"]),

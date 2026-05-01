@@ -17,8 +17,33 @@ logger = logging.getLogger(__name__)
 # (Logos, Trennlinien, winzige UI-Elemente)
 MIN_IMAGE_SIZE: int = 50
 
+# Gemeinsame Boilerplate-Pattern für alle PDF-Quellen (zeilenweise geprüft).
+# Wiederverwendet von handbuecher.py und modulbeschreibungen.py.
+BOILERPLATE_PATTERNS: list[re.Pattern] = [
+    re.compile(r"^\d+$"),                        # isolierte Seitenzahlen
+    re.compile(r"^Copyright\s+©", re.IGNORECASE), # Copyright-Zeilen
+    re.compile(r"^©\s*\d{4}", re.IGNORECASE),    # © YYYY …
+    re.compile(r"^Seite\s+\d+", re.IGNORECASE),  # Seite X / Seite X von Y
+]
+
 _RE_MULTI_SPACE = re.compile(r"[ \t]+")
 _RE_MULTI_NEWLINE = re.compile(r"\n{3,}")
+
+
+def remove_boilerplate(text: str) -> str:
+    """Entfernt Boilerplate-Zeilen aus PDF-extrahiertem Text.
+
+    Filtert isolierte Seitenzahlen, Copyright- und Seiten-Marker anhand
+    von BOILERPLATE_PATTERNS. Wird von handbuecher.py und
+    modulbeschreibungen.py gemeinsam genutzt.
+    """
+    lines = text.splitlines()
+    cleaned = [
+        line
+        for line in lines
+        if not any(pat.match(line.strip()) for pat in BOILERPLATE_PATTERNS)
+    ]
+    return "\n".join(cleaned).strip()
 
 
 def _derive_doc_id(pdf_path: Path) -> str:
