@@ -4,6 +4,21 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-01 – AP-2c: Handbuch-Datenaufbereitung
+
+- Modul `src/rag/preparation/pdf_reader.py` (PyMuPDF-basiert, generisch
+  wiederverwendbar für alle PDF-Quellen: Text, Outline, Bild-Extraktion)
+- Modul `src/rag/preparation/handbuecher.py` (load_bronze, clean_to_silver, transform_to_gold)
+- Pipeline-Skript `scripts/Pipeline/00_prepare_handbuecher.py`
+- Bilder als PNG nach data/gold/images/<doc_id>/ extrahiert; Bilder <50×50px verworfen
+- Outline als strukturierte Liste in Gold-Schicht (für V1-Chunking)
+- Boilerplate-Filter (isolierte Seitenzahlen, Copyright-Zeilen)
+- Dependency: pymupdf>=1.24 (installiert: 1.27.2)
+- 7 PDFs, 7'570 Seiten, 5'154 Bilder extrahiert (2'231 gefiltert als zu klein)
+- Tests 4/4 bestanden
+
+---
+
 ## 2026-05-01 – AP-2b: Ticket-Datenaufbereitung
 
 - Modul `src/rag/preparation/dbf_reader.py` (DBF-Lese-Logik aus
