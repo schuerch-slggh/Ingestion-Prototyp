@@ -17,7 +17,7 @@ from pathlib import Path
 from pypdf import PdfReader
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-SOURCE_DIR = PROJECT_ROOT / "data" / "raw" / "schulungsunterlagen"
+SOURCE_DIR = PROJECT_ROOT / "data" / "bronze" / "schulungsunterlagen"
 EVAL_DIR = PROJECT_ROOT / "data" / "eval"
 REPORT: Path = EVAL_DIR / "schulungsunterlagen_report.txt"
 

@@ -4,6 +4,26 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-02 – AP-2.5: Repo-Aufräumen nach Datenaufbereitungs-APs
+
+Aufräumarbeiten nach Abschluss der Datenaufbereitungs-APs (AP-2a bis AP-2e):
+
+- Duplikat `.github/CLAUDE.md` entfernt (Claude-Konfig nur noch im Root)
+- `src/rag/ingest/` war bereits nicht mehr vorhanden (wurde offenbar schon entfernt)
+- `scripts/Pipeline/01_ingest.py` gelöscht (ersetzt durch `00_prepare_*.py`)
+- `src/rag/pipeline_factory.py` mit `NotImplementedError`-Stubs versehen;
+  Neuimplementation in AP-3 (alte Imports auf `rag.ingest` entfernt)
+- `scripts/transformation/forum_encoding_fix.py` gelöscht
+  (Logik liegt vollständig in `preparation/forum.py`)
+- `.gitignore` modernisiert: spezifische `data/raw|interim|processed|index|eval`-
+  Einträge entfernt (redundant zu pauschaler `data/`-Regel); `runs/naive_rag`-
+  Eintrag entfernt
+- `runs/naive_rag/` entfernt; `NAIVE_RAG_RUNS_DIR` aus `config.py` entfernt
+- Alle fünf `00_prepare_*.py`-Skripte weiterhin lauffähig (Smoke-Tests bestanden)
+- 23/23 Tests bestanden
+
+---
+
 ## 2026-05-02 – AP-2e: Schulungsunterlagen + pages-Array in Gold-Schema (PDF)
 
 - Modul `src/rag/preparation/schulungsunterlagen.py` (analog zu handbuecher.py,

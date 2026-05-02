@@ -27,7 +27,6 @@ EVAL_DIR = DATA_DIR / "eval"         # Pro Variante eigene Evaluation
 
 # ── Run-Artefakte ────────────────────────────────────────────
 RUNS_DIR = PROJECT_ROOT / "runs"
-NAIVE_RAG_RUNS_DIR = RUNS_DIR / "naive_rag"
 EVAL_RUNS_DIR = RUNS_DIR / "eval"
 
 # ── API-Keys ─────────────────────────────────────────────────
