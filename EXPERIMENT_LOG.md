@@ -4,6 +4,40 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-02 – AP-3.1: V0 End-to-End (Retrieval + Generation)
+
+- `src/rag/retrieve/retriever.py`: `retrieve_chunks()` mit cosine-to-similarity-
+  Konvertierung (`similarity = 1 - distance`); ChromaDB-IDs werden automatisch
+  zurückgegeben (nicht in `include` angegeben – ChromaDB 1.5.8 API)
+- `src/rag/generate/prompts.py`: `build_messages()` mit Chunk-Header
+  `[source_file: X, chunk_index: N]` und Zitations-Instruktion in System-Message
+- `src/rag/generate/llm.py`: `call_llm()` mit Token-Tracking und Dauer-Messung
+- `src/rag/generate/pipeline.py`: `answer_query()` orchestriert Retrieval →
+  Prompt-Aufbau → LLM-Aufruf; gibt vollständiges JSON-Output-Schema zurück
+- `scripts/Pipeline/03_query.py`: CLI mit `--query`, `--variant`, `--no-save`;
+  speichert Ergebnis in `runs/<variant>/queries/<ts>_<slug>.json`
+- `tests/test_retrieval_and_prompts.py`: 4 Unit-Tests (pure, kein Index nötig)
+  + 1 Integration-Test (skippt ohne V0-Index)
+- 32/32 Tests bestanden
+
+**Smoke-Tests (Variante v0, TOP_K=5, gpt-4.1):**
+
+| # | Frage | top sim | in tok | out tok | s |
+|---|-------|---------|--------|---------|---|
+| 1 | Wie lege ich einen neuen Kunden im SelectLine Auftrag an? | 0.3789 | 1561 | 135 | 3.2 |
+| 2 | Was tun, wenn der OPOS EZV-Import bei Bezugsteuer einen Fehler wirft? | 0.2542 | 1422 | 263 | 3.5 |
+| 3 | Wie kann ich Makros nachträglich aktivieren? | 0.2107 | 2081 | 183 | 2.1 |
+
+**Befunde:**
+- Similaritätswerte generell niedrig (0.21–0.38): V0-Naive-Baseline expected;
+  ohne Metadaten-Filterung oder Reranking liefert die naive Suche suboptimale Matches
+- Zitation `[Quelle: unknown, Chunk 0]` erscheint bei Fragen 1 & 2: LLM nutzt
+  das Zitations-Format, aber `source_file`-Metadaten aus dem Ticket/Forum-Quellen
+  enthalten keinen Dateinamen → als "unknown" ausgegeben. Muss in V1+ adressiert werden.
+- Frage 3 ("Makros"): korrekte Quellennennung `[Schulungsunterlagen Makroassistent.pdf, Chunk 2]`
+
+---
+
 ## 2026-05-02 – AP-3: V0-Indexierung auf Vollumfang
 
 - `CHUNK_SIZE` auf 1000, `CHUNK_OVERLAP` auf 150 gesetzt (DE-4)

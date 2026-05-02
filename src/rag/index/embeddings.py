@@ -9,6 +9,20 @@ from rag.config import EMBEDDING_MODEL, OPENAI_API_KEY
 logger = logging.getLogger(__name__)
 
 
+def embed_query(text: str) -> list[float]:
+    """Erzeugt das Embedding für einen einzelnen Query-Text.
+
+    Args:
+        text: Anfrage-String.
+
+    Returns:
+        Embedding-Vektor als Liste von Floats.
+    """
+    client = OpenAI(api_key=OPENAI_API_KEY)
+    response = client.embeddings.create(model=EMBEDDING_MODEL, input=[text])
+    return response.data[0].embedding
+
+
 def embed_chunks(chunks: list[dict], batch_size: int = 100) -> list[list[float]]:
     """Erzeugt Embeddings für alle Chunks via OpenAI text-embedding-3-large.
 

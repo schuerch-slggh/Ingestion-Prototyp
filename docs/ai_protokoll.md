@@ -1,0 +1,421 @@
+# KI-Protokoll – RAG-Prototyp Bachelorarbeit
+
+Dieses File dokumentiert alle Prompts und KI-Aktionen im Rahmen der Bachelorarbeit
+"Modular RAG-Architektur für technischen ERP-Support" (Gian Schürch, 2026).
+Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
+
+---
+
+## Konversation 7 – 2026-05-02
+
+### Prompts
+
+**Prompt 1 (AP-3.1 Fortsetzung – Smoke-Tests 2 & 3, Commit):**
+> Fortsetzung aus vorheriger Konversation (Kontextlimit). Smoke-Tests 2 und 3
+> ausführen, EXPERIMENT_LOG und AI-Protokoll aktualisieren, Commit AP-3.1.
+
+### Aktionen & Erkenntnisse
+
+**Ausgeführte Smoke-Tests:**
+
+| # | Query | top_sim | in tok | out tok | s |
+|---|-------|---------|--------|---------|---|
+| 2 | Was tun, wenn der OPOS EZV-Import bei Bezugsteuer einen Fehler wirft? | 0.2542 | 1422 | 263 | 3.5 |
+| 3 | Wie kann ich Makros nachträglich aktivieren? | 0.2107 | 2081 | 183 | 2.1 |
+
+**Geänderte Dateien:**
+
+| Datei | Änderung |
+|-------|----------|
+| `EXPERIMENT_LOG.md` | AP-3.1-Eintrag mit Smoke-Test-Resultaten und Befunden |
+| `docs/ai_protokoll.md` | Konversation 7 (diese) |
+
+**Erkenntnisse:**
+- Similaritätswerte 0.21–0.38 für alle drei Queries: typisch für V0-Naive-Baseline
+  ohne Reranking oder Metadaten-Filterung
+- `[Quelle: unknown, Chunk 0]` bei Ticket/Forum-Chunks: `source_file`-Metadaten
+  dieser Quellen enthalten keinen aussagekräftigen Dateinamen → in V1/V2 zu adressieren
+
+---
+
+## Konversation 6 – 2026-05-01
+
+### Prompts
+
+**Prompt 1 (AP-2e: Schulungsunterlagen + Gold-Schema-Erweiterung pages-Array):**
+> 19 PDFs in data/bronze/schulungsunterlagen/ (flat). Gold-Schema aller PDF-Quellen
+> um content.pages-Array erweitern (seitenbasiertes Chunking in V1/V2). 
+> Boilerplate-Bereinigung pro Seite für Konsistenz zwischen full_text und pages[*].text.
+> handbuecher.py und modulbeschreibungen.py entsprechend erweitern.
+> Gold-Dateien für Handbücher und Modulbeschreibungen neu generieren.
+> schulungsunterlagen.py, Pipeline-Skript, 3+2 Tests.
+> Commit: feat: schulungsunterlagen prep + add pages array to PDF gold schema (AP-2e).
+
+### Aktionen & Erkenntnisse
+
+**Neue Dateien:**
+
+| Datei | Inhalt |
+|-------|--------|
+| `src/rag/preparation/schulungsunterlagen.py` | `load_bronze` (flaches glob), `clean_to_silver`, `transform_to_gold`; source_type="schulungsunterlage" |
+| `scripts/Pipeline/00_prepare_schulungsunterlagen.py` | Orchestrierung mit `--sample N` |
+| `tests/test_preparation_schulungsunterlagen.py` | 3 Tests – source_type, pages-Array, pages/full_text-Konsistenz |
+
+**Geänderte Dateien:**
+
+| Datei | Änderung |
+|-------|----------|
+| `src/rag/preparation/handbuecher.py` | `clean_to_silver`: Boilerplate pro Seite; `pages_json` in Silver; `transform_to_gold`: `content.pages` aus `pages_json` |
+| `src/rag/preparation/modulbeschreibungen.py` | Gleiche Erweiterung wie handbuecher.py |
+| `scripts/Pipeline/00_prepare_handbuecher.py` | `pages_json` beim CSV-Export gedroppt |
+| `scripts/Pipeline/00_prepare_modulbeschreibungen.py` | `pages_json` beim CSV-Export gedroppt |
+| `tests/test_preparation_handbuecher.py` | `_make_silver_df()` mit `pages_json`; Test `test_transform_to_gold_includes_pages` ergänzt; Inline-Doc in Boilerplate-Test mit `pages` ergänzt |
+| `tests/test_preparation_modulbeschreibungen.py` | `_make_doc()` + `_make_silver_row()` mit `pages`; Test `test_transform_to_gold_includes_pages` ergänzt; Schema-Check um `pages` erweitert |
+| `EXPERIMENT_LOG.md` | Eintrag AP-2e hinzugefügt |
+
+**Ergebnisse:**
+- Schulungsunterlagen: 19 PDFs, 937 Seiten, 1'319 Bilder (keine Outline, wie erwartet)
+- Handbücher neu generiert: 8 PDFs, 9'082 Seiten, 6'253 Bilder
+- Modulbeschreibungen neu generiert: 63 PDFs, 1'053 Seiten, 1'542 Bilder
+- 23/23 Tests bestanden
+
+**Erkenntnisse:**
+- Test-Fixtures (Dokument-Dicts) müssen `pages`-Key enthalten, da `clean_to_silver` nun
+  `full_text` aus `pages` ableitet und nicht mehr aus `doc["full_text"]` direkt liest
+- `pages_json` nicht CSV-kompatibel (lange JSON-Arrays) → beim CSV-Schritt explizit droppen
+- Schulungsunterlagen haben durchgängig keine Outline (alle 19 PDFs: 0 Einträge)
+
+---
+
+## Konversation 5 – 2026-05-01
+
+### Prompts
+
+**Prompt 1 (AP-2d: Modulbeschreibungen-Datenaufbereitung Bronze→Silver→Gold):**
+> 63 PDFs in data/bronze/modulbeschreibungen/ (Unterordner). Analog zu handbuecher.py,
+> jedoch rglob statt glob, source_type="modulbeschreibung", outline meist leer (nur 3/63
+> haben Outline). Boilerplate-Pattern in pdf_reader.py extrahieren (gemeinsam nutzbar).
+> Neues Pattern: "Seite X von Y". 3 Tests. EXPERIMENT_LOG aktualisieren.
+> Commit: feat: modulbeschreibungen data preparation bronze to gold (AP-2d).
+
+### Aktionen & Erkenntnisse
+
+**Neue Dateien:**
+
+| Datei | Inhalt |
+|-------|--------|
+| `src/rag/preparation/modulbeschreibungen.py` | `load_bronze` (rglob), `clean_to_silver`, `transform_to_gold` |
+| `scripts/Pipeline/00_prepare_modulbeschreibungen.py` | Orchestrierung mit `--sample N` |
+| `tests/test_preparation_modulbeschreibungen.py` | 3 Tests – alle bestanden |
+
+**Geänderte Dateien:**
+
+| Datei | Änderung |
+|-------|----------|
+| `src/rag/preparation/pdf_reader.py` | `BOILERPLATE_PATTERNS` + `remove_boilerplate()` als öffentliche Symbole ergänzt; neues Pattern `^Seite\s+\d+` |
+| `src/rag/preparation/handbuecher.py` | Lokale Boilerplate-Logik durch Import aus `pdf_reader.py` ersetzt |
+| `EXPERIMENT_LOG.md` | Eintrag AP-2d hinzugefügt |
+
+**Erkenntnisse:**
+- PDFs liegen in 12 Unterordnern → `rglob` statt `glob`
+- Outline nur bei 3/63 Dokumenten vorhanden (Analyse-Erwartung bestätigt)
+- "Seite X von Y" ist das wichtigste neue Boilerplate-Pattern
+- `BOILERPLATE_PATTERNS` und `remove_boilerplate()` in `pdf_reader.py` zentralisiert; kein Duplikat
+
+---
+
+## Konversation 4 – 2026-05-01
+
+### Prompts
+
+**Prompt 1 (AP-2c: Handbuch-Datenaufbereitung Bronze→Silver→Gold):**
+> PDF-Quelle Handbücher (7 PDFs in data/bronze/handbuecher/) aufbereiten.
+> PyMuPDF für Text/Outline/Bild-Extraktion. Generisches pdf_reader.py-Modul
+> (wiederverwendbar für AP-2d/2e). handbuecher.py analog zu forum.py/tickets.py.
+> Bilder als PNG nach data/gold/images/<doc_id>/. Gold-JSONL mit full_text,
+> outline-Liste und Bild-Metadaten. Pipeline-Skript mit --sample 1. 4 Tests.
+> Commit: feat: handbuch data preparation bronze to gold (AP-2c).
+
+### Aktionen & Erkenntnisse
+
+**Neue Dateien:**
+
+| Datei | Inhalt |
+|-------|--------|
+| `src/rag/preparation/pdf_reader.py` | Generisches PDF-Modul: `read_pdf_text()`, `extract_images()`, `read_pdf()` |
+| `src/rag/preparation/handbuecher.py` | `load_bronze()`, `clean_to_silver()`, `transform_to_gold()` |
+| `scripts/Pipeline/00_prepare_handbuecher.py` | Orchestrierung mit `--sample N` |
+| `tests/test_preparation_handbuecher.py` | 4 Tests – alle bestanden |
+
+**Geänderte Dateien:**
+
+| Datei | Änderung |
+|-------|----------|
+| `pyproject.toml` | `pymupdf>=1.24` ergänzt |
+| `EXPERIMENT_LOG.md` | Eintrag AP-2c hinzugefügt |
+
+**Erkenntnisse:**
+- 7 Handbücher (nicht 8 wie im Prompt angegeben) in `data/bronze/handbuecher/`
+- 7'570 Seiten, 5'154 Bilder extrahiert (2'231 < 50×50px verworfen)
+- Durchschnittliche Outline-Tiefe: 4 Ebenen
+- Boilerplate: isolierte Seitenzahlen am Seitenende und Copyright-Zeilen
+- PDF-Erstellung für Tests: zweistufig (create → save → reopen → add images) wegen PyMuPDF-Eigenheit bei in-memory Dokumenten
+- `filepath` in Gold-JSON als relative Pfade zum Projektroot gespeichert
+
+**Offene Punkte:**
+- AP-2d: Aufbereitung der Modulbeschreibungen
+- AP-2e: Aufbereitung der Schulungsunterlagen
+
+---
+
+## Konversation 3 – 2026-05-01
+
+### Prompts
+
+**Prompt 1 (AP-2b: Ticket-Datenaufbereitung Bronze→Silver→Gold):**
+> Felder: ID, KATEGORIE, VERSION, VERSIONERL, BESCHREIBU, PRODUKTID, FEHLER, LOESUNG,
+> STATUSID, BEARBEITET. Lookup-Tabellen PRODUCT_LOOKUP und TICKET_STATUS_LOOKUP in lookups.py.
+> DBF-Lese-Logik aus ticket_dbf_to_csv.py nach dbf_reader.py extrahieren (DataFrame-API).
+> tickets.py mit load_bronze, clean_to_silver, transform_to_gold analog zu forum.py.
+> Pipeline-Skript scripts/Pipeline/00_prepare_tickets.py mit --sample. 5 Tests.
+> EXPERIMENT_LOG aktualisieren. Commit: feat: ticket data preparation bronze to gold (AP-2b).
+
+### Aktionen & Erkenntnisse
+
+**Neue Dateien:**
+
+| Datei | Inhalt |
+|-------|--------|
+| `src/rag/preparation/dbf_reader.py` | `read_dbf()` – DBF+DBT→DataFrame, migriert aus `ticket_dbf_to_csv.py` |
+| `src/rag/preparation/tickets.py` | `load_bronze()`, `clean_to_silver()`, `transform_to_gold()` |
+| `scripts/Pipeline/00_prepare_tickets.py` | Orchestrierung mit `--sample N` |
+| `tests/test_preparation_tickets.py` | 5 Tests – alle bestanden |
+
+**Geänderte Dateien:**
+
+| Datei | Änderung |
+|-------|----------|
+| `src/rag/preparation/lookups.py` | `PRODUCT_LOOKUP`, `TICKET_STATUS_LOOKUP`, `resolve_product()`, `resolve_ticket_status()` |
+| `scripts/transformation/ticket_dbf_to_csv.py` | Auf Wrapper reduziert |
+| `EXPERIMENT_LOG.md` | Eintrag AP-2b hinzugefügt |
+
+**Erkenntnisse:**
+- DBF-Datei liegt unter `data/bronze/helpdesk/vorgaenge.dbf` (nicht `data/raw/`)
+- 18'609 Tickets total, 4'691 mit nicht-leerem LOESUNG-Feld (~25%)
+- 645 E-Mail-Signaturen entfernt, 468 HTML-Felder bereinigt
+- Unbekannte STATUSID-Codes: 3, 4, 14, 16 (werden als Rohcode weitergegeben + Warning)
+- Einige Tickets haben leere PRODUKTID (→ Warning, Feld bleibt leer)
+- Ruff nicht im System-PATH verfügbar; Syntaxkorrektheit via Python-Import verifiziert
+
+**Offene Punkte:**
+- AP-2c: Aufbereitung der PDF-Quellen (Handbücher, Modulbeschreibungen, Schulungsunterlagen)
+
+---
+
+## Konversation 2 – 2026-04-30
+
+### Prompts
+
+**Prompt 1 (Repository für öffentliche Sichtbarkeit vorbereiten):**
+> Mein Bachelorarbeit-Repository soll öffentlich sichtbar werden, jedoch dürfen die Ordner
+> data/ und docs/ und ihre gesamte Git-Historie nicht öffentlich werden. Sie enthalten
+> Geschäftsdaten der SelectLine Software AG (NDA-relevant) sowie den aktuellen Stand der
+> Bachelorarbeit und das KI-Nutzungsprotokoll. Schritte: Backup anlegen, Inventur sensibler
+> Inhalte, .gitignore aktualisieren, git filter-repo ausführen, Force-Push nach Bestätigung,
+> Verifikationscheckliste erstellen, AI-Protokoll aktualisieren.
+
+**Prompt 3 (AP-2a: Forum-Datenaufbereitung Bronze→Silver→Gold – Kontext):**
+> Forum-CSV (phpBB-Export, Tab-getrennt, 26 Spalten, Encoding-korrupt) durch die Pipeline
+> Bronze→Silver→Gold führen. Relevante Spalten: post_id, topic_id, forum_id, post_time,
+> post_subject, post_text. Lookup-Tabelle für forum_id wird in src/rag/preparation/lookups.py
+> abgelegt. Zielformat: JSONL in data/gold/forum.jsonl. Details folgen im nächsten Prompt.
+
+**Prompt 4 (AP-2a: Auszuführende Schritte):**
+> Schritt 1–6: preparation/-Submodul, lookups.py, jsonl_writer.py, forum.py (load_bronze,
+> clean_to_silver, transform_to_gold), Pipeline-Skript 00_prepare_forum.py mit --sample,
+> Tests (6 Testfälle), EXPERIMENT_LOG aktualisieren, commit + push.
+
+**Prompt 2 (AP-1.5: Konfigurations-Synchronisation):**
+> Konfigurationswerte in src/rag/config.py und .env.example mit Designentscheidungen
+> DE-1 bis DE-7 synchronisieren: EMBEDDING_MODEL → text-embedding-3-large, LLM_MODEL →
+> gpt-4.1, CHUNK_SIZE → 800, CHUNK_OVERLAP → 100, neue Konstante LLM_TEMPERATURE = 0.0.
+> Verwendungsstellen prüfen; Hartcodierungen durch Konfigurationsreferenzen ersetzen.
+> Commit: chore: sync config with documented design decisions (AP-1.5).
+
+### Aktionen & Erkenntnisse
+
+**Ziel:** Repository `Ingestion-Prototyp` für öffentliche GitHub-Sichtbarkeit bereinigen –
+`data/` und `docs/` vollständig aus Git-Historie entfernen (NDA-Schutz SelectLine AG).
+
+**Schritt 1 – Backup angelegt:**
+- Pfad: `c:\Users\Giani\OneDrive - Selectline Software AG\BA\Prototyp Beta\Prototyp-Alpha-backup-20260430-1635`
+- Grösse: 691.3 MB (vollständige Kopie inkl. aller Daten)
+
+**Schritt 2 – Inventur sensibler Inhalte:**
+Folgende Dateien wurden jemals in `data/` und `docs/` committet (Auswahl):
+- `data/bronze/handbuecher/*.pdf` (7 Handbücher)
+- `data/bronze/modulbeschreibungen/**/*.pdf` (~50 PDFs)
+- `data/bronze/schulungsunterlagen/*.pdf` (~20 Unterlagen)
+- `data/bronze/helpdesk/vorgaenge.dbf/.dbt/.ods`
+- `data/bronze/forum/forum.csv`
+- `data/silver/Forum_Export_fixed.csv`
+- `docs/BachelorarbeitBisKap6.pdf`
+- `docs/ai_protokoll.md`
+
+**Schritt 3 – .gitignore aktualisiert:**
+- `data/` und `docs/` als globale Einträge hinzugefügt (NDA-Kommentar)
+- Commit: `chore: ignore data/ and docs/ in version control` (vor filter-repo)
+- Push auf `origin/main` erfolgreich
+
+**Schritt 4 – git filter-repo ausgeführt:**
+- Tool: `python -m git_filter_repo --path data/ --path docs/ --invert-paths --force`
+- Ergebnis: Alle Commits mit `data/` oder `docs/` vollständig aus Geschichte getilgt
+- Commit-Anzahl nach Bereinigung: 8
+- Lokale Verifikation: `git log --all -- data/ docs/` → leere Ausgabe ✓
+- Hinweis: git filter-repo entfernt auch lokale Dateien aus dem Working Tree →
+  `docs/` wurde aus Backup wiederhergestellt
+
+**Schritt 5 – Force-Push nach Bestätigung:**
+- Bestätigung erteilt: "Push freigegeben"
+- `git push origin --force --all` → `main` erfolgreich überschrieben
+- Remote: `https://github.com/schuerch-slggh/Ingestion-Prototyp.git`
+
+**Entscheidungen:**
+- Remote-URL bleibt `Ingestion-Prototyp` (Prompt nannte `Prototyp-Alpha` – bestehendes Repo beibehalten)
+- `data/` lokal aus Backup wiederherstellbar falls nötig (Backup vorhanden)
+
+**Offene Punkte aus Konversation 2, Prompt 1:**
+- Verifikationscheckliste auf GitHub manuell abarbeiten (Schritt 6)
+- Repo-Sichtbarkeit auf "Public" umstellen (GitHub Settings → Change visibility)
+
+---
+
+**AP-1.5 – Konfigurations-Synchronisation (Prompt 2):**
+
+**Geänderte Dateien:**
+
+| Datei | Änderung |
+|-------|----------|
+| `src/rag/config.py` | EMBEDDING_MODEL → `text-embedding-3-large`, LLM_MODEL → `gpt-4.1`, neue Konstante `LLM_TEMPERATURE = 0.0`, CHUNK_SIZE → 800, CHUNK_OVERLAP → 100 |
+| `src/rag/generate/llm.py` | `temperature=0.0` (hartcodiert) → `temperature=LLM_TEMPERATURE` aus config |
+| `.env.example` | Kommentare aktualisiert, LLM_TEMPERATURE und VARIANT ergänzt |
+| `EXPERIMENT_LOG.md` | Eintrag AP-1.5 hinzugefügt |
+
+**Entscheidungen:**
+- Hartcodierte Temperatur in `llm.py` als CLAUDE.md-Verletzung erkannt und ersetzt
+- `embeddings.py` und `chunking.py` benötigen keine Änderungen (nehmen Parameter entgegen)
+- Smoke-Test `01_ingest.py` bestanden (leerer Lauf erwartet, keine Daten lokal)
+- `02_index.py`-Fehler vorbestehend (chromadb versucht nicht-existente Collection zu löschen)
+- ruff-Binary nicht im System verfügbar (Installationsproblem Systemrechte); Syntaxkorrektheit via `ast.parse` verifiziert
+
+---
+
+**AP-2a – Forum-Datenaufbereitung (Prompts 3 & 4):**
+
+**Neue Dateien:**
+
+| Datei | Inhalt |
+|-------|--------|
+| `src/rag/preparation/__init__.py` | Submodul-Init |
+| `src/rag/preparation/lookups.py` | `FORUM_MODULE_LOOKUP` + `resolve_forum_module()` |
+| `src/rag/preparation/jsonl_writer.py` | `write_jsonl()` – generisch wiederverwendbar |
+| `src/rag/preparation/forum.py` | `load_bronze()`, `clean_to_silver()`, `transform_to_gold()` |
+| `scripts/Pipeline/00_prepare_forum.py` | Orchestrierung mit `--sample N` |
+| `tests/test_preparation_forum.py` | 6 Tests – alle bestanden |
+
+**Geänderte Dateien:** `pyproject.toml` (`pandas>=2.0`), `EXPERIMENT_LOG.md`
+
+**Erkenntnisse:**
+- Quelldatei liegt unter `data/bronze/forum/forum.csv`, nicht `Forum_Export.csv`
+  (Prompt-Beschreibung abweichend von tatsächlicher Dateistruktur)
+- Trennzeichen ist `;` (Prompt sagte Tab; bestehender Code war korrekt)
+- Encoding-Korrektur (Latin-1→UTF-8 Mojibake-Fix) korrekt; 0 Mojibake-Reste in Gold
+- 2058 Bronze → 2052 Silver/Gold (6 Duplikate, 0 Leerbeiträge entfernt)
+- 340 HTML-Felder, 1333 BBCode-Felder bereinigt
+
+**Offene Punkte:**
+- AP-2b, AP-2c: Aufbereitung weiterer Quellen (Tickets, PDFs)
+
+---
+
+## Konversation 1 – 2026-04-28
+
+### Prompts
+
+**Prompt 1 (Kontext-Setup):**
+> Kontext der Bachelorarbeit [...] Ich entwickle einen Prototyp für meine Bachelorarbeit in
+> Wirtschaftsinformatik zum Thema "Modular RAG-Architektur für technischen ERP-Support".
+> [...] Lies zusätzlich CLAUDE.md für die verbindlichen Coding-Vorgaben. [vollständiger
+> Prompt enthält: Repo-Zustand, V0–V3-Konzept, Refactor-Ziel]
+
+**Prompt 2 (Dokumentation & Bestätigung):**
+> Da meine Dozentin will, dass ich die Prompts die ich dir gebe dokumentiere, möchte ich,
+> dass du alle Prompts sowie eine zusammenfassende & übersichtliche Darstellung deiner
+> Handlungen in einem File dokumentierst und laufend erweiterst. Erstelle ein solches File
+> und ergänze "claude.md" damit dieses File bei jeder Konversation erweitert wird.
+> Antworten auf deine Fragen:
+> - Ja der Bronze-Ordner ist befüllt mit allen Rohdaten
+> - Der Quelltyp kann über die Ordnerstruktur erkannt werden
+
+**Prompt 3 (AP-1: Variantenfähiger Umbau V0):**
+> Aufgabe dieses Arbeitspakets (AP-1): Ziel: V0-Pipeline so umbauen, dass sie variantenfähig
+> wird, ohne V0 inhaltlich zu verändern. [vollständiger Prompt enthält: config.py-Erweiterung,
+> CLI-Argparse, pipeline_factory.py, README-Update, EXPERIMENT_LOG.md]
+
+**Prompt 4 (Klärung Skript-Pfad):**
+> Skripte verschieben [Antwort auf Rückfrage: Skripte nach scripts/Pipeline/ verschieben]
+
+### Aktionen & Erkenntnisse
+
+**Kontext aufgebaut:**
+- CLAUDE.md gelesen (Coding-Vorgaben: Ruff, Pylance, pytest, 4 Spaces, 88 Zeichen)
+- Repo-Struktur vollständig analysiert: 4 Scripts + 5 Module in `src/rag/`
+- Aktueller Zustand entspricht V0 (Naive RAG Baseline)
+
+**Architektur-Analyse:**
+- `config.py` definiert zentral alle Pfade (RAW/INTERIM/PROCESSED/INDEX/EVAL/RUNS)
+- Verzeichnisstruktur in `config.py` weicht noch von CLAUDE.md-Vorgabe ab
+  (raw/interim/processed statt bronze/silver/gold)
+- Scripts nutzen `argparse` noch nicht – kein Variant-Parameter vorhanden
+- `vectorstore.py` hat hardcodierten Collection-Namen `"naive_rag"`
+
+**Refactor-Plan erarbeitet (noch nicht implementiert):**
+
+| Aspekt | Geplante Änderung |
+|--------|-------------------|
+| Pfade | bronze/silver/gold pro Variante; `get_paths(variant)` in config.py |
+| CLI | `--variant v0\|v1\|v2\|v3` in allen 4 Scripts |
+| Ingest | `variants/v0.py` – `v3.py` mit Loader-Factory |
+| Retrieval | V2/V3 erhalten Recency-Prior im Scorer |
+| Vectorstore | Collection-Name wird `rag_<variant>` |
+| Fixe Infrastruktur | Embedding-Modell, ChromaDB, Generator bleiben unverändert |
+
+**Offene Fragen beantwortet:**
+- Bronze-Ordner ist befüllt mit Rohdaten ✓
+- Quelltyp-Erkennung über Unterordner-Struktur ✓
+
+**AP-1 abgeschlossen – geänderte Dateien:**
+
+| Datei | Aktion | Beschreibung |
+|-------|--------|--------------|
+| `src/rag/config.py` | Editiert | `VARIANT` + 3 Getter-Funktionen ergänzt |
+| `src/rag/pipeline_factory.py` | Neu | Factory mit `get_loaders()`, `get_chunker()` |
+| `src/rag/generate/pipeline.py` | Editiert | `run_query()` + optionaler `index_dir`-Parameter |
+| `src/rag/evaluate/ragas_eval.py` | Editiert | `run_evaluation()` + optionaler `index_dir`-Parameter |
+| `scripts/Pipeline/01_ingest.py` | Neu | Argparse + Factory-Loader |
+| `scripts/Pipeline/02_index.py` | Neu | Argparse + Factory-Chunker + Variant-Pfade |
+| `scripts/Pipeline/03_query.py` | Neu | Argparse + Variant-Index-Pfad |
+| `scripts/Pipeline/04_evaluate.py` | Neu | Argparse + Variant-Eval-Pfad |
+| `scripts/01–04_*.py` | Gelöscht | Nach `scripts/Pipeline/` verschoben |
+| `README.md` | Editiert | Pipeline-Varianten-Sektion + korrigierte Pfade |
+| `EXPERIMENT_LOG.md` | Neu | Experiment-Log angelegt |
+
+**Entscheidungen:**
+- `INTERIM_DIR` bleibt variantenunabhängig (geteilte Bronze/Silver-Daten)
+- Factory ohne `choices`-Restriktion in argparse → `ValueError` kommt aus Factory
+- `run_query()` und `run_evaluation()` bleiben rückwärtskompatibel (index_dir optional)
+- `vectorstore.py` und `COLLECTION_NAME` bleiben unverändert (kein AP-1-Scope)
+
+---
+
+<!-- Neue Konversationen werden hier oben als neue Abschnitte eingefügt -->

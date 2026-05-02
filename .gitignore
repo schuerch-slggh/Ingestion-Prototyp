@@ -26,6 +26,7 @@ Thumbs.db
 # Sensible Daten und interne Dokumente (NDA-relevant)
 data/
 docs/
+!docs/ai_protokoll.md
 
 # Run-Artefakte
 runs/eval/*

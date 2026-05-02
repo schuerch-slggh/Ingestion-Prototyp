@@ -1,44 +1,50 @@
-"""Retriever: Findet die relevantesten Chunks zu einer Benutzeranfrage.
-
-Verantwortung:
-- Query-Embedding berechnen
-- Top-K ähnlichste Chunks aus dem Vektorindex abrufen
-- Ergebnisse mit Metadaten zurückgeben
-"""
+"""Retriever: Findet die relevantesten Chunks zu einer Benutzeranfrage."""
 
 import logging
 
-import chromadb
+from rag.config import TOP_K
+from rag.index.embeddings import embed_query
+from rag.index.vectorstore import get_or_create_collection
 
 logger = logging.getLogger(__name__)
 
 
-def retrieve(
-    query_embedding: list[float],
-    collection: chromadb.Collection,
-    top_k: int,
+def retrieve_chunks(
+    query: str, variant: str, top_k: int | None = None
 ) -> list[dict]:
-    """Sucht die *top_k* relevantesten Chunks per Ähnlichkeitssuche.
+    """Ruft die k ähnlichsten Chunks aus dem variantenspezifischen Index ab.
 
-    Erwartet ein vorberechnetes Query-Embedding.
-    Gibt eine Liste von Chunk-Dicts mit ``text``, ``metadata`` und
-    ``score`` zurück.
+    Args:
+        query: Anfrage-Text.
+        variant: Pipeline-Variante (z. B. "v0").
+        top_k: Anzahl abzurufender Chunks. Falls None, wird TOP_K aus
+               config.py verwendet.
+
+    Returns:
+        Liste von Chunk-Dicts mit Schlüsseln 'id', 'text', 'metadata',
+        'similarity'. Reihenfolge: absteigend nach Ähnlichkeit.
     """
-    logger.info("Retrieval: top_k=%d", top_k)
+    k = top_k if top_k is not None else TOP_K
+    logger.info("Retrieval: query='%s…', variant=%s, top_k=%d", query[:50], variant, k)
+
+    query_embedding = embed_query(query)
+    collection = get_or_create_collection(variant)
 
     results = collection.query(
         query_embeddings=[query_embedding],
-        n_results=top_k,
+        n_results=k,
         include=["documents", "metadatas", "distances"],
     )
 
-    retrieved: list[dict] = []
+    chunks: list[dict] = []
     for i in range(len(results["ids"][0])):
-        retrieved.append({
+        distance = results["distances"][0][i]
+        chunks.append({
+            "id": results["ids"][0][i],
             "text": results["documents"][0][i],
             "metadata": results["metadatas"][0][i],
-            "score": results["distances"][0][i],
+            "similarity": round(1.0 - distance, 6),
         })
 
-    logger.info("%d Chunks abgerufen", len(retrieved))
-    return retrieved
+    logger.info("%d Chunks abgerufen (top similarity: %.4f)", len(chunks), chunks[0]["similarity"] if chunks else 0)
+    return chunks
