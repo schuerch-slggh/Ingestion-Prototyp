@@ -49,7 +49,7 @@ def main() -> None:
     silver_df = clean_to_silver(documents)
     silver_path = INTERIM_DIR / f"modulbeschreibungen{suffix}.csv"
     silver_path.parent.mkdir(parents=True, exist_ok=True)
-    silver_df.drop(columns=["outline_json", "images_json"]).to_csv(
+    silver_df.drop(columns=["outline_json", "pages_json", "images_json"]).to_csv(
         silver_path, index=False, encoding="utf-8"
     )
     logger.info("Silver geschrieben: %s (%d Zeilen)", silver_path, len(silver_df))

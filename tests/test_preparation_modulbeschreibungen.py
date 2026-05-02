@@ -31,6 +31,7 @@ def _make_doc(
         "full_text": full_text,
         "outline": outline if outline is not None else [],
         "images": [],
+        "pages": [{"page_number": 1, "text": full_text}],
     }
 
 
@@ -42,6 +43,7 @@ def _make_silver_row(doc_id: str = "modul_test", outline: list | None = None) ->
         "page_count": 5,
         "full_text": "Inhalt der Modulbeschreibung.",
         "outline_json": json.dumps(outline or []),
+        "pages_json": json.dumps([{"page_number": 1, "text": "Seitentext"}]),
         "images_json": json.dumps([]),
         "image_count": 0,
     }
@@ -99,3 +101,21 @@ def test_transform_to_gold_uses_correct_source_type() -> None:
         assert "images" in record
         assert "outline" in record["content"]
         assert isinstance(record["content"]["outline"], list)
+        assert "pages" in record["content"]
+        assert isinstance(record["content"]["pages"], list)
+
+
+def test_transform_to_gold_includes_pages() -> None:
+    """Gold-Records müssen content.pages als Liste von Seiten-Dicts enthalten."""
+    rows = [_make_silver_row("modul_a")]
+    df = pd.DataFrame(rows)
+    records = transform_to_gold(df)
+
+    assert len(records) == 1
+    content = records[0]["content"]
+    assert "pages" in content
+    assert isinstance(content["pages"], list)
+    assert len(content["pages"]) == 1
+    page = content["pages"][0]
+    assert "page_number" in page
+    assert "text" in page

@@ -87,6 +87,10 @@ def _make_silver_df(n: int = 2) -> pd.DataFrame:
         "outline_json": [
             json.dumps([{"level": 1, "title": "Kap 1", "page": 1}])
         ] * n,
+        "pages_json": [
+            json.dumps([{"page_number": 1, "text": f"Seitentext Handbuch {idx}"}])
+            for idx in range(1, n + 1)
+        ],
         "images_json": [
             json.dumps([{
                 "image_id": "img_001",
@@ -150,11 +154,11 @@ def test_clean_to_silver_removes_boilerplate() -> None:
     """clean_to_silver muss Boilerplate-Zeilen (Seitenzahlen, Copyright) entfernen."""
     raw_text = (
         "Einleitung\n"
-        "42\n"  # isolierte Seitenzahl → muss entfernt werden
+        "42\n"
         "Dies ist normaler Text.\n"
-        "Copyright © 2024 SelectLine Software AG\n"  # → muss entfernt werden
+        "Copyright © 2024 SelectLine Software AG\n"
         "Weiterer normaler Text.\n"
-        "© 2023 SelectLine\n"  # → muss entfernt werden
+        "© 2023 SelectLine\n"
         "Abschluss"
     )
     documents = [{
@@ -164,6 +168,7 @@ def test_clean_to_silver_removes_boilerplate() -> None:
         "full_text": raw_text,
         "outline": [],
         "images": [],
+        "pages": [{"page_number": 1, "text": raw_text}],
     }]
     df = clean_to_silver(documents)
 
@@ -209,3 +214,18 @@ def test_transform_to_gold_produces_correct_schema() -> None:
         assert "width" in img
         assert "height" in img
         assert "\\" not in img["filepath"], "Pfad muss Forward-Slashes verwenden"
+
+
+def test_transform_to_gold_includes_pages() -> None:
+    """Gold-Records müssen content.pages als Liste von Seiten-Dicts enthalten."""
+    df = _make_silver_df(1)
+    records = transform_to_gold(df)
+
+    assert len(records) == 1
+    content = records[0]["content"]
+    assert "pages" in content, "content muss pages-Array enthalten"
+    assert isinstance(content["pages"], list)
+    assert len(content["pages"]) == 1
+    page = content["pages"][0]
+    assert "page_number" in page
+    assert "text" in page

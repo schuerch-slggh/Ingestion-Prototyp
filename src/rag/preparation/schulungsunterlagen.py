@@ -1,4 +1,4 @@
-"""Handbuch-Datenaufbereitung: Bronze → Silver → Gold."""
+"""Schulungsunterlagen-Datenaufbereitung: Bronze → Silver → Gold."""
 
 import json
 import logging
@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 def load_bronze(
     source_dir: Path, sample_size: int | None = None
 ) -> list[dict]:
-    """Lädt alle PDFs aus dem Quellverzeichnis und extrahiert Text, Outline und Bilder.
+    """Lädt alle PDFs aus dem Quellverzeichnis (flach, keine Unterordner).
 
-    Bilder werden dabei direkt in GOLD_DIR/images/<doc_id>/ abgelegt.
+    Bilder werden direkt in GOLD_DIR/images/<doc_id>/ abgelegt.
 
     Args:
-        source_dir: Verzeichnis mit den Handbuch-PDFs.
+        source_dir: Verzeichnis mit den Schulungsunterlagen-PDFs.
         sample_size: Bei Angabe reproduzierbare Stichprobe dieser Anzahl Dokumente.
 
     Returns:
@@ -62,8 +62,9 @@ def load_bronze(
 def clean_to_silver(documents: list[dict]) -> pd.DataFrame:
     """Bereinigt Bronze-Dokumente zu Silver.
 
-    Entfernt Boilerplate aus full_text (Seitenzahlen, Copyright-Zeilen).
-    Outline und Bilder werden als JSON-Strings für CSV-Kompatibilität gespeichert.
+    Entfernt Boilerplate aus full_text. Outline wird mitgeführt (bei
+    Schulungsunterlagen in der Regel leer). Speichert pro-Seite-Text in
+    pages_json für späteres V1-Chunking.
 
     Args:
         documents: Liste von Dicts aus load_bronze.
@@ -71,26 +72,22 @@ def clean_to_silver(documents: list[dict]) -> pd.DataFrame:
     Returns:
         DataFrame mit den Spalten:
         doc_id, filename, page_count, full_text, outline_json,
-        images_json, image_count.
+        pages_json, images_json, image_count.
     """
     rows = []
     total_pages = 0
     total_images = 0
-    outline_depths: list[int] = []
 
     for doc in documents:
         outline = doc.get("outline", [])
         images = doc.get("images", [])
 
-        # Boilerplate-Bereinigung pro Seite (Konsistenz mit full_text sichergestellt)
         cleaned_pages = [
             {"page_number": p["page_number"], "text": remove_boilerplate(p["text"])}
             for p in doc.get("pages", [])
         ]
         cleaned_text = "\n\n".join(p["text"] for p in cleaned_pages if p["text"]).strip()
 
-        max_depth = max((e["level"] for e in outline), default=0)
-        outline_depths.append(max_depth)
         total_pages += doc["page_count"]
         total_images += len(images)
 
@@ -106,19 +103,13 @@ def clean_to_silver(documents: list[dict]) -> pd.DataFrame:
         })
 
     df = pd.DataFrame(rows)
-    avg_depth = sum(outline_depths) / len(outline_depths) if outline_depths else 0
     logger.info(
-        "Silver bereinigt: %d Dokumente, %d Seiten, %d Bilder, "
-        "Ø Outline-Tiefe %.1f",
+        "Silver bereinigt: %d Dokumente, %d Seiten, %d Bilder",
         len(df),
         total_pages,
         total_images,
-        avg_depth,
     )
     return df
-
-
-
 
 
 def transform_to_gold(df: pd.DataFrame) -> list[dict]:
@@ -130,7 +121,7 @@ def transform_to_gold(df: pd.DataFrame) -> list[dict]:
         df: Silver-DataFrame aus clean_to_silver.
 
     Returns:
-        Liste von Gold-Dicts mit dem dokumentierten Schema.
+        Liste von Gold-Dicts mit source_type "schulungsunterlage".
     """
     records = []
     for _, row in df.iterrows():
@@ -149,7 +140,7 @@ def transform_to_gold(df: pd.DataFrame) -> list[dict]:
 
         records.append({
             "doc_id": str(row["doc_id"]),
-            "source_type": "handbuch",
+            "source_type": "schulungsunterlage",
             "metadata": {
                 "filename": str(row["filename"]),
                 "page_count": int(row["page_count"]),

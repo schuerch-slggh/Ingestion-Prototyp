@@ -4,6 +4,26 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-02 – AP-2e: Schulungsunterlagen + pages-Array in Gold-Schema (PDF)
+
+- Modul `src/rag/preparation/schulungsunterlagen.py` (analog zu handbuecher.py,
+  flaches glob, source_type="schulungsunterlage", kein Outline erwartet)
+- Pipeline-Skript `scripts/Pipeline/00_prepare_schulungsunterlagen.py`
+- Gold-Schema für alle PDF-Quellen erweitert: `content.pages` als Array von
+  `{page_number, text}`-Dicts (Grundlage für V1-Chunking per Seite)
+- `clean_to_silver()` in allen drei PDF-Modulen: Boilerplate-Bereinigung jetzt
+  pro Seite; `full_text` wird aus bereinigten Seiten zusammengesetzt (Konsistenz)
+- `transform_to_gold()` in allen drei PDF-Modulen: `pages_json` → `content.pages`
+- Pipeline-Skripte (handbuecher, modulbeschreibungen, schulungsunterlagen):
+  `pages_json` wird beim CSV-Export gedroppt (nicht CSV-kompatibel)
+- Schulungsunterlagen: 19 PDFs, 937 Seiten, 1'319 Bilder (alle ohne Outline)
+- Handbücher neu generiert: 8 PDFs, 9'082 Seiten, 6'253 Bilder
+- Modulbeschreibungen neu generiert: 63 PDFs, 1'053 Seiten, 1'542 Bilder
+- Tests: 23/23 bestanden (6 neue Tests: 3 schulungsunterlagen + 1 handbuecher +
+  1 modulbeschreibungen + Fixture-Fix für pages-losen _make_doc)
+
+---
+
 ## 2026-05-01 – AP-2d: Modulbeschreibungen-Datenaufbereitung
 
 - Modul `src/rag/preparation/modulbeschreibungen.py` (analog zu handbuecher.py,

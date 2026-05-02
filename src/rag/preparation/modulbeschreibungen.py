@@ -85,9 +85,15 @@ def clean_to_silver(documents: list[dict]) -> pd.DataFrame:
     docs_without_outline = 0
 
     for doc in documents:
-        cleaned_text = remove_boilerplate(doc["full_text"])
         outline = doc.get("outline", [])
         images = doc.get("images", [])
+
+        # Boilerplate-Bereinigung pro Seite (Konsistenz mit full_text sichergestellt)
+        cleaned_pages = [
+            {"page_number": p["page_number"], "text": remove_boilerplate(p["text"])}
+            for p in doc.get("pages", [])
+        ]
+        cleaned_text = "\n\n".join(p["text"] for p in cleaned_pages if p["text"]).strip()
 
         if outline:
             docs_with_outline += 1
@@ -103,6 +109,7 @@ def clean_to_silver(documents: list[dict]) -> pd.DataFrame:
             "page_count": doc["page_count"],
             "full_text": cleaned_text,
             "outline_json": json.dumps(outline, ensure_ascii=False),
+            "pages_json": json.dumps(cleaned_pages, ensure_ascii=False),
             "images_json": json.dumps(images, ensure_ascii=False),
             "image_count": len(images),
         })
@@ -136,6 +143,7 @@ def transform_to_gold(df: pd.DataFrame) -> list[dict]:
     records = []
     for _, row in df.iterrows():
         outline = json.loads(row["outline_json"])
+        pages = json.loads(row["pages_json"])
         images_raw = json.loads(row["images_json"])
 
         images = []
@@ -158,6 +166,7 @@ def transform_to_gold(df: pd.DataFrame) -> list[dict]:
             "content": {
                 "full_text": str(row["full_text"]),
                 "outline": outline,
+                "pages": pages,
             },
             "images": images,
         })
