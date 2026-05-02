@@ -1,0 +1,67 @@
+{
+  "timestamp": "2026-05-02T18:14:47.499279+00:00",
+  "variant": "v0",
+  "query": "Wie lege ich einen neuen Kunden im SelectLine Auftrag an?",
+  "retrieved_chunks": [
+    {
+      "id": "ticket__ticket_76_chunk_0000",
+      "text": "Wie erfasst man einen Kunden im Auftrag\n\nFehlerbeschreibung:\nWie erfasst man einen Kunden im Auftrag.\n\nLösung:\nUnter Stammdaten/Kunden - >Neu anlegen!",
+      "metadata": {
+        "source_file": "unknown",
+        "source_type": "ticket",
+        "chunk_index": 0
+      },
+      "similarity": 0.37894
+    },
+    {
+      "id": "forum__forum_23_chunk_0000",
+      "text": "Anlegen von Kunden in SL.mobile\n\nZusätzlich zu normalen Adressen können aus SL.mobile heraus mit der Version 4.0 (Gold Skalierung) auch direkt Kunden, Lieferanten, Interessenten sowie Ansprechpartner erstellt werden. \nDie Erfassung neuer Kunden, Interessenten und Lieferanten erfolgt auf Basis schon bestehender Datensätze. \nDazu wählt der Nutzer einen schon bestehenden Kunden aus. Dessen Daten werden bis auf die Adresse für den neuen Kunden übernommen. \nDie Adresse kann wie gewohnt eingegeben werden. Es wird versucht, eine Kundennummer automatisch zu vergeben. Ist dies nicht möglich, so kann der Nutzer selbst eine Nummer vorgeben. Gleiches gilt entsprechend für Lieferanten und Interessenten.",
+      "metadata": {
+        "source_file": "unknown",
+        "source_type": "forum",
+        "chunk_index": 0
+      },
+      "similarity": 0.287636
+    },
+    {
+      "id": "schulungsunterlage__schulungsunterlagen_auftrag_einsteiger_chunk_0008",
+      "text": " Sie die Lagerung noch weiter einschränken. \n \nDas eingetragene Personenkonto wird beim Verbuchen der Ausgangsbelege in der Finanzbuchhaltung \nverwendet. Hier wird vom Programm eine Eingabe erwartet, so dass Sie bei Fehlen einen \nentsprechenden Hinweis erhalten. Sie können aber auch in den Mandanteneinstellungen bestimmen, \ndass die Kundennummer gleichzeitig auch das Personenkonto (Synchronisation) sein soll. In diesem Fall \nbraucht kein Personenkonto angegeben werden. \n \nBeachten Sie, dass Fremdwährungskunden hier das entpsrechende Debitorenkonto der Fremdwährung \naus der Bilanz enthalten müssen. \n \n \n \n \nBelegsperre - Eine gesetzte Belegsperre verhindert das Anlegen neuer Belege und Projekte. Das \nAktivieren bzw. Entfernen dieser Option können Sie benutzerbezogen in der Rechteverwaltung sperren. \n \nZahlsperre - Der Zustand dieser Option wird bei der Belegerstellung als Vorschlagswert mit in die Belege \nübernommen. Belege mit dieser Kennzeichnung werden nicht im Zahlungsvorschlag berücksichtigt. \n \nMahnsperre - Kunden mit einer Mahnsperre erhalten trotz überschrittener Zahlungstermine keine \nMahnungen.\n\nPreis \nAuf der Seite Preis erfassen Sie für den Kunden die geltende Rabattgruppe, Währung, Preisgruppe und \nden Steuertyp, wie Brutto, Netto, steuerfrei und Export. \n \nMit diesen Daten werden die entsprechenden Felder in der Belegerfassung vorbelegt, können aber, den \nBeleg betreffend, bei der Belegerfassung geändert werden.\n\nKreditlimit \nDurch die Eingabe einer Kreditlimite (Wert grösser Null) werden Sie bei der Belegerfassung vom \nProgramm darauf hingewiesen, dass mit dem erfassten Beleg das Kreditlimit überschritten wird. Die \nKreditlimitberechnung erfolgt anhand der Bruttosummen aus noch nicht beglichenen Rechnungen \n(Umsatzbelegen) und den Nettosummen aus noch offenen Belegen (reservierende und auslagernde \nBelege). \n \n \n \nDie Kreditlimitberechnung erfolgt immer in der Leitwährung des Mandanten. \n \n \n \nIn den Mandanteneinstellungen auf der Seite Belege / Ausgangsbelege können Sie bestimmen, ab wann \nSie einen entsprechenden Warnhinweis erhalten bzw. welche Belegarten bei der Prüfung berücksichtigt \nwerden. \n \nWollen Sie einem Kunden nichts mehr verkaufen, geben Sie ihm die Kreditlimite 0,01 oder setzen in \nOptionen die Belegsperre.\n\nZahlung \nHier können Sie für diesen Kunden eine Zahlungsbedingung aus den Stammdaten definieren. \n \nMit dem Feld „Automatischer Zahlungsverkehr“ legen Sie fest, ob der Kunde am automatischen \nZahlungsverkehr teilnehmen soll. Ein fälliger OP kommt nur dann automatisch in den Zahlungsvorschlag, \nwenn für den Kunden die Teilnahme eingestellt ist. \n \n \n \nText \nErfassen Sie hier Langtexte für Kommentare. Die Einträge unter Memo werden bei der Belegerfassung \nautomatisch angezeigt. \n \nKontoauszug \nZeigt Informationen über offene Rechnungen dieses Kunden. \n \n \n \nMahnhistorie \nZeigt Ihnen die Mahnungen und die zugehöhrigen Offenen Posten an.\n\nHistory \nZeigt eine Übersicht sämtlicher Belege und Artikel für diesen Kunden an. Wenn Sie die Seite „History“ \nerweitern ist eine getrennte Anzeige nach Belegart möglich. \n \n \n \nÜber den Button \"Aktion\" können Sie Belege bearbeiten und einzeln neu anlegen. Mit Doppelklick auf \neinen Beleg wird dieser geöffnet \n \nStatistik \nZeigt den aktuellen Auftragsbestand, den Umsatz und Umsatz Vorjahr. Ebenfalls können Sie hier ein \nBudget erfassen.\n\nBeispiele zur Kundenerfassung \n \nErfassen Sie nun im SelectLine folgende vier Kunden: \n \n \nRestaurant Löwen \nBullingerstrasse 60 \n8004 Zürich \nrestaurant@löwen.ch \n \nHerr Markus Müller \n+41 44 492 65 24 \n \n",
+      "metadata": {
+        "source_file": "Schulungsunterlagen Auftrag Einsteiger.pdf",
+        "chunk_index": 8,
+        "source_type": "schulungsunterlage"
+      },
+      "similarity": 0.216506
+    },
+    {
+      "id": "forum__forum_1550_chunk_0000",
+      "text": "Kreditlimitprüfung in SelectLine-Auftrag\n\nBei der Neuerstellung eines Belegs für einen Kunden, wird vorab eine Kreditlimitprüfung durchgeführt. Diese soll feststellen, ob die hinterlegte Kreditlimite des Kunden überschritten wird oder nicht.\nDabei prüft SelectLine-Auftrag die noch offenen Belege des Kunden und summiert dabei die einzelnen Beträge zusammen. Überschreitet die Gesamtsumme die Kreditlimite, wird anhand einer Dialogmeldung entsprechend daraufhingewiesen. \nIn den Mandanteneinstellungen unter \"Belege/Ausgangsbelege/Verkauf\" können Sie bezüglich der Kreditlimitprüfung individuelle Einstellungen definieren. Wurde nichts entsprechend eingestellt, wird automatisch unser „Standard“ verwendet.\nWichtig hierbei ist, dass dieser „Standard“ eigens erstellte Belegtypen bei der Prüfung nicht berücksichtigt, da das Programm an dieser Stelle nicht zuordnen kann, ob dieser Belegtyp zum „Standard“ gehört oder nicht. \nDamit eigene Belege ebenfalls berücksichtigt werden, können Sie anhand unserer Standardbelegtypen festlegen, ab wann die Kreditlimitprüfung durchgeführt werden soll.\nIst der eigene Belegtyp beispielsweise nach dem Auftrag eingeordnet, stellen Sie die \"Kreditlimitprüfung ab\" auf \"Auftrag\" ein. Anschiessend wird auch bei diesem Belegtyp die Prüfung durchgeführt.\nhttp://forum.selectline.ch/forum/bilder/Kreditlimitpruefung.png",
+      "metadata": {
+        "source_file": "unknown",
+        "source_type": "forum",
+        "chunk_index": 0
+      },
+      "similarity": 0.195523
+    },
+    {
+      "id": "forum__forum_1451_chunk_0000",
+      "text": "Kundennummer\n\nHallo, \nIst es Möglich eine Bestehende Kundennummer zu ändern?\nKann man die Kundennummer mit einem Präfix versehen zbs. 1000 plus dann die von SelectLine vorgeschlagene fortlaufende Nummer?\nVielen Dank",
+      "metadata": {
+        "chunk_index": 0,
+        "source_file": "unknown",
+        "source_type": "forum"
+      },
+      "similarity": 0.179821
+    }
+  ],
+  "answer": "Um einen neuen Kunden im SelectLine Auftrag anzulegen, gehen Sie wie folgt vor:\n\n1. Navigieren Sie zu Stammdaten > Kunden.\n2. Klicken Sie auf \"Neu anlegen\", um einen neuen Kunden zu erfassen.\n\nIn SL.mobile (ab Version 4.0, Gold Skalierung) können Sie ebenfalls direkt Kunden, Lieferanten, Interessenten sowie Ansprechpartner anlegen. Hierbei wird ein bestehender Datensatz als Vorlage genutzt, wobei die Adresse individuell eingegeben werden kann. Die Kundennummer wird automatisch vergeben, kann aber auch manuell eingegeben werden, falls die automatische Vergabe nicht möglich ist.\n\nQuelle: [unknown, Chunk 0]",
+  "metadata": {
+    "model": "gpt-4.1",
+    "embedding_model": "text-embedding-3-large",
+    "top_k": 5,
+    "temperature": 0.0,
+    "duration_seconds": 3.156,
+    "input_tokens": 1561,
+    "output_tokens": 135
+  }
+}

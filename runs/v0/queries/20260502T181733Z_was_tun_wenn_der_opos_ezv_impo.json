@@ -1,0 +1,67 @@
+{
+  "timestamp": "2026-05-02T18:17:33.121130+00:00",
+  "variant": "v0",
+  "query": "Was tun, wenn der OPOS EZV-Import bei Bezugsteuer einen Fehler wirft?",
+  "retrieved_chunks": [
+    {
+      "id": "ticket__ticket_218669_chunk_0000",
+      "text": "MWST Aufteilung von importierten Rechnungen\n\nFehlerbeschreibung:\nBei der MwSt. Abrechnung ist aufgefallen, dass es beim Verbuchen von importierten Debitoren Unstimmigkeiten bezüglich der MwSt. Aufteilung gibt.\r\n\r\nBuchungsliste SelectLine Auftrag:\r\n\r\nBuchungsmaske SelectLine Fibu --> stimmt mit SelectLine Auftrag überein\r\n\r\n[cid:image003.jpg@01DA1933.8D4F9380]\r\n\r\nVerbucht wird jedoch wie folgt:\r\n[cid:image004.jpg@01DA1933.8D4F9380]\r\n\r\nBuchungssätze:\r\n[cid:image005.png@01DA1933.8D4F9380]\n\nLösung:\nPrüfen Sie bitte folgenden Lösungsansatz:\r\n- Sämtliche Exporte nach dem Update zurücknehmen/löschen\r\n- Unter \"Applikationsmenu/Wartung/Reorganisieren/Offene Posten\" die \"Offene Posten ausgleichen und verrechnen\" Maske öffnen.\r\n- Nur die erste Checkbox \"Datenintegrität prüfen und korrigieren\" aktivieren und die OP-Reorganisation starten\r\n\r\nFalls gewünscht:\r\n- Nach Abschluss noch einmal die Maske \"Offene Posten ausgleichen und verrechnen\" öffnen\r\n- Unter \"Ausgleich bei gleichem OPBeleg\" alle drei Flags bei Debitoren/Kreditoren aktivieren und erneut starten.\r\n\r\nWichtig!\r\nBitte zuvor unbedingt eine Datensicherung erstellen.\r\n\r\nVermutlich fehlen in den Feldern \"SteuerSplit / BelegSplit\" die benötigten Einträge, damit beim Export bzw. Import die Steuerbuchung erstellt wird. Der oben beschriebene Prozess sorgt dafür, dass diese Werte nachträglich gesetzt werden.\r\nAlternativ können Sie auch ein Update auf die aktuellste Version durchführen und das Verhalten in dieser erneut überprüfen.",
+      "metadata": {
+        "source_file": "unknown",
+        "source_type": "ticket",
+        "chunk_index": 0
+      },
+      "similarity": 0.254201
+    },
+    {
+      "id": "ticket__ticket_208246_chunk_0000",
+      "text": "Vorsteuerschlüssel unzulässig\n\nFehlerbeschreibung:\nProblem beim Fibuexport siehe PDF\r\nDie oberen habe ich gefunden jedoch die untern 2 finde ich nicht.\r\n \r\nWo kann ich die Daten kontrollieren (gelb markiert ) OP8084 und OP8085.\n\nLösung:\nwenn diese Meldung kommt, dann ist das zu bebuchende Konto nicht korrekt geschlüsselt.\r\nWenn es heisst \"Vorsteuerschlüssel unzulässig\" passt der Steuerschlüssel nicht zum Typ des Kontos.\r\nBitte nochmals im Beleg das verwendete Skontokonto prüfen und welche Typ-Einstellung im Kontenstamm ist, sollte auf Vorsteuer stehen.",
+      "metadata": {
+        "source_file": "unknown",
+        "chunk_index": 0,
+        "source_type": "ticket"
+      },
+      "similarity": 0.236604
+    },
+    {
+      "id": "ticket__ticket_211485_chunk_0000",
+      "text": "MWST Umbuchung bei OPOS-Zlg aus Dialogbuchen fehlt\n\nFehlerbeschreibung:\nMWST Umbuchung bei OPOS-Zlg aus Dialogbuchen fehlt\n\nLösung:\nFall geprüft und Verhalten ist korrekt. \r\nGrundsätzlich wird bei Rechnungswesen OPOS - primär unabhängig von der Versteuerungsart des Mandanten - empfohlen über die Offen Posten Tabelle zu bezahlen bzw. über den Zahlungslauf, wodurch alles korrekt verbucht wird. I\r\n\r\nm Fall der vereinahmten Methode ist es zudem so, dass zum Zeitpunkt der Erstellung der Buchungskombination Kreditor / Finanzkonto (oder umgekehrt bzw. auch bei Debitoren) das Programm noch gar nicht weiss, wie der Quellbeleg besteuert wurde (Art und Anzahl der Steuercodes). Weiter kommt dazu, dass das nachfolgend eingeblendte OP-Ausgleichsfenster auch nur optional automatisch geöffnet wird. \r\n\r\nHätte z. B. der Quellbeleg mehrere unterschiedliche Konten, Steuercodes und Kostenstellen/-träger u. U. in Kombination mit Nachlässen müsste das Programm automatisch \"rückwirkend\" eine Sammelbuchung generieren oder es könnte sich auch nur um eine Gutschrift handeln, bei der wiederum keine MWST-Buchung ausgelöst werden müsste. \r\n\r\nAus all diesen Gründen bleibt das Verhalten in dieser Form so bestehen und wird empfohlen, Ausgleiche und Zahlungen entweder über das Zahlungsmodul oder manuell über \"Offene Posten/Bearbeiten\" durchzuführen.",
+      "metadata": {
+        "source_type": "ticket",
+        "chunk_index": 0,
+        "source_file": "unknown"
+      },
+      "similarity": 0.228498
+    },
+    {
+      "id": "ticket__ticket_213658_chunk_0000",
+      "text": "Steuer wird nicht umgebucht (vereinbart) bei Nachlässen\n\nFehlerbeschreibung:\nSteuer wird nicht umgebucht (vereinbart) bei Nachlässen - Fibu-Direkt-Export. Zum Teil fehlt auch der \"SteuerSplit/BelegSplit\" in der OP-Verwaltung, Auftrag\n\nLösung:\nPrüfen Sie bitte im Beleg xy, ob sämtliche Positionen eine MWST aufweisen bzw. der entsprechende Steuercode in der Position hinterlegt ist und die Checkbox \"Skontofähig\" aktiviert ist.\r\nDies muss bei allen Positionen im Beleg der Fall sein. Sollte eine davon abweichen, bitte die Position anpassen und nochmals einen Nachlass erstellen, da dies eine mögliche Ursache dafür sein könnte.\r\n\r\nWird beim Nachlass das richtige Konto verwendet und ist die MWST ersichtlich?",
+      "metadata": {
+        "source_file": "unknown",
+        "source_type": "ticket",
+        "chunk_index": 0
+      },
+      "similarity": 0.22655
+    },
+    {
+      "id": "ticket__ticket_218209_chunk_0000",
+      "text": "Fibu-Export: \"Interner Fehler\" bei Zahlungen\n\nFehlerbeschreibung:\nKunde hat das Verhalten, dass beim Fibu-Export direkt eine Meldung erscheint: Interner Fehler bei Nachlass in OP-Verwaltung\n\nLösung:\n13.07.2018 rc:\r\nGemäss Lösungsvorschlag von SLDE mit der Anpassung im OPOS ein Makro erstellt.\r\nNICHT rausgeben ausser Notfall. Wir wissen ja nicht ob ein zweiter Wert falsch ist.\r\n\r\n-------------------------------------------------------------\r\nSELECT * FROM OPOS\r\nWHERE quelle LIKE 'F|%'\r\nAND (OPTyp = '4' OR OPTyp = '7')\r\n-------------------------------------------------------------\r\n\r\num sie zu ändern\r\n\r\n-------------------------------------------------------------\r\nUPDATE OPOS\r\nSET Quelle = REPLACE(quelle,'F|','K|')\r\nWHERE quelle LIKE 'F|%'\r\nAND (OPTyp = '4' OR OPTyp = '7')\r\n-------------------------------------------------------------\r\n\r\nAlternativ -> Lösung zur Anpassung gibt es auch von Phirents (Hr. Flückiger)...(rc's ist vollständiger) in Ticket 201609",
+      "metadata": {
+        "source_type": "ticket",
+        "chunk_index": 0,
+        "source_file": "unknown"
+      },
+      "similarity": 0.225137
+    }
+  ],
+  "answer": "Wenn beim OPOS EZV-Import (Einfuhrzollverfahren) ein Fehler im Zusammenhang mit der Bezugsteuer auftritt, kann dies darauf hindeuten, dass in den Feldern \"SteuerSplit / BelegSplit\" die benötigten Einträge fehlen, damit beim Export bzw. Import die Steuerbuchung korrekt erstellt wird. \n\nEmpfohlene Vorgehensweise:\n1. Sämtliche Exporte nach dem Update zurücknehmen/löschen.\n2. Unter \"Applikationsmenu/Wartung/Reorganisieren/Offene Posten\" die Maske \"Offene Posten ausgleichen und verrechnen\" öffnen.\n3. Nur die erste Checkbox \"Datenintegrität prüfen und korrigieren\" aktivieren und die OP-Reorganisation starten.\n4. Optional: Nach Abschluss erneut die Maske öffnen und unter \"Ausgleich bei gleichem OPBeleg\" alle drei Flags bei Debitoren/Kreditoren aktivieren und erneut starten.\n\nWichtig: Vor diesen Schritten unbedingt eine Datensicherung erstellen.\n\nHinweis: Der beschriebene Prozess sorgt dafür, dass die fehlenden Werte nachträglich gesetzt werden. Alternativ kann auch ein Update auf die aktuellste Version durchgeführt und das Verhalten erneut überprüft werden.\n\n[Quelle: unknown, Chunk 0]",
+  "metadata": {
+    "model": "gpt-4.1",
+    "embedding_model": "text-embedding-3-large",
+    "top_k": 5,
+    "temperature": 0.0,
+    "duration_seconds": 3.5,
+    "input_tokens": 1422,
+    "output_tokens": 263
+  }
+}

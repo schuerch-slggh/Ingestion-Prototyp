@@ -1,0 +1,67 @@
+{
+  "timestamp": "2026-05-02T18:17:44.299859+00:00",
+  "variant": "v0",
+  "query": "Wie kann ich Makros nachträglich aktivieren?",
+  "retrieved_chunks": [
+    {
+      "id": "forum__forum_1018_chunk_0000",
+      "text": "Makro Menü wiederherstellen\n\nHallo zusammen,\nnach einem Client Absturz während der bearbeitung eines Makros ist das Makro Menü nicht mehr vorhanden. Die Makos selbst sind noch vorhanden? Gibt es eine Möglichkeit das Makro Menü wiederherzustellen? Backup ist vorhanden!",
+      "metadata": {
+        "source_file": "unknown",
+        "chunk_index": 0,
+        "source_type": "forum"
+      },
+      "similarity": 0.210711
+    },
+    {
+      "id": "schulungsunterlage__schulungsunterlagen_makroassistent_chunk_0006",
+      "text": ".x \n \n \n \n \nbis 16.3.0 \n \n \n:'Datum zum Beginn' \n \n \n:[Datum zum Beginn]\n\nMit diesem Schalter können Sie alle vorhandenen Parameter in einem Makro bearbeiten. \nFolgende Einstellungen sind dabei möglich: \n \nDatentyp \nWählen Sie den passenden Datentyp \nfür den definierten Parameter. \n \nAuswahlfeld \nHier können Sie eine Tabelle als \nAuswahlfeld definieren. So können \nSie den Hauptschlüssel der \nausgewählten Tabelle als Parameter \nübernehmen. \n \nVorgabewert \nDer Parameter wird immer mit dem \nhier erfassten Wert vorerfasst \n \nLetzter Wert \nZeigt den zuletzt verwendeten Wert \nan. \nHinweistext \nHier können Sie einen Hinweistext für den Anwender erfassen. Dieser Text wird dem Anwender als \nTooltipp angezeigt (mit der Maus auf das Eingabefeld des Parameters zeigen). \n \nParameterautomatik \nFür die Parameterübernahme aus dem aktiven Dialog muss die Parameterautomaik definiert werden. Bei \nden Parametern einer SQL-Anweisung kann man einstellen, ob: \n \n• die Parameter vor dem Starten immer abgefragt werden. \n• im aktiven Stammdialog betroffene Tabellenfelder gesucht und als Vorschlag für die Parameter \nangeboten werden. \n• im aktiven Stammdialog betroffene Tabellenfelder gesucht werden, falls alle Parameter gefunden \nwurden, die Anweisung ohne Parameterkontrolle gestartet wird. \n• in der aktiven Datenmenge betroffene Tabellenfelder gesucht und als Vorschlag für die Parameter \nangeboten werden. \n• in der aktiven Datenmenge betroffene Tabellenfelder gesucht werden, falls alle Parameter gefunden \nwurden, die Anweisung ohne Parameterkontrolle gestartet wird. \n \n \n \n \nErfassen Sie das unten aufgeschriebene Makro und legen Sie es auf den Toolbutton. \nAnschliessend öffnen Sie die Kundenmaske und führen Sie das Makro aus der \nSchnellzugriffsliste aus. Testen Sie die verschiedenen Einstellungen für die \nParameterautomatik. \n \nselect nummer, anzeigename, plz, ort, gruppe from Kunden where gruppe = :gruppe\n\n3.3.4 \nBestätigungsdialoge für „ausgeführt“, „gedruckt“, „gespeichert“ \nBei einer Abfrage mit dem Typ „ausgeführt“ können Sie vor der Ausführung einen Bestätigungstext \nanzeigen lassen. Die Aktion wird erst nach der Bestätigung ausgeführt. (Ist der Bestätigungstext leer und \ndie Checkbox für die Ausführungsmeldung inaktiv, wird das SQL-Statement dialogfrei abgearbeitet). \n \n \n \nBei einer Abfrage mit dem Typ „gedruckt“ können Sie ebenfalls wählen ob zuerst der Bestätigungsdialog \nangezeigt werden soll oder der Druck mit Ausführung der Abfrage gleich ohne Dialog erfolgen soll. \n \n \n \nBei der ersten Ausführung einer Abfrage vom Typ „gespeichert“ erhalten Sie den gleichen Dialog wie \nwenn der Exportassisten ausgeführt wird und die Ergebnismenge kann in eines der vordefinierten \nFormate gespeichert werden. \n \n \n \n \n \n \n \n \n \n \n3.3.5 \nAnlegen einer Folge von Makros \nDas Anlegen einer Makrofolge ermöglicht Ihnen mehrere Makros nacheinander ausführen zu lassen. \nDies ermöglicht Ihnen beispielsweise in einem ersten Makro eine neue Tabelle zu erstellen und diese mit\n\nDaten zu füllen. Im zweiten Makro werden die abgefüllten Daten ausgedruckt. Dazu verwenden wir \nfolgendes Beispiel: \n \nMakro 1 – Aktualisieren der Bankverbindungen \nUPDATE [BANKVERB] \nSET kasebank = : [Banbezug neu] \nWHERE blobkey = ‘KU’ -- Nur Kunden \nAND kassebank = : [Banbezug Alt] – falls mehrere Bankbezüge (je Währung) vorhanden sind \n \nMakro 2 – Backup \nSELECT * FROM bankverb \nWhere blobkey = 'KU' \n-- Backup wird unter C:\\Temp\\ im XML Format abgelegt \n \n \n \nWenn Sie den Bearbeitungsmodus einer Makrofolge aktivieren, können Sie Mak",
+      "metadata": {
+        "source_type": "schulungsunterlage",
+        "source_file": "Schulungsunterlagen Makroassistent.pdf",
+        "chunk_index": 6
+      },
+      "similarity": 0.157179
+    },
+    {
+      "id": "forum__forum_1966_chunk_0000",
+      "text": "Makro ausführen wenn ich einen Beleg drucke\n\nIch habe praktische Makros welche ich gerne ausführen will, wenn ich einen Beleg drucke.\nGibt es eine möglichkeit das im Formulareditor anzustossen?",
+      "metadata": {
+        "chunk_index": 0,
+        "source_type": "forum",
+        "source_file": "unknown"
+      },
+      "similarity": 0.155605
+    },
+    {
+      "id": "schulungsunterlage__schulungsunterlagen_makroassistent_chunk_0002",
+      "text": " als .QDF-Dateien im Installationsverzeichnis von SelectLine im Ordner „Makro“ \nabgespeichert. Um Makros von einer anderen Installation zu übertragen empfehlen wir Ihnen \nallerdings die Funktion „Einschleussen“ / „Ausschleussen“ zu verwenden.\n\nBedienung \n \n \n \nDie Eingabemaske des Makroassistenten ist in zwei Bereiche aufgeteilt. Im linken Maskenbereich \nwerden in einer Baumstruktur alle vorhandenen Elemente aufgelistet, deren Typ und Status durch \nSymbol, Farbe bzw. Schrifttyp unterschiedlich dargestellt wird. Die Gestaltung der Maskenansicht auf der \nrechten Seite variiert entsprechend dem Typ des gewählten Elements. Die Breite des linken bzw. \nrechten Bereiches kann durch verschieben den „Mittelsteges“ angepasst werden. \n \nDer Status eines Makros wird wie folgt dargestellt: \n• \nStatusfarbe grün - aktiv neu erstelltes, noch nicht gespeichertes Element. \n• \nStatusfarbe rot - aktiv geändertes, noch nicht gespeichertes Element. \n• \nStatusfarbe grau - Makrodatei ist physisch im Makroverzeichnis nicht vorhanden. \n• \ndurchgestrichen - als gelöscht markiertes Element. \n• \nunterstrichen - einem Toolbu􀆩on zugeordnetes Element. \n• \nmit rotem Pfeil am Symbol - dem Makromenü zugeordnetes Element. \n \n \nAm unteren Rand der Maske finden Sie eine Legende zur unterschiedlichen Darstellung der \nEinträge im linken Maskenbereich. \n \n \nDer Ordner „Unzugeordnet“ enthält Makros, welche von Hand in den Makro-Ordner in das \nInstallationsverzeichnis von SelectLine kopiert wurden, oder Elemente, welche nicht korrekt \nabgespeichert werden konnten. Falls Sie befürchten ein Makro verloren zu haben, lohnt \nsich ein Blick in diesen Ordner.\n\n3.2.1 \nBenutzereinstellungen \nUnter „Applikationsmenü/Einstellungen“ finden Sie einige Einstellungen, welche das Verhalten des \nMakroassistenten optimieren. Diese Einstellungen werden pro Benutzer gespeichert! \n \n \n \nMakro-Assistent \n• Ein Doppelklick auf einen Makro-Eintrag (nur bei SQL-Abfragen) öffnet den Makro-Editor, sonst \nAusführen. \n• Bei Neuanlage eines Makros wird ein Eingabedialog zum Dateinamen des Makros angezeigt. \n \nAbfragen-Editor \nDie Leiste mit der Anzeige der verfügbaren Tabellen und Tabellenfelder im Abfrage-Editor kann für die \nlinke bzw. rechte Maskenseite eingestellt oder ganz ausgeblendet werden. Weiter kann für diese Leiste \neine farbliche Markierung eingestellt werden, die kenntlich macht, in welchem Verzeichnis (Daten- oder \nMandant) sich die Tabelle befindet bzw. um welchen Feldtyp (String, Float, ...) es sich handelt. Darüber \nhinaus wählen Sie die zu verwendende SQL-Syntax, d.h. nach welchem Dialekt die Farben in \nbestimmten Anweisungen dargestellt werden. \n \nMit gesetzter Option \"Ausführungsmodus automatisch wechseln\" wird die Makro-Aktion bei Eingabe der \nBefehlsanweisung automatisch angepasst. So wird z. B. automatisch auf die Aktion \"Ausführen\" \ngewechselt, wenn Befehlseingaben mit update, create, insert erfolgen. \n \nEinfügeautomatik \n• Die Auswahl einer Tabelle bzw. eines Tabellenfeldes wird automatisch um die entsprechende \n\"select\"-Syntax ergänzt. \n• Für die Auswahl wird zusätzlich der Sekundärschlüssel der Tabelle als \"where\"-Klausel eingefügt. \n• Vor dem Einfügetext wird zusätzlich ein Zeilenumbruch eingefügt. \n• Nach dem Einfügetext wird zusätzlich ein Zeilenumbruch eingefügt.\n\n2.1.1 \nDie Funktionsleiste, Bedienelemente und Symbole des Makro-Assistenten \nÜber den Button und das entsprechende Untermenü lassen sich",
+      "metadata": {
+        "source_type": "schulungsunterlage",
+        "source_file": "Schulungsunterlagen Makroassistent.pdf",
+        "chunk_index": 2
+      },
+      "similarity": 0.153389
+    },
+    {
+      "id": "forum__forum_1021_chunk_0000",
+      "text": "Re: Makro Menü wiederherstellen\n\nMeistens sind die Makros nicht einfach weg, sondern im untersten Ordner \"Unzugeordnet\" gewandert. Dort kann man sie auch via Drag&Drop wieder rausziehen.\nDas passiert dann, wenn das Programm die Makro-Datei findet aber keine Informationen (mehr) hat, wo wie dieses Makro eingesetzt sein soll.",
+      "metadata": {
+        "source_type": "forum",
+        "chunk_index": 0,
+        "source_file": "unknown"
+      },
+      "similarity": 0.149141
+    }
+  ],
+  "answer": "Wenn das Makro-Menü nach einem Absturz nicht mehr vorhanden ist, die Makros selbst aber noch existieren, kann es sein, dass die Makros in den Ordner „Unzugeordnet“ verschoben wurden. In diesem Fall kannst du die Makros im Makroassistenten im Ordner „Unzugeordnet“ wiederfinden und per Drag&Drop zurück in das gewünschte Menü oder an die gewünschte Stelle ziehen. Das passiert, wenn das Programm die Makro-Datei zwar findet, aber keine Informationen mehr hat, wo das Makro eingesetzt werden soll.\n\nEin Backup ist zwar vorhanden, aber in den meisten Fällen reicht es, die Makros aus dem Ordner „Unzugeordnet“ wieder zuzuordnen, um das Makro-Menü wiederherzustellen.\n\nQuelle: [unknown, Chunk 0], [Schulungsunterlagen Makroassistent.pdf, Chunk 2]",
+  "metadata": {
+    "model": "gpt-4.1",
+    "embedding_model": "text-embedding-3-large",
+    "top_k": 5,
+    "temperature": 0.0,
+    "duration_seconds": 2.11,
+    "input_tokens": 2081,
+    "output_tokens": 183
+  }
+}
