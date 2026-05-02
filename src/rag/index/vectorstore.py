@@ -1,66 +1,70 @@
-"""Vectorstore: Verwaltet den Vektorindex (ChromaDB).
-
-Verantwortung:
-- Chunks und Embeddings in eine ChromaDB-Collection einfügen
-- Index persistieren (data/index/)
-- Bestehenden Index laden
-"""
+"""Vectorstore: ChromaDB-Wrapper für variantenspezifische Collections."""
 
 import logging
-from pathlib import Path
 
 import chromadb
 
+from rag.config import get_variant_index_dir
+
 logger = logging.getLogger(__name__)
 
-COLLECTION_NAME = "naive_rag"
+COLLECTION_NAME = "v0_index"
 
 
-def create_index(
-    chunks: list[dict],
-    embeddings: list[list[float]],
-    persist_dir: Path,
-) -> None:
-    """Erstellt einen neuen Vektorindex und speichert ihn in *persist_dir*."""
-    logger.info("Erstelle Index mit %d Chunks in %s", len(chunks), persist_dir)
+def get_or_create_collection(
+    variant: str, reset: bool = False
+) -> chromadb.Collection:
+    """Liefert eine ChromaDB-Collection für die angegebene Variante.
 
-    client = chromadb.PersistentClient(path=str(persist_dir))
+    Args:
+        variant: Pipeline-Variante (z. B. "v0").
+        reset: Wenn True, wird eine bestehende Collection gelöscht und neu erstellt.
 
-    # Bestehende Collection entfernen für sauberen Neuaufbau
-    try:
-        client.delete_collection(COLLECTION_NAME)
-    except ValueError:
-        pass
+    Returns:
+        ChromaDB-Collection-Objekt.
+    """
+    index_dir = get_variant_index_dir(variant)
+    index_dir.mkdir(parents=True, exist_ok=True)
+    client = chromadb.PersistentClient(path=str(index_dir))
 
-    collection = client.create_collection(name=COLLECTION_NAME)
+    if reset:
+        try:
+            client.delete_collection(COLLECTION_NAME)
+            logger.info("Bestehende Collection '%s' gelöscht.", COLLECTION_NAME)
+        except Exception:
+            pass
 
-    ids = [c["metadata"]["chunk_id"] for c in chunks]
-    documents = [c["text"] for c in chunks]
-    metadatas = [c["metadata"] for c in chunks]
-
-    batch_size = 500
-    for i in range(0, len(ids), batch_size):
-        end = i + batch_size
-        collection.add(
-            ids=ids[i:end],
-            documents=documents[i:end],
-            embeddings=embeddings[i:end],
-            metadatas=metadatas[i:end],
-        )
-
+    collection = client.get_or_create_collection(name=COLLECTION_NAME)
     logger.info(
-        "Index mit %d Einträgen erstellt und persistiert", len(ids)
-    )
-
-
-def load_index(persist_dir: Path) -> chromadb.Collection:
-    """Lädt einen bestehenden Vektorindex aus *persist_dir*."""
-    logger.info("Lade Index aus %s", persist_dir)
-    client = chromadb.PersistentClient(path=str(persist_dir))
-    collection = client.get_collection(name=COLLECTION_NAME)
-    logger.info(
-        "Collection '%s' geladen (%d Einträge)",
-        COLLECTION_NAME,
-        collection.count(),
+        "Collection '%s' bereit (%d Einträge).", COLLECTION_NAME, collection.count()
     )
     return collection
+
+
+def add_chunks_to_collection(
+    collection: chromadb.Collection,
+    chunks: list[dict],
+    embeddings: list[list[float]],
+    batch_size: int = 500,
+) -> None:
+    """Fügt Chunks und ihre Embeddings einer Collection hinzu.
+
+    Args:
+        collection: Ziel-Collection.
+        chunks: Chunk-Dicts mit 'id', 'text', 'metadata'.
+        embeddings: Vektoren in derselben Reihenfolge wie chunks.
+        batch_size: Einträge pro ChromaDB-Add-Call.
+    """
+    total = len(chunks)
+    logger.info("Füge %d Chunks in Collection ein …", total)
+
+    for i in range(0, total, batch_size):
+        end = min(i + batch_size, total)
+        collection.add(
+            ids=[c["id"] for c in chunks[i:end]],
+            documents=[c["text"] for c in chunks[i:end]],
+            metadatas=[c["metadata"] for c in chunks[i:end]],
+            embeddings=embeddings[i:end],
+        )
+
+    logger.info("Collection enthält jetzt %d Einträge.", collection.count())

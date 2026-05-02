@@ -4,6 +4,34 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-02 – AP-3: V0-Indexierung auf Vollumfang
+
+- `CHUNK_SIZE` auf 1000, `CHUNK_OVERLAP` auf 150 gesetzt (DE-4)
+- `src/rag/index/chunking.py`: V0-Chunker mit tiktoken (`cl100k_base`),
+  quelltypagnostisch; liest `content.full_text`; Chunk-IDs mit `source_type`-
+  Prefix zur Vermeidung von Kollisionen bei gleichen Dateinamen in
+  verschiedenen Quellen
+- `src/rag/index/embeddings.py`: `embed_chunks()` mit Batch-Logging
+- `src/rag/index/vectorstore.py`: `get_or_create_collection()` + `add_chunks_to_collection()`
+- `src/rag/pipeline_factory.py`: `get_chunker("v0")` implementiert
+- `scripts/Pipeline/02_index.py`: Orchestrierung über alle fünf Gold-Quellen,
+  `--reset` und `--max-chunks N` Flags, Kosten-Schätzung im Log
+- Indexierung Vollumfang:
+  - forum.jsonl:              2'052 Einträge →  2'303 Chunks
+  - tickets.jsonl:            4'691 Einträge →  4'867 Chunks
+  - handbuecher.jsonl:            8 Einträge →  3'814 Chunks
+  - modulbeschreibungen.jsonl:   63 Einträge →    469 Chunks
+  - schulungsunterlagen.jsonl:   19 Einträge →    336 Chunks
+  - Total: 11'789 Chunks im Index (`data/index/v0/`)
+  - Embedding-Kosten: ~0.82 USD (text-embedding-3-large, 6.34M Tokens)
+  - Dauer: 29.3 Minuten
+- 27/27 Tests bestanden (4 neue Chunking-Tests)
+- Befund: "Jahresabschluss und Zwischenabschluss SelectLine.pdf" liegt in
+  sowohl modulbeschreibungen/ als auch schulungsunterlagen/ → gleiche doc_id;
+  gelöst durch source_type-Prefix in Chunk-IDs
+
+---
+
 ## 2026-05-02 – AP-2.5: Repo-Aufräumen nach Datenaufbereitungs-APs
 
 Aufräumarbeiten nach Abschluss der Datenaufbereitungs-APs (AP-2a bis AP-2e):

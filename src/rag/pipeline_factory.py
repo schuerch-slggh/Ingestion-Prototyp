@@ -1,35 +1,35 @@
 """Pipeline-Factory: Wählt Komponenten je nach Pipeline-Variante.
 
-WICHTIG: Diese Factory wird in AP-3 (V0 End-to-End) neu konzipiert.
-Die alte Implementation, die auf src/rag/ingest verwies, wurde mit
-AP-2.5 entfernt, da die Datenaufbereitung jetzt in src/rag/preparation
-liegt.
+get_loaders ist nicht mehr nötig (Datenaufbereitung erfolgt über
+quellenspezifische 00_prepare_*.py-Skripte). get_chunker liefert die
+V0-Chunking-Funktion; V1–V3 werden in späteren APs implementiert.
 """
 
 from typing import Callable
 
 
 def get_loaders(variant: str) -> dict[str, Callable]:
-    """Liefert Loader-Funktionen für die angegebene Variante.
-
-    Wird in AP-3 mit Bezug auf src/rag/preparation neu implementiert.
-    """
-    if variant in ("v0", "v1", "v2", "v3"):
-        raise NotImplementedError(
-            f"Loader für Variante '{variant}' werden in AP-3 neu implementiert. "
-            "Datenaufbereitung erfolgt aktuell über die quellenspezifischen "
-            "scripts/Pipeline/00_prepare_*.py-Skripte."
-        )
-    raise ValueError(f"Unbekannte Variante: '{variant}'")
+    """Nicht mehr benötigt – Datenaufbereitung erfolgt über 00_prepare_*.py."""
+    raise NotImplementedError(
+        "get_loaders wird nicht mehr verwendet. Datenaufbereitung erfolgt "
+        "über die quellenspezifischen scripts/Pipeline/00_prepare_*.py-Skripte."
+    )
 
 
 def get_chunker(variant: str) -> Callable:
     """Liefert die Chunking-Funktion für die angegebene Variante.
 
-    Wird in AP-3 implementiert.
+    Args:
+        variant: Pipeline-Variante ("v0", "v1", "v2", "v3").
+
+    Returns:
+        Callable mit Signatur (gold_entries: list[dict]) -> list[dict].
     """
-    if variant in ("v0", "v1", "v2", "v3"):
+    if variant == "v0":
+        from rag.index.chunking import chunk_documents
+        return chunk_documents
+    if variant in ("v1", "v2", "v3"):
         raise NotImplementedError(
-            f"Chunker für Variante '{variant}' werden in AP-3 implementiert."
+            f"Chunker für Variante '{variant}' wird in einem späteren AP implementiert."
         )
     raise ValueError(f"Unbekannte Variante: '{variant}'")

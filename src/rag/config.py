@@ -38,8 +38,8 @@ LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-4.1")
 LLM_TEMPERATURE: float = float(os.getenv("LLM_TEMPERATURE", "0.0"))
 
 # ── Chunking ─────────────────────────────────────────────────
-CHUNK_SIZE: int = 800
-CHUNK_OVERLAP: int = 100
+CHUNK_SIZE: int = 1000
+CHUNK_OVERLAP: int = 150
 
 # ── Retrieval ────────────────────────────────────────────────
 TOP_K: int = 5
