@@ -6,6 +6,50 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 8 – 2026-05-08
+
+### Prompts
+
+**Prompt 1 (AP-4.1: Test-Set-Modul für die RAGAS-Evaluation):**
+> Test-Set-Datei bereits vorhanden. Modul `src/rag/evaluate/testset.py` mit
+> `load_testset`, `validate_entry`, `iter_by_category`, `_check_consistency`
+> und `TestQuestion`-Dataclass implementieren. `TESTSET_PATH` in config.py.
+> 13 pytest-Tests. Smoke-Test gegen echtes Test-Set. Commit AP-4.1.
+
+### Aktionen & Erkenntnisse
+
+**Neue Dateien:**
+
+| Datei | Inhalt |
+|-------|--------|
+| `src/rag/evaluate/testset.py` | Loader, Validator, Iter-Funktionen, TestQuestion-Dataclass |
+| `tests/test_testset.py` | 13 Tests (Schema-Validierung, Loader, Konsistenz, Iter) |
+
+**Geänderte Dateien:**
+
+| Datei | Änderung |
+|-------|----------|
+| `src/rag/evaluate/__init__.py` | Modul-Docstring mit Stub-Hinweisen für AP-4.2/4.3 |
+| `src/rag/config.py` | `TESTSET_PATH` ergänzt |
+| `data/eval/testset_v1.jsonl` | Ungültigen JSON-Escape `\ ` in Q016 behoben |
+| `pyproject.toml` | `filterwarnings` für PytestCollectionWarning |
+| `EXPERIMENT_LOG.md` | Eintrag AP-4.1 |
+
+**Ergebnisse:**
+- Smoke-Test: 50 Fragen geladen, keine Fehler
+- 45/45 Tests bestanden (13 neue)
+
+**Erkenntnisse:**
+- `testset_v1.jsonl` hatte in Q016 einen ungültigen JSON-Escape (`\ ` vor ` -`).
+  Korrigiert zu `?\"` (schliessende Anführungszeichen der Meldung).
+- pytest versucht `TestQuestion`-Dataclass als Testklasse zu sammeln (Prefix `Test`);
+  `filterwarnings = ["ignore::pytest.PytestCollectionWarning"]` in pyproject.toml
+  unterdrückt die Warnung sauber.
+- `I001`-Ruff-Warning (unsortierter Import-Block) in test_testset.py ist dieselbe
+  pre-existing Situation wie in allen anderen Testdateien (sys.path.insert vor imports).
+
+---
+
 ## Konversation 7 – 2026-05-02
 
 ### Prompts

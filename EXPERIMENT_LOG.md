@@ -4,6 +4,26 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-08 – AP-4.1: Test-Set-Modul für die RAGAS-Evaluation
+
+- `src/rag/evaluate/__init__.py`: Modul-Docstring mit Stub-Hinweisen für AP-4.2/4.3
+- `src/rag/evaluate/testset.py`: Loader, Validator, Iter-Funktionen
+  - `load_testset(path)`: JSONL-Loader mit Zeilennummer in Fehlermeldungen
+  - `validate_entry(entry, line_number)`: Strenge Validierung (ID-Format, Pflichtfelder,
+    Kategorie-Whitelist), zusätzliche Felder werden ignoriert (Vorwärtskompatibilität)
+  - `iter_by_category(questions)`: Gruppierung in Canonical-Reihenfolge
+  - `_check_consistency(questions)`: Warnungen bei Duplikaten / ID-Lücken (kein Abbruch)
+- `src/rag/config.py`: `TESTSET_PATH` ergänzt (variantenunabhängig unter `data/eval/`)
+- `data/eval/testset_v1.jsonl`: 50 Fragen, 4 Kategorien
+  (Chunking 25, Recency 10, Visuals 10, CrossSource 5)
+  Korrektur: ungültiger JSON-Escape `\ ` in Q016 behoben
+- `tests/test_testset.py`: 13 Tests, alle ohne API-Calls
+- `pyproject.toml`: `filterwarnings` für `PytestCollectionWarning` ergänzt
+  (pytest versucht `TestQuestion`-Dataclass als Testklasse zu sammeln)
+- 45/45 Tests bestanden
+
+---
+
 ## 2026-05-02 – AP-3.1: V0 End-to-End (Retrieval + Generation)
 
 - `src/rag/retrieve/retriever.py`: `retrieve_chunks()` mit cosine-to-similarity-

@@ -1,0 +1,50 @@
+{"id": "Q001", "question": "Wie kann ich in SelectLine Auftrag eine Sammelrechnung aus mehreren Lieferscheinen erzeugen?", "category": "Chunking"}
+{"id": "Q002", "question": "Wie funktioniert die Abgrenzung von Vorauszahlungen über die Periodengrenze hinweg in der Fibu?", "category": "Chunking"}
+{"id": "Q003", "question": "Wie muss ich einen quellensteuerpflichtigen Mitarbeiter in SelectLine Lohn anlegen?", "category": "Chunking"}
+{"id": "Q004", "question": "Wie erstelle ich einen MDE-Benutzer?", "category": "Chunking"}
+{"id": "Q005", "question": "Was kann ich in der Produktionssteuerung konfigurieren?", "category": "Chunking"}
+{"id": "Q006", "question": "Welche Funktion erfüllt das Modul Artikelmanager und wie wird es in der Auftragsbearbeitung eingebunden?", "category": "Chunking"}
+{"id": "Q007", "question": "Welche Schritte sind für den Jahresabschluss in der Fibu erforderlich?", "category": "Chunking"}
+{"id": "Q008", "question": "Wie erfolgt die Einrichtung von E-Banking in SelectLine?", "category": "Chunking"}
+{"id": "Q009", "question": "Wie werden im Lohnportal von SelectLine die Daten geschützt?", "category": "Chunking"}
+{"id": "Q010", "question": "Wie werden die SelectLine Applikationen installiert?", "category": "Chunking"}
+{"id": "Q011", "question": "Wie kann ich per Makro einen Kunden löschen, welcher nicht in einem Beleg verwendet wurde?", "category": "Chunking"}
+{"id": "Q012", "question": "Welcher Ablauf wird in der Lohn-Schulung für die monatliche Lohnverarbeitung beschrieben?", "category": "Chunking"}
+{"id": "Q013", "question": "Wie wird in der Schulungsunterlage das Anlegen eines Sachkontos in der Fibu dokumentiert?", "category": "Chunking"}
+{"id": "Q014", "question": "Wie kann man mit dem Toolbox Editor Extradialoge erstellen?", "category": "Chunking"}
+{"id": "Q015", "question": "Welche Schritte zur Konfiguration der PC-Kasse werden in der Schulungsunterlagen erläutert?", "category": "Chunking"}
+{"id": "Q016", "question": "Beim Start von SelectLine Auftrag erscheint die Meldung \"Anmeldung fehlgeschlagen - SSL provider:Das empfangene Zertifikat ist abgelaufen?\" - was ist zu tun?", "category": "Chunking"}
+{"id": "Q017", "question": "Das Programm meldet dass der Betrag zu gross für die Umwandlung ist - wie kann dieses Problem behoben werden?", "category": "Chunking"}
+{"id": "Q018", "question": "Was ist zu tun wenn die Meldung \"Update/Setup.c20 veraltet\" erscheint?", "category": "Chunking"}
+{"id": "Q019", "question": "Welche Lösung wurde für den Bug bei der QR-Rechnungsausgabe in den Tickets festgehalten?", "category": "Chunking"}
+{"id": "Q020", "question": "Wie können Probleme mit den Druckertreibern behoben werden?", "category": "Chunking"}
+{"id": "Q021", "question": "Welche Forum-Diskussion erläutert das nachträgliche Aktivieren von Makros?", "category": "Chunking"}
+{"id": "Q022", "question": "Wie wird im Forum die Aktivierung der elektronischen Lohnausweismeldung über Swissdec beschrieben?", "category": "Chunking"}
+{"id": "Q023", "question": "Welche Empfehlungen werden im Forum zur Anbindung eines neuen Bankkontos in der Fibu diskutiert?", "category": "Chunking"}
+{"id": "Q024", "question": "Wie wird im Forum das Vorgehen bei einer fehlerhaften MWST-Verbuchung erläutert?", "category": "Chunking"}
+{"id": "Q025", "question": "Welche Lösungsansätze werden im Forum für Probleme beim Mahnlauf vorgeschlagen?", "category": "Chunking"}
+{"id": "Q026", "question": "Welche Anpassungen wurden im aktuellen Update am Modul Lohn vorgenommen?", "category": "Recency"}
+{"id": "Q027", "question": "Wie wirkt sich die jüngste Änderung der Quellensteuerverbuchung auf die Lohnabrechnung aus?", "category": "Recency"}
+{"id": "Q028", "question": "Welche aktuellen Hinweise gibt es zum Verhalten der QR-Rechnung nach dem letzten Update?", "category": "Recency"}
+{"id": "Q029", "question": "Welche neuen Probleme wurden im Ticketsystem nach dem letzten Versionsupdate gemeldet?", "category": "Recency"}
+{"id": "Q030", "question": "Welche aktuellen Tickets behandeln Auffälligkeiten bei der ISO-20022-Bankübertragung?", "category": "Recency"}
+{"id": "Q031", "question": "Welche aktuellen Forum-Beiträge thematisieren die MWST-Anpassungen 2024?", "category": "Recency"}
+{"id": "Q032", "question": "Welche Forum-Diskussionen behandeln Erfahrungen mit dem aktuellen Lohn-Update?", "category": "Recency"}
+{"id": "Q033", "question": "Welche jüngsten Forum-Beiträge geben Hinweise zur Konfiguration der elektronischen Lohnmeldung?", "category": "Recency"}
+{"id": "Q034", "question": "Welche aktuellen Forum-Threads diskutieren Probleme mit der mobilen Anwendung?", "category": "Recency"}
+{"id": "Q035", "question": "Welche aktuellen Forum-Diskussionen behandeln neue Funktionen im Modul CRM?", "category": "Recency"}
+{"id": "Q036", "question": "Wie ist die Kassenoberfläche in der PC-Kasse aufgebaut und welche Schaltflächen sind standardmässig vorhanden?", "category": "Visuals"}
+{"id": "Q037", "question": "Welche grafische Darstellung verwendet die Modulbeschreibung des Artikelmanagers für den Datenfluss?", "category": "Visuals"}
+{"id": "Q038", "question": "Welche Bildschirmdarstellung zeigt die Modulbeschreibung des Lagerverwaltungsmoduls für Lagerbewegungen?", "category": "Visuals"}
+{"id": "Q039", "question": "Welche Eingabemasken werden in der Modulbeschreibung des CRM-Moduls grafisch dargestellt?", "category": "Visuals"}
+{"id": "Q040", "question": "Welche Synchronisationsschritte werden in der Modulbeschreibung der mobilen Anwendung visuell dokumentiert?", "category": "Visuals"}
+{"id": "Q041", "question": "Welche Bildschirmmasken zeigt die Schulungsunterlage zur Erfassung eines Eingangsbelegs?", "category": "Visuals"}
+{"id": "Q042", "question": "Welche grafischen Darstellungen verwendet die Schulungsunterlage zur Erläuterung des Mandantenwechsels?", "category": "Visuals"}
+{"id": "Q043", "question": "Wie wird in der Schulungsunterlage die Erstellung eines Auswertungsdiagramms bildlich dargestellt?", "category": "Visuals"}
+{"id": "Q044", "question": "Welche Bildschirmdarstellungen zur PC-Kasse-Einrichtung sind in der Schulungsunterlage enthalten?", "category": "Visuals"}
+{"id": "Q045", "question": "Welche visuellen Schritte zeigt die Schulungsunterlage zur Ersteinrichtung des Lohn-Moduls?", "category": "Visuals"}
+{"id": "Q046", "question": "Wie wird die Lagerbewertung nach FIFO-Methode in den Stammdaten konfiguriert und welche Auswertungen unterstützen das?", "category": "CrossSource"}
+{"id": "Q047", "question": "Wie funktioniert der Datenabgleich zwischen mobiler Anwendung und Hauptprogramm Auftrag?", "category": "CrossSource"}
+{"id": "Q048", "question": "Wie kann ich aus einem Lohnlauf eine Zahlungsdatei erstellen und diese in die Fibu exportieren?", "category": "CrossSource"}
+{"id": "Q049", "question": "Welche Möglichkeiten gibt es, einen Stundenlohn-Mitarbeiter abzurechnen, und worin unterscheiden sich die Varianten?", "category": "CrossSource"}
+{"id": "Q050", "question": "Wie löst man einen Fehler beim Mahnlauf, wenn offene Posten nicht angezeigt werden?", "category": "CrossSource"}

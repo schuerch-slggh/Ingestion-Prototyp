@@ -20,6 +20,9 @@ RAW_DIR = DATA_DIR / "bronze"        # Rohdaten
 INTERIM_DIR = DATA_DIR / "silver"    # Bereinigt
 GOLD_DIR = DATA_DIR / "gold"         # Einheitliches Zwischenformat (JSONL)
 
+# ── Evaluation (variantenunabhängig) ─────────────────────────
+TESTSET_PATH: Path = DATA_DIR / "eval" / "testset_v1.jsonl"
+
 # ── Ingestion-Artefakte (variantenabhängig) ──────────────────
 CHUNKS_DIR = DATA_DIR / "chunks"     # Pro Variante eigene Chunks
 INDEX_DIR = DATA_DIR / "index"       # Pro Variante eigener Vektorindex
