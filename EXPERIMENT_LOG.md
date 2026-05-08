@@ -4,6 +4,68 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-08 – AP-5.3: V1-Smoke-Eval
+
+- V1-Smoke-Eval auf 5 Fragen via `scripts/Pipeline/04_evaluate.py --variant v1 --dry-run --score`
+  (kein neuer Code – Workflow ist variantenagnostisch)
+- Bundle: `runs/eval/v1/responses_2026-05-08T13-57-31.jsonl`
+- Scores: `runs/eval/v1/ragas_2026-05-08T13-57-31.json`
+- Summary: `runs/eval/v1/summary_2026-05-08T13-57-31.md`
+- Identisches Dry-Run-Subset wie V0 (Q001, Q002, Q026, Q036, Q046)
+- 429-Rate-Limit-Retries beim RAGAS-Judge (gpt-4o), automatisch abgefangen
+
+**V1-Smoke-Eval-Resultat:**
+
+| Aspekt | Wert |
+| --- | --- |
+| Erfolgreiche Antworten | 5/5 |
+| Generator-Kosten (geschätzt) | ~0.045 USD |
+| Judge-Kosten (RAGAS gpt-4o) | ~0.05 USD |
+| Dauer | 81.7 s (Runner) + ~155 s (Judge) |
+
+**RAGAS-Scores V1:**
+
+| Metrik | Gesamt | Chunking | Recency | Visuals | CrossSource |
+| --- | --- | --- | --- | --- | --- |
+| Faithfulness | 0.877 | 1.000 | 1.000 | 1.000 | 0.385 |
+| Answer Relevance | 0.892 | 0.939 | 0.893 | 0.848 | 0.841 |
+| Context Precision | 0.684 | 0.669 | 0.333 | 1.000 | 0.750 |
+
+**V0/V1-Direktvergleich pro Frage:**
+
+| Frage | Kategorie | Faith V0/V1 | AnsRel V0/V1 | CtxPrec V0/V1 |
+| --- | --- | --- | --- | --- |
+| Q001 | Chunking | 1.00/1.00 | 0.91/0.91 | 1.00/0.76 |
+| Q002 | Chunking | 1.00/1.00 | 0.81/0.97 | 0.87/0.58 |
+| Q026 | Recency | 1.00/1.00 | 0.89/0.89 | 0.20/0.33 |
+| Q036 | Visuals | 0.97/1.00 | 0.85/0.85 | 1.00/1.00 |
+| Q046 | CrossSource | 0.62/0.38 | 0.85/0.84 | 0.53/0.75 |
+
+**V0/V1-Gesamtvergleich:**
+
+| Metrik | V0 | V1 | Δ |
+| --- | --- | --- | --- |
+| Faithfulness | 0.917 | 0.877 | −0.040 |
+| Answer Relevance | 0.863 | 0.892 | +0.029 |
+| Context Precision | 0.720 | 0.684 | −0.036 |
+
+**Befunde:**
+
+- Recency Context Precision: V1=0.333 > V0=0.200 (+0.133) — atomares Chunking von
+  Forum-/Ticket-Einträgen liefert kohärentere, zeitlich relevantere Kontexte
+- CrossSource Context Precision: V1=0.750 > V0=0.533 (+0.217) — V1 findet bessere
+  Quellkombinationen
+- CrossSource Faithfulness: V1=0.385 < V0=0.615 (−0.230) — atomare Chunks sind kürzer;
+  LLM synthetisiert stärker über Quellen hinweg → höheres Halluzinationsrisiko
+- Chunking Context Precision: V1=0.669 < V0=0.933 (−0.264) — V1-Outline-Chunks für
+  Handbücher sind teils grösser als V0-Token-Windows, was Precision senkt
+- Answer Relevance leicht besser in V1 (+0.029), weil atomare Chunks inhaltlich
+  fokussierter sind und die Antwortqualität steigt
+- Hinweis: N=1 pro Kategorie (ausser Chunking N=2) — keine statistisch belastbare
+  Aussage. Vollauf für belastbare Werte erforderlich.
+
+---
+
 ## 2026-05-08 – AP-5.2: V1-Indexierung
 
 - `scripts/analysis/v1_token_estimate.py`: Pre-Flight-Skript zur Token- und

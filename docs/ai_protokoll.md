@@ -10,6 +10,10 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ### Prompts
 
+**Prompt 3 (AP-5.3: V1-Smoke-Eval):**
+> V1-Smoke-Eval auf 5 Fragen via --variant v1 --dry-run --score. Resultate
+> inspizieren. V0/V1-Direktvergleich berechnen. EXPERIMENT_LOG aktualisieren.
+
 **Prompt 2 (AP-5.2: V1-Indexierung):**
 > Pre-Flight-Skript v1_token_estimate.py erstellen. V1-Indexlauf via
 > 02_index.py --variant v1. Sanity-Check Retrieval. EXPERIMENT_LOG aktualisieren.
@@ -47,12 +51,17 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 **Offene Punkte:**
 - V1-Indexierung (AP-5.2): abgeschlossen
-- V1-Smoke-Eval (AP-5.3): nächster Schritt
+- V1-Smoke-Eval (AP-5.3): abgeschlossen
 
 **AP-5.2 Ergebnis (kurz):**
 - Pre-Flight: 12'381 Chunks, 5.32M Tokens, 0.691 USD — OK
 - Indexlauf: 6.7 min, $0.6911 USD, V0=11'789 bleibt unverändert
 - Sanity-Check: 5 Chunks mit V1-Metadaten zurückgegeben, Top-1 semantisch passend
+
+**AP-5.3 Ergebnis (kurz):**
+- V1 Overall: Faithfulness=0.877, Answer Relevance=0.892, Context Precision=0.684
+- Recency Ctx Prec verbessert (0.333 vs V0 0.200); CrossSource Faith verschlechtert (0.385 vs V0 0.615)
+- V1 Answer Relevance leicht besser (+0.029); Faithfulness/CtxPrec leicht schlechter
 
 ---
 
