@@ -4,6 +4,57 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-08 – AP-4.3: RAGAS-Scorer und Reporter
+
+- `src/rag/evaluate/scorer.py`: RAGAS-Bewertung auf Response-Bundle
+  - Drei Metriken: Faithfulness, ResponseRelevancy,
+    LLMContextPrecisionWithoutReference (RAGAS 0.2.15)
+  - Judge-LLM: gpt-4o (Begründung in Kap. 7 der Arbeit)
+  - Filtert Bundle-Einträge mit `error != null` heraus
+  - Persistiert Pro-Frage-Scores als JSON mit Metadaten
+- `src/rag/evaluate/reporter.py`: Aggregation und Markdown-Output
+  - `build_summary()`: Gesamt- und Kategorie-Mittelwerte
+  - `write_markdown()`: Tabellen-Format für Kap. 8 der Arbeit
+  - None-Scores werden ausgeschlossen (nicht als 0 gewertet)
+- `scripts/Pipeline/04_evaluate.py`: `--score`, `--bundle`, `--no-runner`
+  - Bugfix: `--bundle` impliziert nun `--no-runner` (verhindert
+    versehentlichen Vollauf beim Scoren eines bestehenden Bundles)
+- `src/rag/config.py`: `RAGAS_JUDGE_MODEL`, `_TEMPERATURE`, `_SEED`
+- `pyproject.toml`: `ragas>=0.2.0,<0.3`, `langchain-openai>=0.3`, `tqdm>=4.0`
+- `tests/test_scorer.py`: 6 Tests mit RAGAS-Mocks (kein API-Call)
+- `tests/test_reporter.py`: 5 Tests, pure (kein RAGAS, keine API)
+- 64/64 Tests bestanden (11 neue)
+
+**Smoke-Test (V0, 5-Fragen-Bundle aus AP-4.2, gpt-4o als Judge):**
+
+| Metrik | Mittelwert | n |
+|--------|------------|---|
+| Faithfulness | 0.917 | 5 |
+| Answer Relevance | 0.863 | 5 |
+| Context Precision | 0.720 | 5 |
+
+| Kategorie | n | Faithfulness | Answer Relevance | Context Precision |
+|-----------|---|---|---|---|
+| Chunking | 2 | 1.000 | 0.861 | 0.933 |
+| Recency | 1 | 1.000 | 0.894 | 0.200 |
+| Visuals | 1 | 0.968 | 0.848 | 1.000 |
+| CrossSource | 1 | 0.615 | 0.853 | 0.533 |
+
+**Befunde:**
+- Faithfulness hoch (0.917): V0-Generator halluziniert wenig relativ zum
+  abgerufenen Kontext – aber Kontext selbst ist ggf. nicht ideal (V0)
+- Context Precision Recency (0.200): Erwartungsgemäss tief – V0 ohne
+  Recency-Prior ruft thematisch-ähnliche aber nicht zeitlich-relevante
+  Chunks ab; wird in V2 adressiert
+- CrossSource Faithfulness (0.615): Tiefster Wert; Fragen über mehrere
+  Quellen liegen ausserhalb des V0-Abdeckungsbereichs
+- Vollständiger V0-Lauf über 50 Fragen zufällig mitgestartet (CLI-Bug):
+  674.6s, ~0.437 USD Runner-Kosten; Bundle in
+  `runs/eval/v0/responses_<ts>.jsonl` persistiert (kann für V0-Report
+  genutzt werden)
+
+---
+
 ## 2026-05-08 – AP-4.2: Runner für die RAGAS-Evaluation
 
 - `src/rag/evaluate/runner.py`: Bundle-Generator für RAGAS-Eval

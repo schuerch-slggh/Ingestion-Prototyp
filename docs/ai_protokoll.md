@@ -6,6 +6,52 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 10 – 2026-05-08
+
+### Prompts
+
+**Prompt 1 (AP-4.3: RAGAS-Scorer und Reporter):**
+> `scorer.py` mit RAGAS 0.2.x (Faithfulness, ResponseRelevancy,
+> LLMContextPrecisionWithoutReference), Judge-LLM gpt-4o. `reporter.py` mit
+> Markdown-Output. `04_evaluate.py` um --score/--bundle/--no-runner erweitern.
+> 11 Tests (6 + 5). Smoke-Test auf AP-4.2-Bundle. Commit AP-4.3.
+
+### Aktionen & Erkenntnisse
+
+**Neue Dateien:**
+
+| Datei | Inhalt |
+|-------|--------|
+| `src/rag/evaluate/scorer.py` | RAGAS-Scoring, _build_ragas_dataset, _configure_judge, _extract_scores, _persist_scores |
+| `src/rag/evaluate/reporter.py` | build_summary, write_markdown, _mean_excluding_none |
+| `tests/test_scorer.py` | 6 Tests mit RAGAS-Mocks |
+| `tests/test_reporter.py` | 5 Tests, pure |
+
+**Geänderte Dateien:**
+
+| Datei | Änderung |
+|-------|----------|
+| `scripts/Pipeline/04_evaluate.py` | --score, --bundle, --no-runner hinzugefügt; Bugfix: --bundle impliziert --no-runner |
+| `src/rag/config.py` | RAGAS_JUDGE_MODEL, _TEMPERATURE, _SEED |
+| `pyproject.toml` | ragas>=0.2.0,<0.3; langchain-openai>=0.3; tqdm>=4.0 in Hauptdeps |
+| `EXPERIMENT_LOG.md` | Eintrag AP-4.3 |
+
+**Ergebnisse Smoke-Test:**
+- Faithfulness=0.917, Answer Relevance=0.863, Context Precision=0.720
+- 64/64 Tests bestanden
+
+**Erkenntnisse:**
+- `--bundle` ohne `--no-runner` startete versehentlich den vollen 50-Fragen-Runner
+  (674.6s, ~0.437 USD). Bug sofort gefixt: `--bundle` setzt jetzt automatisch
+  `args.no_runner = True`.
+- RAGAS 0.2 `LangchainLLMWrapper` benötigt langchain_openai (als transitive
+  Dependency bereits installiert). `ChatOpenAI(seed=...)` ist der korrekte
+  Parameter für Determinismus (nicht `model_kwargs`).
+- Context Precision Recency = 0.200: Erwartungsgemäss niedrig für V0 ohne
+  Recency-Prior – bestätigt Hypothese für V2-Verbesserung.
+
+---
+
 ## Konversation 9 – 2026-05-08
 
 ### Prompts

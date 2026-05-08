@@ -23,6 +23,11 @@ GOLD_DIR = DATA_DIR / "gold"         # Einheitliches Zwischenformat (JSONL)
 # ── Evaluation (variantenunabhängig) ─────────────────────────
 TESTSET_PATH: Path = DATA_DIR / "eval" / "testset_v1.jsonl"
 
+# RAGAS-Judge-Konfiguration (siehe Kap. 7 der Arbeit)
+RAGAS_JUDGE_MODEL: str = "gpt-4o"
+RAGAS_JUDGE_TEMPERATURE: float = 0.0
+RAGAS_JUDGE_SEED: int = 42
+
 # ── Ingestion-Artefakte (variantenabhängig) ──────────────────
 CHUNKS_DIR = DATA_DIR / "chunks"     # Pro Variante eigene Chunks
 INDEX_DIR = DATA_DIR / "index"       # Pro Variante eigener Vektorindex
