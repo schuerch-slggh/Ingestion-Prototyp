@@ -4,6 +4,34 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-08 – AP-4.2: Runner für die RAGAS-Evaluation
+
+- `src/rag/evaluate/runner.py`: Bundle-Generator für RAGAS-Eval
+  - `run_testset(questions, variant, output_path)`: zeilenweise JSONL-
+    Persistierung, fehlerresilient (>50% Fehler → Abbruch via RuntimeError)
+  - `_select_dry_run_subset()`: stratifiziert 5 Fragen über alle 4 Kategorien
+    (Chunking 2×, Recency/Visuals/CrossSource je 1×); deterministisch
+  - `_aggregate_stats()`: summiert Token-Counts und schätzt LLM-Kosten
+  - `BundleEntry`-Dataclass: question_id, category, result, error
+- `scripts/Pipeline/04_evaluate.py`: CLI mit --variant, --dry-run, --verbose
+  (ersetzt den alten `ragas_eval`-Stub)
+- `tests/test_runner.py`: 8 Tests mit `answer_query`-Mock (kein API-Call)
+- Output-Schema: `runs/eval/<variant>/responses_<ts>.jsonl`
+  - Hülle: question_id, category, result (= answer_query-Dict), error
+- 53/53 Tests bestanden (8 neue)
+
+**Smoke-Test (--dry-run, V0):**
+
+| Aspekt | Wert |
+|--------|------|
+| Anzahl Fragen | 5 (Q001, Q002, Q026, Q036, Q046) |
+| Erfolgreiche Antworten | 5/5 |
+| Geschätzte Kosten | ~0.0475 USD |
+| Gesamtdauer | 30.8 s |
+| Bundle-Datei | `runs/eval/v0/responses_2026-05-08T09-58-07.jsonl` |
+
+---
+
 ## 2026-05-08 – AP-4.1: Test-Set-Modul für die RAGAS-Evaluation
 
 - `src/rag/evaluate/__init__.py`: Modul-Docstring mit Stub-Hinweisen für AP-4.2/4.3

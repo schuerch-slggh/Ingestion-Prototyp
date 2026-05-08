@@ -6,6 +6,45 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 9 – 2026-05-08
+
+### Prompts
+
+**Prompt 1 (AP-4.2: Runner für die RAGAS-Evaluation):**
+> `runner.py` mit `run_testset`, `_select_dry_run_subset`, `_aggregate_stats`,
+> `BundleEntry`. CLI `04_evaluate.py` mit --dry-run, --variant, --verbose.
+> 8 pytest-Tests mit `answer_query`-Mock. Smoke-Test --dry-run. Commit AP-4.2.
+
+### Aktionen & Erkenntnisse
+
+**Neue Dateien:**
+
+| Datei | Inhalt |
+|-------|--------|
+| `src/rag/evaluate/runner.py` | Bundle-Generator, Fehlerresilienz, Kosten-Schätzung |
+| `tests/test_runner.py` | 8 Tests mit unittest.mock.patch |
+
+**Geänderte Dateien:**
+
+| Datei | Änderung |
+|-------|----------|
+| `scripts/Pipeline/04_evaluate.py` | Vollständige Neuimplementierung (alter ragas_eval-Stub ersetzt) |
+| `src/rag/evaluate/__init__.py` | Docstring: runner als AP-4.2 markiert |
+| `EXPERIMENT_LOG.md` | Eintrag AP-4.2 |
+
+**Ergebnisse:**
+- Smoke-Test: 5/5 erfolgreich, ~0.0475 USD, 30.8 s
+- 53/53 Tests bestanden
+
+**Erkenntnisse:**
+- Alter `04_evaluate.py` importierte `rag.evaluate.ragas_eval.run_evaluation` –
+  dieser Stub wurde vollständig überschrieben, da er zur neuen AP-4.2-API inkompatibel war
+- `dataclasses.asdict()` serialisiert `BundleEntry` direkt zu JSON-kompatiblem Dict;
+  kein manuelles Mapping nötig
+- tqdm-Progressbar ist in Python 3.12 / pytest kompatibel ohne Konfiguration
+
+---
+
 ## Konversation 8 – 2026-05-08
 
 ### Prompts
