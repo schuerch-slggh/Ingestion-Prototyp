@@ -4,6 +4,45 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-08 – AP-5.1: Quellenspezifischer V1-Chunker
+
+- `src/rag/index/chunking_v1.py`: V1-Chunking mit Quelltyp-Dispatch
+  - Atomar (forum, ticket): 1 Chunk pro Eintrag, Recursive-Fallback bei
+    Token-Überlauf > 8000
+  - Seitenweise (modulbeschreibung, schulungsunterlage): 1 Chunk pro Seite,
+    Recursive-Fallback bei > 2000 Tokens
+  - Outline (handbuch): H2-basiert (Outline-Feld mit `level`, `title`, `page`),
+    Fallback H3 → Recursive bei > 2000 Tokens. Text-Extraktion via
+    Page-Range-Mapping (pages_by_num dict)
+  - Wiederverwendung des V0-`_split_text` für alle Recursive-Fallbacks
+  - Erweitertes Metadaten-Schema: `chunking_strategy`, `outline_path`,
+    `page_number`
+- `src/rag/pipeline_factory.py`: `get_chunker("v1")` aktiviert
+- `tests/test_chunking_v1.py`: 13 Tests (alle Strategien + Dispatch + IDs),
+  rein synthetisch (kein API, kein echtes Gold)
+
+**Gold-Schema-Verifikation (Schritt 1):**
+- Outline-Felder: `level` (1–4), `title`, `page` (Startseite), kein `page_start`
+- Pages-Felder: `page_number`, `text`
+- forum/ticket: nur `full_text`, keine Pages/Outline
+
+**Smoke-Test auf realen Gold-Einträgen (1 Eintrag pro Quelltyp):**
+
+| Quelle | Strategie | Anzahl Chunks |
+| --- | --- | --- |
+| forum | atomic | 1 |
+| ticket | atomic | 1 |
+| handbuch | outline + recursive_fallback | 685 + 356 |
+| modulbeschreibung | page | 20 |
+| schulungsunterlage | page | 18 |
+| **Total** | | **1081** |
+
+Beobachtung: Das Handbuch hat viele grosse H2-Sektionen (> 2000 Tokens), die
+in den Recursive-Fallback fallen. Dies zeigt, dass der H3-Fallback bei diesem
+Dokument häufig greift — ein Optimierungspunkt für spätere Varianten.
+
+---
+
 ## 2026-05-08 – AP-4.3: RAGAS-Scorer und Reporter
 
 - `src/rag/evaluate/scorer.py`: RAGAS-Bewertung auf Response-Bundle

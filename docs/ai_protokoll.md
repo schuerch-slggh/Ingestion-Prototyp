@@ -6,6 +6,47 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 11 – 2026-05-08
+
+### Prompts
+
+**Prompt 1 (AP-5.1: Quellenspezifischer V1-Chunker):**
+> `chunking_v1.py` mit quellenspezifischem Chunking: atomar (forum/ticket),
+> seitenweise (modulbeschreibung/schulungsunterlage), outline-basiert H2
+> (handbuch). Pipeline-Factory für V1 aktivieren. 13 Tests. Smoke-Test auf
+> echten Gold-Einträgen.
+
+### Aktionen & Erkenntnisse
+
+**Gold-Schema-Verifikation:**
+- Outline-Felder: `level` (1–4), `title`, `page` (Startseite)
+- Pages-Felder: `page_number`, `text`
+- forum/ticket: nur `full_text`
+
+**Neue Dateien:**
+
+| Datei | Inhalt |
+|-------|--------|
+| `src/rag/index/chunking_v1.py` | chunk_documents_v1, _chunk_atomic, _chunk_pages, _chunk_outline, Hilfsfunktionen |
+| `tests/test_chunking_v1.py` | 13 Tests, rein synthetisch |
+
+**Geänderte Dateien:**
+
+| Datei | Änderung |
+|-------|----------|
+| `src/rag/pipeline_factory.py` | get_chunker("v1") aktiviert |
+| `EXPERIMENT_LOG.md` | Eintrag AP-5.1 |
+
+**Smoke-Test (1 Eintrag pro Quelltyp):**
+- 1081 Chunks total: atomic=2, outline=685, page=38, recursive_fallback=356
+- Alle vier Strategien ausgelöst, kein Crash
+
+**Offene Punkte:**
+- V1-Indexierung (AP-5.2): Embedding-Lauf ~0.82 USD
+- V1-Smoke-Eval (AP-5.3)
+
+---
+
 ## Konversation 10 – 2026-05-08
 
 ### Prompts
