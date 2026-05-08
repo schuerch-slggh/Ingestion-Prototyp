@@ -3,7 +3,9 @@
     "allow": [
       "Bash(python scripts/Pipeline/02_index.py --variant v0)",
       "Bash(python -m pytest tests/ -q)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "PowerShell(& \"C:\\\\Users\\\\Giani\\\\OneDrive - Selectline Software AG\\\\BA\\\\Prototyp Beta\\\\.venv\\\\Scripts\\\\ruff.exe\" check \"c:\\\\Users\\\\Giani\\\\OneDrive - Selectline Software AG\\\\BA\\\\Ingestion-Prototyp\\\\src\\\\\" \"c:\\\\Users\\\\Giani\\\\OneDrive - Selectline Software AG\\\\BA\\\\Ingestion-Prototyp\\\\tests\\\\\" 2>&1)",
+      "PowerShell(C:\\\\Python312\\\\python.exe -c \"import tqdm; print\\(tqdm.__version__\\)\" 2>&1)"
     ]
   }
 }
