@@ -10,6 +10,10 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ### Prompts
 
+**Prompt 2 (AP-5.2: V1-Indexierung):**
+> Pre-Flight-Skript v1_token_estimate.py erstellen. V1-Indexlauf via
+> 02_index.py --variant v1. Sanity-Check Retrieval. EXPERIMENT_LOG aktualisieren.
+
 **Prompt 1 (AP-5.1: Quellenspezifischer V1-Chunker):**
 > `chunking_v1.py` mit quellenspezifischem Chunking: atomar (forum/ticket),
 > seitenweise (modulbeschreibung/schulungsunterlage), outline-basiert H2
@@ -42,8 +46,13 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 - Alle vier Strategien ausgelöst, kein Crash
 
 **Offene Punkte:**
-- V1-Indexierung (AP-5.2): Embedding-Lauf ~0.82 USD
-- V1-Smoke-Eval (AP-5.3)
+- V1-Indexierung (AP-5.2): abgeschlossen
+- V1-Smoke-Eval (AP-5.3): nächster Schritt
+
+**AP-5.2 Ergebnis (kurz):**
+- Pre-Flight: 12'381 Chunks, 5.32M Tokens, 0.691 USD — OK
+- Indexlauf: 6.7 min, $0.6911 USD, V0=11'789 bleibt unverändert
+- Sanity-Check: 5 Chunks mit V1-Metadaten zurückgegeben, Top-1 semantisch passend
 
 ---
 

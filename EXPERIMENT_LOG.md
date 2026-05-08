@@ -4,6 +4,60 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-08 – AP-5.2: V1-Indexierung
+
+- `scripts/analysis/v1_token_estimate.py`: Pre-Flight-Skript zur Token- und
+  Kostenschätzung ohne API-Calls (vor 02_index.py --variant v1)
+- V1-Indexlauf via `scripts/Pipeline/02_index.py --variant v1` (kein
+  Code-Change nötig — Skript war bereits variantenagnostisch)
+- ChromaDB-Sammlung in `data/index/v1/` (parallel zu data/index/v0/)
+- Variante v1 ist nun End-to-End nutzbar (Retrieval funktioniert)
+- Hinweis: COLLECTION_NAME = "v0_index" ist hardcoded in vectorstore.py,
+  aber jede Variante nutzt ein eigenes ChromaDB-Verzeichnis → kein Problem
+
+**Pre-Flight-Schätzung:**
+
+| Quelle | Einträge | Chunks | Tokens | Strategie-Verteilung |
+| --- | --- | --- | --- | --- |
+| forum.jsonl | 2052 | 2093 | 637'191 | atomic=2045, recursive_fallback=48 |
+| tickets.jsonl | 4691 | 4745 | 1'064'593 | atomic=4686, recursive_fallback=59 |
+| handbuecher.jsonl | 8 | 3564 | 2'953'642 | outline=2535, recursive_fallback=1029 |
+| modulbeschreibungen.jsonl | 63 | 1048 | 381'173 | page=1048 |
+| schulungsunterlagen.jsonl | 19 | 931 | 279'394 | page=931 |
+
+**Indexlauf-Resultat:**
+
+| Aspekt | V1 | V0 (Vergleich) |
+| --- | --- | --- |
+| Total Chunks | 12'381 | 11'789 |
+| Total Tokens | 5'315'993 (~5.32M) | ~6.34M |
+| Embedding-Kosten | 0.6911 USD | 0.82 USD |
+| Dauer | 403.9 s (6.7 min) | 29.3 min |
+
+V1 ist trotz mehr Chunks günstiger als V0, da der Token-Sliding-Overlap (1000/150
+in V0) bei 11'789 Chunks viele redundante Tokens produziert, während V1 mit
+atomaren und seitenbasierten Chunks weniger Overhead hat.
+
+**Sanity-Check Retrieval (Query: "Wie konfiguriere ich die Mehrwertsteuer?"):**
+
+| Top | ID | Strategy | Source | Similarity |
+| --- | --- | --- | --- | --- |
+| 1 | `modulbeschreibung__anwendung_saldo_und_pauschalsteuersatz_methode_v11_0_page_0010` | page | modulbeschreibung | 0.2194 |
+| 2 | `forum__forum_311` | atomic | forum | 0.2186 |
+| 3 | `forum__forum_1573` | atomic | forum | 0.1891 |
+| 4 | `ticket__ticket_206510` | atomic | ticket | 0.1767 |
+| 5 | `forum__forum_1650` | atomic | forum | 0.1736 |
+
+**Befunde:**
+
+- Recursive-Fallback-Anteil im Vollumfang: 1136/12381 = 9.2% (vs. Smoke-Test 33%)
+- Chunk-Anzahl gegenüber V0: +5% (12'381 vs. 11'789)
+- Handbücher dominieren Token-Volumen (2.95M von 5.32M = 55%), da 8 grosse PDFs
+- Top-1 Retrieval-Ergebnis (Saldo-/Pauschalsteuersatz-Modulbeschreibung) ist
+  semantisch passend zur Mehrwertsteuer-Query
+
+---
+
 ## 2026-05-08 – AP-5.1: Quellenspezifischer V1-Chunker
 
 - `src/rag/index/chunking_v1.py`: V1-Chunking mit Quelltyp-Dispatch
