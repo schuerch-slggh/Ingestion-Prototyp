@@ -10,6 +10,11 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ### Prompts
 
+**Prompt 4 (AP-6.1: V2-Metadaten-Anreicherung):**
+> `chunking_v2.py` als Wrapper auf V1. Quelltyp-spezifische Metadaten-Anreicherung.
+> `module` für Schulungsunterlagen aus doc_id (korrigiert: Token nach erstem
+> Unterstrich, nicht aus source_file). 14 Tests. Smoke-Test. EXPERIMENT_LOG.
+
 **Prompt 3 (AP-5.3: V1-Smoke-Eval):**
 > V1-Smoke-Eval auf 5 Fragen via --variant v1 --dry-run --score. Resultate
 > inspizieren. V0/V1-Direktvergleich berechnen. EXPERIMENT_LOG aktualisieren.

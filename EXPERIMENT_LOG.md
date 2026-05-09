@@ -4,6 +4,45 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-08 – AP-6.1: V2-Metadaten-Anreicherung
+
+- `src/rag/index/chunking_v2.py`: V2-Chunker als Wrapper auf V1
+  - `chunk_documents_v2()` ruft `chunk_documents_v1()` auf, danach
+    `_enrich_with_metadata()` — V1-Code bleibt unverändert
+  - Quelltyp-spezifische Anreicherungs-Funktionen:
+    - forum: `post_id`, `topic_id`, `module`, `post_date`
+    - ticket: `ticket_id`, `product`, `category`, `version_reported`,
+      `version_resolved`, `processed_date`
+    - handbuch: `outline_level`, `page_start`, `page_end`, `doc_title`;
+      `outline_path` (Liste → String serialisiert, z. B. `'H1 > H2'`)
+    - modulbeschreibung: `doc_title`
+    - schulungsunterlage: `doc_title`, `module` (aus doc_id abgeleitet)
+  - `_derive_module_from_doc_id()`: erstes Token nach erstem Unterstrich aus
+    doc_id, kapitalisiert (z. B. `schulungsunterlagen_auftrag` → `Auftrag`)
+  - ChromaDB-Kompatibilität: alle Werte als str/int/float/bool
+  - Recursive-Fallback-Chunks erben Parent-Metadaten
+- `src/rag/pipeline_factory.py`: `get_chunker("v2")` aktiviert
+- `tests/test_chunking_v2.py`: 14 Tests (Hilfsfunktionen, Anreicherung pro
+  Quelltyp, Edge Cases, Dispatch, ChromaDB-Kompatibilität)
+
+**Smoke-Test V2-Metadaten (1 Eintrag pro Quelltyp):**
+
+| Quelltyp | Beispiel-Felder |
+| --- | --- |
+| forum | `post_id='118'`, `topic_id='100'`, `module='SelectLine Auftrag Allgemein'`, `post_date='2013-11-11'` |
+| ticket | `ticket_id='76'`, `product='Auftrag'`, `category='1000'`, `version_resolved=''` |
+| handbuch | `outline_path='1 Willkommen > Inhalt'`, `outline_level=2`, `page_start=5`, `page_end=38`, `doc_title='...'` |
+| modulbeschreibung | `page_number=1`, `doc_title='Beschreibung Cloudkasse'` |
+| schulungsunterlage | `page_number=1`, `doc_title='...'`, `module='Und'`* |
+
+*Heuristik-Edge-Case: `jahresabschluss_und_...` → `module='Und'` (erster Token nach
+Unterstrich ist `und`). Für Standard-Doc-IDs wie `schulungsunterlagen_auftrag_profi`
+funktioniert die Heuristik korrekt.
+
+ChromaDB-Kompatibilitäts-Verstösse: **0**
+
+---
+
 ## 2026-05-08 – AP-5.3: V1-Smoke-Eval
 
 - V1-Smoke-Eval auf 5 Fragen via `scripts/Pipeline/04_evaluate.py --variant v1 --dry-run --score`
