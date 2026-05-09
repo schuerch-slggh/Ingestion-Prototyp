@@ -3,6 +3,8 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from rag.index.chunking_v2 import (
@@ -13,9 +15,29 @@ from rag.index.chunking_v2 import (
     _enrich_modulbeschreibung,
     _enrich_schulungsunterlage,
     _enrich_ticket,
+    _extract_doc_id,
     _serialize_outline_path,
     chunk_documents_v2,  # noqa: E402
 )
+
+# ── Mock: LLM-Tagger in allen V2-Tests deaktivieren ─────────────────────────
+
+
+@pytest.fixture(autouse=True)
+def mock_llm_tagger(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Mockt den LLM-Tagger für alle V2-Tests (kein API-Call)."""
+
+    def _stub_tag_chunks(
+        chunks: list[dict], cache_path: object = None
+    ) -> list[dict]:
+        for c in chunks:
+            c["metadata"]["module_tags"] = ""
+            c["metadata"]["thema_tags"] = ""
+            c["metadata"]["typ_tags"] = ""
+        return chunks
+
+    monkeypatch.setattr("rag.index.chunking_v2.tag_chunks", _stub_tag_chunks)
+
 
 # ── Hilfsfunktionen für synthetische Gold-Einträge ───────────────────────────
 
@@ -163,7 +185,7 @@ def test_enrich_forum_adds_metadata() -> None:
     _enrich_forum(meta, entry)
     assert meta["post_id"] == "118"
     assert meta["topic_id"] == "100"
-    assert meta["module"] == "SL Auftrag"
+    assert meta["module_lookup"] == "SL Auftrag"
     assert meta["post_date"] == "2023-01-01"
 
 
@@ -216,7 +238,7 @@ def test_enrich_schulungsunterlage_derives_module() -> None:
         "page_number": 1,
     }
     _enrich_schulungsunterlage(meta, entry)
-    assert meta["module"] == "Auftrag"
+    assert meta["module_filename"] == "Auftrag"
     assert meta["doc_title"] == "Auftrag Schulung Profi"
 
 
@@ -257,6 +279,50 @@ def test_enrich_handles_recursive_fallback_chunks() -> None:
     assert meta["doc_title"] == "SL Handbuch"
 
 
+# ── _extract_doc_id (6 Tests) ────────────────────────────────────────────────
+
+
+def test_extract_doc_id_atomic() -> None:
+    assert _extract_doc_id("forum__forum_001", "forum") == "forum_001"
+
+
+def test_extract_doc_id_page() -> None:
+    assert (
+        _extract_doc_id(
+            "modulbeschreibung__beschreibung_cloudkasse_page_0001",
+            "modulbeschreibung",
+        )
+        == "beschreibung_cloudkasse"
+    )
+
+
+def test_extract_doc_id_h2() -> None:
+    assert _extract_doc_id("handbuch__doc_id_h2_0001", "handbuch") == "doc_id"
+
+
+def test_extract_doc_id_overflow_recursive() -> None:
+    assert (
+        _extract_doc_id("forum__forum_001_overflow_recursive_0000", "forum")
+        == "forum_001"
+    )
+
+
+def test_extract_doc_id_h2_recursive() -> None:
+    assert (
+        _extract_doc_id("handbuch__doc_id_h2_0001_recursive_0000", "handbuch")
+        == "doc_id"
+    )
+
+
+def test_extract_doc_id_nooutline_recursive() -> None:
+    assert (
+        _extract_doc_id(
+            "handbuch__doc_id_nooutline_recursive_0000", "handbuch"
+        )
+        == "doc_id"
+    )
+
+
 # ── Dispatch und Integration (2 Tests) ───────────────────────────────────────
 
 
@@ -289,7 +355,7 @@ def test_chunk_documents_v2_dispatches_correctly() -> None:
     # Modulbeschreibung
     assert "doc_title" in by_type["modulbeschreibung"][0]["metadata"]
     # Schulungsunterlage
-    assert "module" in by_type["schulungsunterlage"][0]["metadata"]
+    assert "module_filename" in by_type["schulungsunterlage"][0]["metadata"]
     assert "doc_title" in by_type["schulungsunterlage"][0]["metadata"]
 
 

@@ -1,20 +1,20 @@
-"""V2-Chunking: V1-Strategien plus strukturelle Metadaten-Anreicherung.
+"""V2-Chunking: V1-Strategien + strukturelle Metadaten + LLM-Tags.
 
-V2 = V1 + Post-Processing:
+V2 = V1 + zwei Post-Processing-Schritte:
     Schritt 1: V1-Chunker liefert Chunks mit V1-Metadaten.
-    Schritt 2: Pro Chunk werden strukturelle Metadaten aus dem
-               Gold-Eintrag extrahiert und ergänzt:
-               - Forum:             post_id, topic_id, module, post_date
+    Schritt 2: Strukturelle Metadaten aus Gold-Eintrag:
+               - Forum:             post_id, topic_id, module_lookup, post_date
                - Ticket:            ticket_id, product, category,
                                     version_reported, version_resolved,
                                     processed_date
                - Handbuch:          outline_level, page_start, page_end,
                                     doc_title; outline_path serialisiert
                - Modulbeschreibung: doc_title
-               - Schulungsunterlage:doc_title, module (aus Dateiname)
+               - Schulungsunterlage:doc_title, module_filename (aus doc_id)
+    Schritt 3: LLM-Tags (gpt-4o-mini, Structured Outputs):
+               module_tags, thema_tags, typ_tags als kommagetrennte Strings.
 
-Die V2-Metadaten dienen in nachfolgenden Schritten als Filter und als
-Eingabe für das Recency-Re-Ranking (AP-6.2).
+V3 (Recency-Re-Ranking) und V4 (VLM) kommen in späteren APs.
 """
 
 import logging
@@ -22,6 +22,7 @@ import re
 from pathlib import Path
 
 from rag.index.chunking_v1 import chunk_documents_v1
+from rag.index.llm_tagger import tag_chunks
 
 logger = logging.getLogger(__name__)
 
@@ -169,12 +170,12 @@ def _enrich_forum(chunk_metadata: dict, gold_entry: dict) -> None:
     Modifiziert chunk_metadata in-place. Felder werden als leerer String
     gesetzt, wenn im Gold-Eintrag nicht vorhanden (ChromaDB-Kompatibilität).
 
-    Felder: post_id, topic_id, module, post_date.
+    Felder: post_id, topic_id, module_lookup, post_date.
     """
     meta = gold_entry.get("metadata", {})
     chunk_metadata["post_id"] = str(meta.get("post_id") or "")
     chunk_metadata["topic_id"] = str(meta.get("topic_id") or "")
-    chunk_metadata["module"] = str(meta.get("module") or "")
+    chunk_metadata["module_lookup"] = str(meta.get("module") or "")
     chunk_metadata["post_date"] = str(meta.get("post_date") or "")
 
 
@@ -213,6 +214,9 @@ def _enrich_handbuch(chunk_metadata: dict, gold_entry: dict) -> None:
         page_start, page_end = _find_section_pages(outline, outline_path)
     else:
         # Bereits serialisiert (sollte bei V1-Input nicht vorkommen)
+        logger.warning(
+            "outline_path für Chunk bereits serialisiert: %r", outline_path
+        )
         outline_level = outline_path.count(" > ") + 1 if outline_path else 0
         page_start, page_end = 0, 0
 
@@ -232,16 +236,15 @@ def _enrich_modulbeschreibung(chunk_metadata: dict, gold_entry: dict) -> None:
 def _enrich_schulungsunterlage(
     chunk_metadata: dict, gold_entry: dict
 ) -> None:
-    """Ergänzt Chunk-Metadaten um doc_title und module für Schulungsunterlagen.
+    """Ergänzt Chunk-Metadaten um doc_title und module_filename.
 
-    module wird heuristisch aus dem doc_id-Feld des Gold-Eintrags abgeleitet
-    (erstes Token nach dem ersten Unterstrich, z. B.
-    'schulungsunterlagen_auftrag' → 'Auftrag').
+    module_filename heuristisch aus doc_id abgeleitet: erstes Token nach
+    dem ersten Unterstrich, z. B. 'schulungsunterlagen_auftrag' → 'Auftrag'.
     """
     source_file = chunk_metadata.get("source_file", "")
     doc_id = gold_entry.get("doc_id", "")
     chunk_metadata["doc_title"] = _derive_doc_title(source_file)
-    chunk_metadata["module"] = _derive_module_from_doc_id(doc_id)
+    chunk_metadata["module_filename"] = _derive_module_from_doc_id(doc_id)
 
 
 _ENRICHERS = {
@@ -309,7 +312,7 @@ def _enrich_with_metadata(
 
 
 def chunk_documents_v2(gold_entries: list[dict]) -> list[dict]:
-    """V2-Chunking: V1-Strategien plus strukturelle Metadaten.
+    """V2-Chunking: V1-Strategien + strukturelle Metadaten + LLM-Tags.
 
     Args:
         gold_entries: Liste von Gold-Eintrag-Dicts (eingelesen aus JSONL).
@@ -321,5 +324,6 @@ def chunk_documents_v2(gold_entries: list[dict]) -> list[dict]:
     logger.info("V2-Chunking gestartet: %d Gold-Einträge", len(gold_entries))
     chunks = chunk_documents_v1(gold_entries)
     chunks = _enrich_with_metadata(chunks, gold_entries)
+    chunks = tag_chunks(chunks)
     logger.info("V2-Chunking abgeschlossen: %d Chunks", len(chunks))
     return chunks

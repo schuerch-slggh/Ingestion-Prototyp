@@ -6,6 +6,57 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 12 – 2026-05-09
+
+### Prompts
+
+**Prompt 2 (AP-6.1b: V2 LLM-Tagging):**
+> Zweiter Anreicherungs-Schritt für V2: gpt-4o-mini Tagging mit drei Kategorien
+> (module_tags, thema_tags, typ_tags). tag_taxonomy.py, llm_tagger.py, Pre-Flight-
+> Skript, 10 Mock-Tests, Naming-Konflikt (module → module_lookup/module_filename),
+> autouse-Mock in V2-Tests, Mini-Smoke-Test, EXPERIMENT_LOG.
+
+**Prompt 1 (AP-6.1 Nacharbeit: _extract_doc_id Tests + defensive Warning):**
+> Code-Review von chunking_v2.py und test_chunking_v2.py (GitHub URLs).
+> Review-Befund: fehlende Unit-Tests für _extract_doc_id. Fortsetzung aus
+> Konversation 11 nach Context-Zusammenfassung.
+
+### Aktionen & Erkenntnisse
+
+**Ergänzungen in test_chunking_v2.py (6 neue Tests):**
+- `test_extract_doc_id_atomic` — `"forum__forum_001"` → `"forum_001"`
+- `test_extract_doc_id_page` — `_page_0001`-Suffix wird korrekt abgeschnitten
+- `test_extract_doc_id_h2` — `_h2_0001`-Suffix wird korrekt abgeschnitten
+- `test_extract_doc_id_overflow_recursive` — kombinierten Suffix erkennt
+- `test_extract_doc_id_h2_recursive` — kombinierten H2+Recursive-Suffix erkennt
+- `test_extract_doc_id_nooutline_recursive` — nooutline-Suffix erkennt
+- Gesamtzahl Tests in test_chunking_v2.py: 14 → 20
+
+**Ergänzung in chunking_v2.py:**
+- `logger.warning()` in `_enrich_handbuch` für bereits serialisierten
+  `outline_path` (defensiv, bei V1-Input nicht erreichbar, aber explizit sichtbar)
+
+**Alle 20 Tests passed**, kein Ruff-Fehler erwartet (Ruff nicht auf PATH verfügbar
+in dieser Session, Stil-konsistent mit bestehendem Code).
+
+**AP-6.1b abgeschlossen:**
+
+| Datei | Änderung |
+|-------|----------|
+| `src/rag/index/tag_taxonomy.py` | Neu: MODULE_TAGS, THEMA_TAGS, TYP_TAGS, MAX_TAGS |
+| `src/rag/index/llm_tagger.py` | Neu: tag_chunks(), Caching, Validierung, Abort-Logik |
+| `src/rag/index/chunking_v2.py` | Schritt 3 (tag_chunks) + Naming-Konflikt aufgelöst |
+| `src/rag/config.py` | V2_TAGS_CACHE_PATH ergänzt |
+| `scripts/analysis/v2_tagging_estimate.py` | Neu: Pre-Flight-Schätzung |
+| `tests/test_llm_tagger.py` | Neu: 10 Tests (kein API-Call) |
+| `tests/test_chunking_v2.py` | Naming + autouse-Mock-Fixture |
+
+Gesamtzahl Tests: 107/107 grün.
+Pre-Flight-Schätzung: 12'381 Chunks, ~$1.40 USD.
+Mini-Smoke-Test: 1 Chunk, Tags whitelist-valide.
+
+---
+
 ## Konversation 11 – 2026-05-08
 
 ### Prompts

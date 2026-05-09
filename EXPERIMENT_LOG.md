@@ -4,6 +4,52 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-09 – AP-6.1b: V2 LLM-Tagging als zweiter Anreicherungs-Schritt
+
+- `src/rag/index/tag_taxonomy.py`: Tag-Listen als Modul-Konstanten
+  - `MODULE_TAGS` (~35 Werte aus `FORUM_MODULE_LOOKUP`)
+  - `THEMA_TAGS` (16 Werte)
+  - `TYP_TAGS` (6 Werte)
+  - `MAX_TAGS` (module_tags=2, thema_tags=3, typ_tags=1)
+- `src/rag/index/llm_tagger.py`: gpt-4o-mini Tagging mit Structured Outputs
+  - Pro-Chunk-Caching nach chunk_id in `data/cache/v2_tags.jsonl`
+  - Validierung gegen Whitelist, MAX_TAGS-Limits
+  - Abbruch bei Ungetaggt-Rate > 5%
+  - Crash-Resistenz: Cache-Append nach jedem Call
+- `src/rag/index/chunking_v2.py`:
+  - Dritter Schritt in `chunk_documents_v2()`: `tag_chunks()` hinzugefügt
+  - Naming-Konflikt aufgelöst: `module` → `module_lookup` (Forum),
+    `module` → `module_filename` (Schulungsunterlage)
+  - `llm_tagger.tag_chunks` als Top-Level-Import
+- `src/rag/config.py`: `V2_TAGS_CACHE_PATH` ergänzt
+- `scripts/analysis/v2_tagging_estimate.py`: Pre-Flight-Kostenschätzung
+- `tests/test_llm_tagger.py`: 10 Tests mit Mocks (kein API-Call)
+- `tests/test_chunking_v2.py`: `module` → `module_lookup`/`module_filename`,
+  `autouse`-Mock-Fixture für LLM-Tagger
+
+**Mini-Smoke-Test (1 Forum-Chunk, echter LLM-Call):**
+
+| Aspekt | Wert |
+| --- | --- |
+| Anzahl Chunks | 1 (forum ist atomic → 1 Entry = 1 Chunk) |
+| Tags valide (in Whitelist) | 1/1 |
+| Mindestens 1 Tag pro Kategorie | 1/1 |
+| Beispiel-Tags | `module_tags='SelectLine Auftrag,Programm Einrichtung'`, `thema_tags='Stammdaten,Druck,Konfiguration'`, `typ_tags='Anleitung'` |
+
+**Pre-Flight-Schätzung Voll-Tagging-Lauf:**
+
+| Aspekt | Wert |
+| --- | --- |
+| Total Chunks | 12'381 |
+| Geschätzte Input-Tokens | ~6.83M |
+| Geschätzte Output-Tokens | ~619K (50 Tokens pro Chunk) |
+| Geschätzte Kosten | ~1.40 USD |
+
+Voller Tagging-Lauf, V2-Indexierung und V2-Smoke-Eval kommen in
+separaten APs (AP-6.2, AP-6.3).
+
+---
+
 ## 2026-05-08 – AP-6.1: V2-Metadaten-Anreicherung
 
 - `src/rag/index/chunking_v2.py`: V2-Chunker als Wrapper auf V1
