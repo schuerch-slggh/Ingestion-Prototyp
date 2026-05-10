@@ -20,23 +20,25 @@ from rag.index.chunking_v2 import (
     chunk_documents_v2,  # noqa: E402
 )
 
-# ── Mock: LLM-Tagger in allen V2-Tests deaktivieren ─────────────────────────
+# ── Mock: Keyword-Generator in allen V2-Tests deaktivieren ──────────────────
 
 
 @pytest.fixture(autouse=True)
-def mock_llm_tagger(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Mockt den LLM-Tagger für alle V2-Tests (kein API-Call)."""
+def mock_keyword_generator(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Mockt den Keyword-Generator für alle V2-Tests (kein API-Call)."""
 
-    def _stub_tag_chunks(
+    def _stub_enrich(
         chunks: list[dict], cache_path: object = None
     ) -> list[dict]:
         for c in chunks:
-            c["metadata"]["module_tags"] = ""
-            c["metadata"]["thema_tags"] = ""
-            c["metadata"]["typ_tags"] = ""
+            c["metadata"]["keywords"] = (
+                "test_keyword_a,test_keyword_b,test_keyword_c"
+            )
         return chunks
 
-    monkeypatch.setattr("rag.index.chunking_v2.tag_chunks", _stub_tag_chunks)
+    monkeypatch.setattr(
+        "rag.index.chunking_v2.enrich_with_keywords", _stub_enrich
+    )
 
 
 # ── Hilfsfunktionen für synthetische Gold-Einträge ───────────────────────────

@@ -6,6 +6,44 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 13 – 2026-05-10
+
+### Prompts
+
+**Prompt 1 (AP-6.1c: V2 Schlüsselwort-basierte Hybrid-Suche):**
+> Architekturwechsel: Tagging (AP-6.1b) durch Keyword-Anreicherung +
+> Hybrid-Retrieval (Embedding + BM25 + RRF) ersetzen. Rückbau llm_tagger.py/
+> tag_taxonomy.py. keyword_generator.py (5–12 Keywords, Synonyme erlaubt),
+> bm25_index.py (rank_bm25, serialisiert), retriever.py um Hybrid-Modus für
+> V2 erweitern. 16 neue Tests (8+4+4), Mini-Smoke-Test.
+
+### Aktionen & Erkenntnisse
+
+| Datei | Änderung |
+|-------|----------|
+| `src/rag/index/llm_tagger.py` | Gelöscht |
+| `src/rag/index/tag_taxonomy.py` | Gelöscht |
+| `tests/test_llm_tagger.py` | Gelöscht |
+| `scripts/analysis/v2_tagging_estimate.py` | Gelöscht |
+| `src/rag/index/keyword_generator.py` | Neu |
+| `src/rag/index/bm25_index.py` | Neu |
+| `src/rag/retrieve/retriever.py` | Hybrid-Modus für V2 + RRF |
+| `scripts/Pipeline/02_index.py` | BM25-Aufbau für V2 |
+| `scripts/analysis/v2_keywords_estimate.py` | Neu |
+| `tests/test_keyword_generator.py` | Neu: 8 Tests |
+| `tests/test_bm25_index.py` | Neu: 4 Tests |
+| `tests/test_retriever_hybrid.py` | Neu: 4 Tests |
+| `src/rag/index/chunking_v2.py` | tag_chunks → enrich_with_keywords |
+| `tests/test_chunking_v2.py` | Mock-Fixture für Keyword-Generator |
+| `src/rag/config.py` | V2_KEYWORDS_CACHE_PATH, V2_BM25_INDEX_PATH |
+| `pyproject.toml` | rank_bm25>=0.2.2 |
+
+Gesamtzahl Tests: 113/113 grün.
+Pre-Flight: 12'381 Chunks, ~$1.80 USD.
+Mini-Smoke: 5 Chunks, 8–11 Keywords pro Chunk, keine Violations.
+
+---
+
 ## Konversation 12 – 2026-05-09
 
 ### Prompts

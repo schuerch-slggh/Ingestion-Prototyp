@@ -100,6 +100,14 @@ def main() -> None:
     collection = get_or_create_collection(variant, reset=args.reset)
     add_chunks_to_collection(collection, all_chunks, embeddings)
 
+    # ── 3b. BM25-Index für V2 ──────────────────────────────────────────────────
+    if variant == "v2":
+        from rag.config import V2_BM25_INDEX_PATH
+        from rag.index.bm25_index import build_bm25_index
+
+        build_bm25_index(all_chunks, V2_BM25_INDEX_PATH)
+        logger.info("BM25-Index geschrieben: %s", V2_BM25_INDEX_PATH)
+
     # ── 4. Summary ─────────────────────────────────────────────────────────────
     duration = time.monotonic() - t_start
     logger.info("=== Indexierung abgeschlossen in %.1f s ===", duration)

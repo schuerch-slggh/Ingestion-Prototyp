@@ -1,4 +1,4 @@
-"""V2-Chunking: V1-Strategien + strukturelle Metadaten + LLM-Tags.
+"""V2-Chunking: V1-Strategien + strukturelle Metadaten + Schlüsselwörter.
 
 V2 = V1 + zwei Post-Processing-Schritte:
     Schritt 1: V1-Chunker liefert Chunks mit V1-Metadaten.
@@ -11,9 +11,10 @@ V2 = V1 + zwei Post-Processing-Schritte:
                                     doc_title; outline_path serialisiert
                - Modulbeschreibung: doc_title
                - Schulungsunterlage:doc_title, module_filename (aus doc_id)
-    Schritt 3: LLM-Tags (gpt-4o-mini, Structured Outputs):
-               module_tags, thema_tags, typ_tags als kommagetrennte Strings.
+    Schritt 3: Schlüsselwort-Anreicherung (gpt-4o-mini, 5–12 pro Chunk).
+               Feld: keywords (kommagetrennter String).
 
+Hybrid-Retrieval (Embedding + BM25 + RRF) ist in retriever.py implementiert.
 V3 (Recency-Re-Ranking) und V4 (VLM) kommen in späteren APs.
 """
 
@@ -22,7 +23,7 @@ import re
 from pathlib import Path
 
 from rag.index.chunking_v1 import chunk_documents_v1
-from rag.index.llm_tagger import tag_chunks
+from rag.index.keyword_generator import enrich_with_keywords
 
 logger = logging.getLogger(__name__)
 
@@ -312,7 +313,7 @@ def _enrich_with_metadata(
 
 
 def chunk_documents_v2(gold_entries: list[dict]) -> list[dict]:
-    """V2-Chunking: V1-Strategien + strukturelle Metadaten + LLM-Tags.
+    """V2-Chunking: V1-Strategien + strukturelle Metadaten + Schlüsselwörter.
 
     Args:
         gold_entries: Liste von Gold-Eintrag-Dicts (eingelesen aus JSONL).
@@ -324,6 +325,6 @@ def chunk_documents_v2(gold_entries: list[dict]) -> list[dict]:
     logger.info("V2-Chunking gestartet: %d Gold-Einträge", len(gold_entries))
     chunks = chunk_documents_v1(gold_entries)
     chunks = _enrich_with_metadata(chunks, gold_entries)
-    chunks = tag_chunks(chunks)
+    chunks = enrich_with_keywords(chunks)
     logger.info("V2-Chunking abgeschlossen: %d Chunks", len(chunks))
     return chunks

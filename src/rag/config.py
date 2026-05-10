@@ -55,8 +55,9 @@ TOP_K: int = 5
 # ── Reproduzierbarkeit ───────────────────────────────────────
 RANDOM_SEED: int = 42
 
-# ── V2 LLM-Tagging Cache (variantenunabhängig persistiert) ──────────────────
-V2_TAGS_CACHE_PATH: Path = DATA_DIR / "cache" / "v2_tags.jsonl"
+# ── V2 Schlüsselwort-Caches und BM25-Index ──────────────────────────────────
+V2_KEYWORDS_CACHE_PATH: Path = DATA_DIR / "cache" / "v2_keywords.jsonl"
+V2_BM25_INDEX_PATH: Path = DATA_DIR / "index" / "v2" / "bm25.pkl"
 
 # ── Variante ─────────────────────────────────────────────────
 VARIANT: str = os.getenv("VARIANT", "v0")

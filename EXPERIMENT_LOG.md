@@ -4,6 +4,51 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-10 – AP-6.1c: V2 Schlüsselwort-basierte Hybrid-Suche
+
+**Architekturwechsel:** V2 von Tagging (AP-6.1b) auf Schlüsselwort-
+Anreicherung mit Hybrid-Retrieval (Embedding + BM25 + RRF) umgestellt.
+
+**Rückbau aus AP-6.1b:**
+- `src/rag/index/llm_tagger.py` gelöscht
+- `src/rag/index/tag_taxonomy.py` gelöscht
+- `tests/test_llm_tagger.py` gelöscht
+- `scripts/analysis/v2_tagging_estimate.py` durch `v2_keywords_estimate.py` ersetzt
+
+**Neu implementiert:**
+- `src/rag/index/keyword_generator.py`: gpt-4o-mini Keyword-Generierung
+  (5–12 pro Chunk, Synonyme erlaubt), Structured Outputs, Pro-Chunk-Caching,
+  Qualitäts-Abort bei <3 Keywords > 5% der Chunks
+- `src/rag/index/bm25_index.py`: BM25Okapi-Index (rank_bm25), Aufbau aus
+  Keywords, serialisiert als .pkl, Suche mit Score-Filterung
+- `src/rag/retrieve/retriever.py`: Hybrid-Retrieval für V2 mit RRF (k=60
+  nach Cormack et al., 2009); V0/V1 behalten Embedding-only-Pfad
+- `scripts/Pipeline/02_index.py`: BM25-Index-Aufbau am Ende des V2-Indexlaufs
+- `src/rag/config.py`: V2_KEYWORDS_CACHE_PATH, V2_BM25_INDEX_PATH
+- `pyproject.toml`: rank_bm25>=0.2.2 als Dependency
+
+**Mini-Smoke-Test (5 Forum-Chunks, echter LLM-Call):**
+
+| Aspekt | Wert |
+| --- | --- |
+| Anzahl Chunks | 5 |
+| Keywords pro Chunk | 8–11 (Ziel: 8) |
+| Violations (char-range) | 0/5 |
+| Beispiel-Keywords | `Fremdsprachen,Artikelgruppen,Datensätze,Anlegen,Bearbeiten,Entfernen,Formulare,Stammdaten,Formulareditor,Fremdbezeichnungen` |
+
+**Pre-Flight-Schätzung Voll-Lauf:**
+
+| Aspekt | Wert |
+| --- | --- |
+| Total Chunks | 12'381 |
+| Geschätzte Input-Tokens | ~8.05M |
+| Geschätzte Output-Tokens | ~990K (80 Tokens pro Chunk) |
+| Geschätzte Kosten | ~1.80 USD |
+
+Voller Keyword-Lauf, V2-Indexlauf und V2-Smoke-Eval kommen in AP-6.2.
+
+---
+
 ## 2026-05-09 – AP-6.1b: V2 LLM-Tagging als zweiter Anreicherungs-Schritt
 
 - `src/rag/index/tag_taxonomy.py`: Tag-Listen als Modul-Konstanten

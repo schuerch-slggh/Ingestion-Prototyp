@@ -1,8 +1,8 @@
-"""Pre-Flight: Schätzt LLM-Tagging-Kosten für V2-Lauf ohne API-Calls.
+"""Pre-Flight: Schätzt Schlüsselwort-Generierungs-Kosten ohne API-Calls.
 
 Lädt Gold-JSONL, ruft V1-Chunker und strukturelle Metadaten-Anreicherung
-auf (kein LLM-Tagger!), summiert Tokens für Tagging-Prompts.
-Soll vor dem Tagging-Lauf gerunnt werden.
+auf (kein LLM-Aufruf!), summiert Token-Schätzungen für die
+Schlüsselwort-Generierung. Soll vor dem Keyword-Lauf ausgeführt werden.
 """
 
 import json
@@ -15,14 +15,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 import tiktoken
 
 from rag.config import GOLD_DIR
+from rag.index.chunking_v1 import chunk_documents_v1
 from rag.index.chunking_v2 import _enrich_with_metadata
-from rag.index.llm_tagger import (
+from rag.index.keyword_generator import (
     GPT_4O_MINI_INPUT_COST_PER_MTOK,
     GPT_4O_MINI_OUTPUT_COST_PER_MTOK,
     TOKEN_TRUNCATION_LIMIT,
     _SYSTEM_PROMPT,
 )
-from rag.index.chunking_v1 import chunk_documents_v1
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ GOLD_FILES = [
 COST_WARN_THRESHOLD = 5.00
 _ENC = tiktoken.get_encoding("cl100k_base")
 _SYSTEM_TOKENS = len(_ENC.encode(_SYSTEM_PROMPT))
-_OUTPUT_TOKENS_PER_CHUNK = 50  # conservative estimate for tag JSON
+_OUTPUT_TOKENS_PER_CHUNK = 80  # ~8 Keywords à 10 Tokens
 
 
 def main() -> None:
@@ -86,7 +86,7 @@ def main() -> None:
         * GPT_4O_MINI_OUTPUT_COST_PER_MTOK
     )
 
-    logger.info("=== V2 LLM-Tagging Pre-Flight-Schätzung ===")
+    logger.info("=== V2 Keyword Pre-Flight-Schätzung ===")
     logger.info("Total Chunks:              %d", grand_total_chunks)
     logger.info(
         "Geschätzte Input-Tokens:   %d (~%dM)",
@@ -111,7 +111,7 @@ def main() -> None:
         sys.exit(1)
 
     logger.info(
-        "Kosten OK (%.4f USD <= %.2f USD) – bereit für Tagging-Lauf.",
+        "Kosten OK (%.4f USD <= %.2f USD) – bereit für Keyword-Lauf.",
         estimated_cost,
         COST_WARN_THRESHOLD,
     )
