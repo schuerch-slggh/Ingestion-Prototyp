@@ -6,6 +6,22 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 14 – 2026-05-10
+
+### Prompts
+
+**Prompt 1 (AP-6.2: V2 Voll-Lauf – Keyword-Generierung + Indexierung):**
+> Pre-Flight-Check (v2_keywords_estimate.py), dann Voll-Lauf mit
+> `02_index.py --variant v2 --reset`. Sanity-Checks: Keyword-Verteilung,
+> Hybrid-Retrieval-Test, V0/V1/V2 Chunk-Zähler-Vergleich, BM25-Index-Prüfung.
+> EXPERIMENT_LOG.md aktualisieren, Commit + Push.
+
+### Aktionen & Erkenntnisse
+
+_(wird nach Abschluss ergänzt)_
+
+---
+
 ## Konversation 13 – 2026-05-10
 
 ### Prompts
