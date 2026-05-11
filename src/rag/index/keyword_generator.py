@@ -8,10 +8,11 @@ Caching nach chunk_id (JSONL) für Crash-Resistenz.
 
 import json
 import logging
+import time
 from pathlib import Path
 
 import tiktoken
-from openai import OpenAI
+from openai import APIConnectionError, APITimeoutError, OpenAI, RateLimitError
 from tqdm import tqdm
 
 from rag.config import V2_KEYWORDS_CACHE_PATH
@@ -33,6 +34,10 @@ KEYWORD_MIN_CHARS: int = 2
 KEYWORD_MAX_CHARS: int = 60
 TOKEN_TRUNCATION_LIMIT: int = 2000
 LOW_KEYWORDS_RATE_ABORT_THRESHOLD: float = 0.05
+
+# ── Retry-Konfiguration ──────────────────────────────────────────────────────
+RETRY_MAX_ATTEMPTS: int = 5
+RETRY_BACKOFF_SECONDS: tuple[int, ...] = (2, 5, 15, 30, 60)
 
 _ENC = tiktoken.get_encoding("cl100k_base")
 
@@ -94,24 +99,64 @@ def _build_keyword_prompt(chunk_text: str) -> list[dict]:
 def _call_llm(
     messages: list[dict], schema: dict
 ) -> tuple[list[str], int, int]:
-    """Führt OpenAI-Call durch und gibt Keywords und Token-Counts zurück.
+    """Führt OpenAI-Call durch mit Retry bei Netzwerkfehlern.
+
+    Versucht bis zu RETRY_MAX_ATTEMPTS mal mit exponentiellem Backoff.
+    Retried bei APIConnectionError, APITimeoutError, RateLimitError.
+    Andere Exceptions werden sofort propagiert.
 
     Returns:
         (keywords_list, input_tokens, output_tokens).
+
+    Raises:
+        APIConnectionError, APITimeoutError, RateLimitError: Nach Erschöpfung
+            aller Retry-Versuche.
+        Andere OpenAI-Errors: Sofort propagiert ohne Retry.
     """
     client = OpenAI()
-    response = client.chat.completions.create(
-        model=KEYWORDS_MODEL,
-        temperature=KEYWORDS_TEMPERATURE,
-        seed=KEYWORDS_SEED,
-        messages=messages,
-        response_format=schema,
-    )
-    raw = json.loads(response.choices[0].message.content)
-    keywords = raw.get("keywords", [])
-    if not isinstance(keywords, list):
-        keywords = []
-    return keywords, response.usage.prompt_tokens, response.usage.completion_tokens
+    last_exc: Exception | None = None
+
+    for attempt in range(RETRY_MAX_ATTEMPTS):
+        try:
+            response = client.chat.completions.create(
+                model=KEYWORDS_MODEL,
+                temperature=KEYWORDS_TEMPERATURE,
+                seed=KEYWORDS_SEED,
+                messages=messages,
+                response_format=schema,
+            )
+            raw = json.loads(response.choices[0].message.content)
+            keywords = raw.get("keywords", [])
+            if not isinstance(keywords, list):
+                keywords = []
+            return (
+                keywords,
+                response.usage.prompt_tokens,
+                response.usage.completion_tokens,
+            )
+        except (APIConnectionError, APITimeoutError, RateLimitError) as exc:
+            last_exc = exc
+            if attempt == RETRY_MAX_ATTEMPTS - 1:
+                logger.error(
+                    "API-Aufruf endgültig fehlgeschlagen nach %d Versuchen: %s",
+                    RETRY_MAX_ATTEMPTS,
+                    type(exc).__name__,
+                )
+                raise
+            wait = RETRY_BACKOFF_SECONDS[attempt]
+            logger.warning(
+                "API-Aufruf fehlgeschlagen (Versuch %d/%d): %s. Warte %ds vor Retry.",
+                attempt + 1,
+                RETRY_MAX_ATTEMPTS,
+                type(exc).__name__,
+                wait,
+            )
+            time.sleep(wait)
+
+    # Defensiver Fallback – sollte nie erreicht werden
+    if last_exc:
+        raise last_exc
+    raise RuntimeError("Unerwarteter Zustand in _call_llm-Retry-Logik")
 
 
 def _validate_keywords(raw_keywords: list[str]) -> list[str]:

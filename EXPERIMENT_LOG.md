@@ -4,6 +4,25 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-11 – AP-6.1d: Retry-Robustheit im Keyword-Generator
+
+- `src/rag/index/keyword_generator.py`: `_call_llm()` mit Retry-Wrapping (5 Versuche,
+  exponentielles Backoff: 2s / 5s / 15s / 30s / 60s)
+- Retry bei `APIConnectionError`, `APITimeoutError`, `RateLimitError`
+- Andere Exceptions werden sofort propagiert (kein Retry)
+- WARNING-Logging pro Retry-Versuch (Versuch N/5, Fehlertyp, Wartezeit)
+- Neue Modul-Konstanten `RETRY_MAX_ATTEMPTS = 5`, `RETRY_BACKOFF_SECONDS = (2, 5, 15, 30, 60)`
+- `tests/test_keyword_generator.py`: 3 neue Retry-Tests (8 → 11 Tests gesamt)
+- Alle 116 Tests grün, Ruff sauber
+
+**Hintergrund:** AP-6.2 Session 3 brach mit `httpx.ConnectError: [WinError 10054]`
+ab (7'533/12'381 Chunks gecacht). Die erweiterte Retry-Logik soll zukünftige
+Netzwerk-Unterbrüche überbrücken.
+
+**Smoke-Test:** 3 Chunks aus Cache geladen, keine Retries ausgelöst.
+
+---
+
 ## 2026-05-10 – AP-6.1c: V2 Schlüsselwort-basierte Hybrid-Suche
 
 **Architekturwechsel:** V2 von Tagging (AP-6.1b) auf Schlüsselwort-

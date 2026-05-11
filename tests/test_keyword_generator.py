@@ -1,20 +1,22 @@
-"""Tests für den Keyword-Generator (AP-6.1c). Alle LLM-Aufrufe sind gemockt."""
+"""Tests für den Keyword-Generator (AP-6.1c/d). Alle LLM-Aufrufe sind gemockt."""
 
 import json
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from rag.index.keyword_generator import (
+    RETRY_MAX_ATTEMPTS,
     _append_cache_entry,
+    _call_llm,
     _load_cache,
     _validate_keywords,
     enrich_with_keywords,
 )
-
 
 # ── Hilfsfunktionen ──────────────────────────────────────────────────────────
 
@@ -140,3 +142,96 @@ def test_enrich_with_keywords_serializes_to_metadata(
 
     result = chunks[0]["metadata"]["keywords"]
     assert result == ",".join(keywords)
+
+
+# ── Retry-Logik (3 Tests) ─────────────────────────────────────────────────────
+
+
+def _make_success_response(keywords: list[str]) -> MagicMock:
+    resp = MagicMock()
+    resp.choices[0].message.content = json.dumps({"keywords": keywords})
+    resp.usage.prompt_tokens = 100
+    resp.usage.completion_tokens = 30
+    return resp
+
+
+def _make_openai_mock(create_fn) -> type:
+    """Returns a replacement class for OpenAI() whose create calls create_fn."""
+    client = MagicMock()
+    client.chat.completions.create.side_effect = create_fn
+    return lambda: client
+
+
+def test_call_llm_retries_on_connection_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Nach einem APIConnectionError soll der Call beim 2. Versuch erfolgreich sein."""
+    from openai import APIConnectionError
+
+    call_count: dict[str, int] = {"n": 0}
+    success_response = _make_success_response(["MWST", "Auftrag", "Buchung"])
+
+    def mock_create(*args, **kwargs):
+        call_count["n"] += 1
+        if call_count["n"] == 1:
+            raise APIConnectionError(request=MagicMock())
+        return success_response
+
+    monkeypatch.setattr(
+        "rag.index.keyword_generator.OpenAI", _make_openai_mock(mock_create)
+    )
+    monkeypatch.setattr("rag.index.keyword_generator.time.sleep", lambda s: None)
+
+    keywords, in_tok, out_tok = _call_llm([{"role": "user", "content": "test"}], {})
+
+    assert call_count["n"] == 2
+    assert keywords == ["MWST", "Auftrag", "Buchung"]
+    assert in_tok == 100
+    assert out_tok == 30
+
+
+def test_call_llm_raises_after_max_retries(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Nach RETRY_MAX_ATTEMPTS Fehlern soll die Exception propagiert werden."""
+    from openai import APIConnectionError
+
+    call_count: dict[str, int] = {"n": 0}
+
+    def mock_create(*args, **kwargs):
+        call_count["n"] += 1
+        raise APIConnectionError(request=MagicMock())
+
+    monkeypatch.setattr(
+        "rag.index.keyword_generator.OpenAI", _make_openai_mock(mock_create)
+    )
+    monkeypatch.setattr("rag.index.keyword_generator.time.sleep", lambda s: None)
+
+    with pytest.raises(APIConnectionError):
+        _call_llm([{"role": "user", "content": "test"}], {})
+
+    assert call_count["n"] == RETRY_MAX_ATTEMPTS
+
+
+def test_call_llm_does_not_retry_on_other_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Andere Exceptions (z.B. BadRequestError) sollen sofort propagiert werden."""
+    from openai import BadRequestError
+
+    call_count: dict[str, int] = {"n": 0}
+
+    def mock_create(*args, **kwargs):
+        call_count["n"] += 1
+        raise BadRequestError(
+            message="invalid request", response=MagicMock(), body=None
+        )
+
+    monkeypatch.setattr(
+        "rag.index.keyword_generator.OpenAI", _make_openai_mock(mock_create)
+    )
+
+    with pytest.raises(BadRequestError):
+        _call_llm([{"role": "user", "content": "test"}], {})
+
+    assert call_count["n"] == 1
