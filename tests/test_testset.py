@@ -1,4 +1,4 @@
-"""Tests für das Test-Set-Modul (AP-4.1)."""
+"""Tests für das Test-Set-Modul (AP-4.1/6.4)."""
 
 import json
 import sys
@@ -14,7 +14,6 @@ from rag.evaluate.testset import (
     load_testset,
     validate_entry,
 )
-
 
 # ---------------------------------------------------------------------------
 # Hilfsfunktionen
@@ -168,6 +167,35 @@ def test_iter_by_category_groups_correctly() -> None:
     assert len(result[0][1]) == 1
     assert result[1][0] == "Recency"
     assert len(result[1][1]) == 2
+
+
+# ---------------------------------------------------------------------------
+# Ground-Truth-Feld (2 Tests)
+# ---------------------------------------------------------------------------
+
+
+def test_load_testset_with_ground_truth(tmp_path: Path) -> None:
+    """Eintrag mit gefülltem ground_truth wird korrekt geladen."""
+    f = tmp_path / "ts.jsonl"
+    f.write_text(
+        '{"id": "Q001", "question": "Test?", "category": "Chunking", '
+        '"ground_truth": "Test answer."}\n',
+        encoding="utf-8",
+    )
+    questions = load_testset(f)
+    assert len(questions) == 1
+    assert questions[0].ground_truth == "Test answer."
+
+
+def test_load_testset_without_ground_truth(tmp_path: Path) -> None:
+    """Eintrag ohne ground_truth-Feld wird mit Default-Wert geladen."""
+    f = tmp_path / "ts.jsonl"
+    f.write_text(
+        '{"id": "Q001", "question": "Test?", "category": "Chunking"}\n',
+        encoding="utf-8",
+    )
+    questions = load_testset(f)
+    assert questions[0].ground_truth == ""
 
 
 def test_iter_by_category_skips_empty_categories() -> None:

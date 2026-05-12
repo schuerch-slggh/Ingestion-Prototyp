@@ -4,6 +4,25 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-12 – AP-6.4: Test-Set-Schema um Ground-Truth erweitert
+
+- `src/rag/evaluate/testset.py`: `TestQuestion` um Feld `ground_truth: str = ""`
+  erweitert (rückwärtskompatibel durch Default)
+- `validate_entry()`: prüft `ground_truth` als String (wirft ValueError bei
+  falschem Typ, nimmt fehlendes Feld mit Default `""` an)
+- `_check_consistency()`: gibt WARNING wenn Fragen ohne Ground-Truth vorhanden
+- `data/eval/testset_v1.jsonl`: 50 Einträge um `"ground_truth": ""` ergänzt
+- `data/eval/testset_v1.jsonl.backup`: Sicherungskopie der alten Version
+- `scripts/analysis/migrate_testset_to_v2.py`: idempotentes Migrations-Skript
+- `tests/test_testset.py`: 2 neue Tests (13 → 15 Tests)
+- 118/118 Tests grün, Ruff sauber
+
+**Vorbereitung für:**
+- Manuelle Befüllung der Ground-Truth-Antworten durch User
+- Scorer-Erweiterung auf `LLMContextRecall` und `FactualCorrectness` (separater AP)
+
+---
+
 ## 2026-05-12 – AP-6.3: V2-Smoke-Eval
 
 - V2-Smoke-Eval auf 5 Fragen via `04_evaluate.py --variant v2 --dry-run --score`

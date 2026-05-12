@@ -31,6 +31,7 @@ class TestQuestion:
     id: str
     question: str
     category: str
+    ground_truth: str = ""
 
 
 def load_testset(path: Path | None = None) -> list[TestQuestion]:
@@ -117,10 +118,18 @@ def validate_entry(entry: dict, line_number: int | None = None) -> TestQuestion:
             f"Erlaubt: {allowed}"
         )
 
+    ground_truth = entry.get("ground_truth", "")
+    if not isinstance(ground_truth, str):
+        raise ValueError(
+            f"Feld 'ground_truth' muss ein String sein in Eintrag {entry_id}{loc}, "
+            f"got {type(ground_truth).__name__}"
+        )
+
     return TestQuestion(
         id=entry["id"],
         question=entry["question"],
         category=entry["category"],
+        ground_truth=ground_truth,
     )
 
 
@@ -170,6 +179,17 @@ def _check_consistency(questions: list[TestQuestion]) -> None:
         if missing:
             missing_ids = [f"Q{n:03d}" for n in sorted(missing)]
             logger.warning("Lücken in ID-Sequenz: %s", missing_ids)
+
+    # Ground-Truth coverage
+    empty_gt = sum(1 for q in questions if not q.ground_truth.strip())
+    if empty_gt > 0:
+        logger.warning(
+            "Test-Set: %d von %d Fragen haben kein ground_truth gesetzt. "
+            "Referenz-basierte Metriken (LLMContextRecall, FactualCorrectness) "
+            "können für diese Fragen nicht berechnet werden.",
+            empty_gt,
+            len(questions),
+        )
 
     # Category distribution (INFO)
     from collections import Counter
