@@ -4,6 +4,75 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-12 – AP-6.3: V2-Smoke-Eval
+
+- V2-Smoke-Eval auf 5 Fragen via `04_evaluate.py --variant v2 --dry-run --score`
+  (kein neuer Code – Infrastruktur ist variantenagnostisch)
+- Identisches Dry-Run-Subset wie V0 und V1: Q001, Q002 (Chunking), Q026 (Recency),
+  Q036 (Visuals), Q046 (CrossSource)
+- Bundle: `runs/eval/v2/responses_2026-05-12T07-41-46.jsonl`
+- Scores: `runs/eval/v2/ragas_2026-05-12T07-41-46.json`
+- Summary: `runs/eval/v2/summary_2026-05-12T07-41-46.md`
+
+**Lauf-Statistiken:**
+
+| Aspekt | Wert |
+| --- | --- |
+| Erfolgreiche Antworten | 5/5 |
+| Generator-Tokens (Input/Output) | 11'619 / 1'911 |
+| Generator-Kosten | ~$0.0385 USD (gpt-4.1) |
+| Judge-Kosten | ~$0.13 USD (gpt-4o, RAGAS) |
+| Generator-Dauer | 19.8 s |
+| RAGAS 429-Rate-Limits | häufig (Auto-Retry griff) |
+
+**RAGAS-Scores V2:**
+
+| Metrik | Gesamt | Chunking | Recency | Visuals | CrossSource |
+| --- | --- | --- | --- | --- | --- |
+| Faithfulness | **0.875** | 1.000 | 1.000 | 1.000 | 0.375 |
+| Answer Relevance | **0.923** | 0.942 | 0.919 | 0.848 | 0.962 |
+| Context Precision | **0.655** | 0.662 | 0.250 | 0.700 | 1.000 |
+
+**V0/V1/V2-Direktvergleich pro Frage:**
+
+| Frage | Kategorie | Faith V0/V1/V2 | AnsRel V0/V1/V2 | CtxPrec V0/V1/V2 |
+| --- | --- | --- | --- | --- |
+| Q001 | Chunking | 1.00/1.00/1.00 | 0.91/0.91/0.91 | 1.00/0.76/1.00 |
+| Q002 | Chunking | 1.00/1.00/1.00 | 0.81/0.97/0.97 | 0.87/0.58/0.33 |
+| Q026 | Recency | 1.00/1.00/1.00 | 0.89/0.89/0.92 | 0.20/0.33/0.25 |
+| Q036 | Visuals | 0.97/1.00/1.00 | 0.85/0.85/0.85 | 1.00/1.00/0.70 |
+| Q046 | CrossSource | 0.62/0.38/0.38 | 0.85/0.84/0.96 | 0.53/0.75/1.00 |
+
+**Aggregat-Mittelwerte:**
+
+| Variante | Faithfulness | Answer Relevance | Context Precision |
+| --- | --- | --- | --- |
+| V0 | 0.917 | 0.863 | 0.720 |
+| V1 | 0.877 | 0.892 | 0.684 |
+| V2 | **0.875** | **0.923** | **0.655** |
+
+**Befunde:**
+
+- **CrossSource Context Precision: stärkste Verbesserung** (+0.250 vs V1, +0.467 vs V0).
+  Hauptbeleg für den Wert des Hybrid-Retrievals: BM25 auf Schlüsselwörtern
+  verbessert die Treffgenauigkeit bei quellenübergreifenden Fragen deutlich.
+- **Answer Relevance: beste aller drei Varianten** (0.923). Antworten sind durch
+  den verbesserten Kontext relevanter.
+- **Visuals Context Precision: Rückgang** (0.700 vs 1.000 in V0/V1).
+  Q036 (Kassenoberfläche PC-Kasse) – BM25 bringt andere Chunks hoch, die den
+  visuellen Kontext verdrängen. Mögliche Ursache: Keywords wurden auf Text-
+  Inhalt generiert, nicht auf visuelle Elemente.
+- **Recency Context Precision weiterhin niedrig** (0.250). V2 adressiert Temporalität
+  noch nicht strukturell (das ist V3-Scope).
+- **Q002 Context Precision: Rückgang** (0.325 vs V1 0.583). Mischeffekt durch
+  BM25-Treffer aus anderen Quellen; bei N=1 pro Kategorie nicht belastbar.
+- **Faithfulness CrossSource konstant niedrig** (0.375–0.625) über alle Varianten.
+  Diese Kategorie erfordert Syntheseleistung über Quellen – inherent schwierig.
+- Hinweis: N=1 pro Kategorie (ausser Chunking N=2) – keine statistisch
+  belastbare Aussage. Vollauf (50 Fragen) für belastbare Werte erforderlich.
+
+---
+
 ## 2026-05-11 – AP-6.1d: Retry-Robustheit im Keyword-Generator
 
 - `src/rag/index/keyword_generator.py`: `_call_llm()` mit Retry-Wrapping (5 Versuche,
