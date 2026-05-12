@@ -16,7 +16,6 @@ from rag.evaluate.reporter import (
     write_markdown,
 )
 
-
 # ---------------------------------------------------------------------------
 # Hilfsfunktionen
 # ---------------------------------------------------------------------------
@@ -30,6 +29,7 @@ def _write_scores_json(path: Path, scores: list[dict], n_total: int = None) -> N
             "scored_at": "2026-05-08T10:00:00+00:00",
             "n_total": n_total or len(scores),
             "n_skipped_errors": 0,
+            "n_with_ground_truth": len(scores),
         },
         "scores": scores,
     }
@@ -41,14 +41,16 @@ def _make_score(
     category: str,
     faith: float | None = 0.8,
     arel: float | None = 0.7,
-    cprec: float | None = 0.6,
+    crecall: float | None = 0.6,
+    cfact: float | None = 0.5,
 ) -> dict:
     return {
         "question_id": q_id,
         "category": category,
         "faithfulness": faith,
         "answer_relevance": arel,
-        "context_precision": cprec,
+        "context_recall": crecall,
+        "factual_correctness": cfact,
     }
 
 
@@ -77,11 +79,11 @@ def test_mean_excluding_none_all_none() -> None:
 def test_build_summary_aggregates_correctly(tmp_path: Path) -> None:
     """Mittelwerte über alle Einträge und pro Kategorie korrekt berechnet."""
     scores = [
-        _make_score("Q001", "Chunking", faith=0.8, arel=0.6, cprec=0.5),
-        _make_score("Q002", "Chunking", faith=0.6, arel=0.8, cprec=0.7),
-        _make_score("Q026", "Recency", faith=0.9, arel=0.7, cprec=0.8),
-        _make_score("Q036", "Visuals", faith=0.7, arel=0.5, cprec=0.4),
-        _make_score("Q046", "CrossSource", faith=1.0, arel=0.9, cprec=0.9),
+        _make_score("Q001", "Chunking", faith=0.8, arel=0.6, crecall=0.5, cfact=0.4),
+        _make_score("Q002", "Chunking", faith=0.6, arel=0.8, crecall=0.7, cfact=0.6),
+        _make_score("Q026", "Recency", faith=0.9, arel=0.7, crecall=0.8, cfact=0.7),
+        _make_score("Q036", "Visuals", faith=0.7, arel=0.5, crecall=0.4, cfact=0.3),
+        _make_score("Q046", "CrossSource", faith=1.0, arel=0.9, crecall=0.9, cfact=0.8),
     ]
     scores_path = tmp_path / "ragas_test.json"
     _write_scores_json(scores_path, scores, n_total=5)
@@ -117,16 +119,18 @@ def test_write_markdown_produces_valid_md(tmp_path: Path) -> None:
         n=5,
         faithfulness_mean=0.8,
         answer_relevance_mean=0.7,
-        context_precision_mean=0.6,
+        context_recall_mean=0.6,
+        factual_correctness_mean=0.5,
     )
     by_cat = [
-        CategoryAggregate("Chunking", 2, 0.75, 0.65, 0.55),
-        CategoryAggregate("Recency", 1, 0.9, 0.8, 0.7),
+        CategoryAggregate("Chunking", 2, 0.75, 0.65, 0.55, 0.45),
+        CategoryAggregate("Recency", 1, 0.9, 0.8, 0.7, 0.6),
     ]
     summary = VariantSummary(
         variant="v0",
         n_total=5,
         n_scored=5,
+        n_with_ground_truth=3,
         overall=overall,
         by_category=by_cat,
         bundle_path=Path("runs/eval/v0/responses_test.jsonl"),

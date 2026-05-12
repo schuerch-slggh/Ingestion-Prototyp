@@ -6,6 +6,94 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 17 – 2026-05-12
+
+### Prompts
+
+**Prompt 1 (AP-7: Scorer-Umstellung auf referenz-gestützte RAGAS-Metriken):**
+> Scorer von 3 auf 4 Metriken umstellen: Faithfulness + ResponseRelevancy
+> bleiben, LLMContextPrecisionWithoutReference wird durch LLMContextRecall +
+> FactualCorrectness ersetzt. Ground-Truth-Lookup aus Test-Set. Reporter mit
+> 4-Spalten-Tabellen. Tests anpassen + 3 neue.
+
+### Aktionen & Erkenntnisse
+
+**scorer.py** komplett umgeschrieben:
+- `RagasScores`: `context_precision` durch `context_recall` + `factual_correctness` ersetzt
+- `score_bundle()`: lädt Testset via `load_testset()`, baut Ground-Truth-Lookup, warnt
+  bei fehlenden Ground-Truth-Werten, übergibt `n_with_gt` an `_persist_scores()`
+- `_build_ragas_dataset()`: nimmt `ground_truth_by_id` entgegen, setzt `reference`
+  in `SingleTurnSample`
+- `_extract_scores()`: Closure-Bug mit `_row=row`-Default behoben
+
+**reporter.py** für 4 Metriken angepasst:
+- `CategoryAggregate`: `context_precision_mean` → `context_recall_mean` +
+  `factual_correctness_mean`
+- `VariantSummary`: neues Feld `n_with_ground_truth`
+- `write_markdown()`: Gesamtergebnis-Tabelle (4 Zeilen) und Pro-Kategorie-Tabelle
+  (6 Spalten) mit Context Recall + Factual Correctness
+
+**Tests:**
+- `test_scorer.py`: 6 → 11 Tests (3 neue: reference-passing, extract-neue-metriken,
+  ground-truth-warning; `load_testset` wird gemockt in score_bundle-Tests)
+- `test_reporter.py`: bestehende Tests auf neues Schema aktualisiert
+
+**Mini-Smoke-Test:** Reporter mit synthetischem neuen Score-JSON (2 Einträge,
+davon 1 mit Ground-Truth) produziert korrekte 4-Spalten-Markdown-Tabelle.
+
+41/41 Tests grün, Ruff sauber. Commit: `feat: scorer mit referenz-gestützten RAGAS-Metriken (AP-7)`.
+
+---
+
+## Konversation 16 – 2026-05-12
+
+### Prompts
+
+**Prompt 1 (AP-6.4: Test-Set-Schema-Erweiterung um Ground-Truth):**
+> TestQuestion-Dataclass um `ground_truth: str = ""` erweitern. Validator
+> prüft Typ, gibt WARNING bei leeren Werten. Migrations-Skript für
+> testset_v1.jsonl. 2 neue Tests. Rückwärtskompatibel.
+
+### Aktionen & Erkenntnisse
+
+| Datei | Änderung |
+|-------|----------|
+| `src/rag/evaluate/testset.py` | `ground_truth: str = ""` in Dataclass, Validator, Consistency-Check |
+| `data/eval/testset_v1.jsonl` | 50 Einträge migriert (Feld ergänzt, initial leer) |
+| `data/eval/testset_v1.jsonl.backup` | Backup der alten Version |
+| `scripts/analysis/migrate_testset_to_v2.py` | Migrations-Skript (idempotent) |
+| `tests/test_testset.py` | 2 neue Tests (13 → 15 Tests) |
+| `EXPERIMENT_LOG.md` | AP-6.4 Eintrag |
+
+118/118 Tests grün, Ruff sauber.
+
+---
+
+## Konversation 15 – 2026-05-12
+
+### Prompts
+
+**Prompt 1 (AP-6.3: V2-Smoke-Eval mit V0/V1/V2-Vergleich):**
+> V2-Smoke-Eval auf identischem 5-Fragen-Subset (Q001, Q002, Q026, Q036, Q046)
+> via `04_evaluate.py --variant v2 --dry-run --score`. Kein neuer Code.
+> V0/V1/V2-Direktvergleich pro Frage, EXPERIMENT_LOG aktualisieren.
+
+### Aktionen & Erkenntnisse
+
+| Datei | Änderung |
+|-------|----------|
+| `runs/eval/v2/responses_2026-05-12T07-41-46.jsonl` | Bundle (5 Einträge, kein Fehler) |
+| `runs/eval/v2/ragas_2026-05-12T07-41-46.json` | RAGAS-Scores (gpt-4o Judge) |
+| `runs/eval/v2/summary_2026-05-12T07-41-46.md` | Markdown-Summary |
+| `EXPERIMENT_LOG.md` | AP-6.3 Eintrag mit V0/V1/V2-Vergleich |
+
+V2-Aggregat: Faith=0.875, AnsRel=0.923, CtxPrec=0.655.
+Stärkste Verbesserung: CrossSource Context Precision (+0.250 vs V1).
+Rückgang: Visuals Context Precision (−0.300 vs V1, BM25-Verdrängungseffekt).
+Kein neuer Code – reine Operations-AP.
+
+---
+
 ## Konversation 14 – 2026-05-10
 
 ### Prompts
@@ -16,9 +104,24 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 > Hybrid-Retrieval-Test, V0/V1/V2 Chunk-Zähler-Vergleich, BM25-Index-Prüfung.
 > EXPERIMENT_LOG.md aktualisieren, Commit + Push.
 
+**Prompt 2 (AP-6.1d: Retry-Robustheit im Keyword-Generator):**
+> `_call_llm()` mit Retry-Wrapping (5 Versuche, exponentielles Backoff:
+> 2/5/15/30/60s). Retry bei APIConnectionError, APITimeoutError, RateLimitError.
+> Modul-Konstanten, WARNING-Logging, 3 neue Tests. Hintergrund: AP-6.2-Lauf
+> brach bei Chunk 695/3564 mit ConnectError ab; 7'533 Chunks im Cache.
+
 ### Aktionen & Erkenntnisse
 
-_(wird nach Abschluss ergänzt)_
+| Datei | Änderung |
+|-------|----------|
+| `src/rag/index/keyword_generator.py` | Retry-Logik in `_call_llm()`, neue Konstanten, `time`-Import, OpenAI-Exception-Imports |
+| `tests/test_keyword_generator.py` | 3 neue Retry-Tests (8 → 11), Import-Sort-Fix via Ruff |
+| `scripts/analysis/smoke_ap61d.py` | Smoke-Test-Skript (10 Chunks) |
+| `EXPERIMENT_LOG.md` | AP-6.1d Eintrag |
+
+Pre-Flight AP-6.2: 12'381 Chunks, ~$1.80 USD (OK).
+AP-6.2 Voll-Lauf brach bei Chunk 695/3564 ab (ConnectError) → AP-6.1d Hotfix.
+116/116 Tests grün, Ruff sauber, Smoke-Test OK (3 Chunks aus Cache).
 
 ---
 

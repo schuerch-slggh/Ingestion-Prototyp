@@ -18,7 +18,8 @@ class CategoryAggregate:
     n: int
     faithfulness_mean: float | None
     answer_relevance_mean: float | None
-    context_precision_mean: float | None
+    context_recall_mean: float | None
+    factual_correctness_mean: float | None
 
 
 @dataclass
@@ -28,6 +29,7 @@ class VariantSummary:
     variant: str
     n_total: int
     n_scored: int
+    n_with_ground_truth: int
     overall: CategoryAggregate
     by_category: list[CategoryAggregate]
     bundle_path: Path
@@ -54,6 +56,7 @@ def build_summary(scores_path: Path, variant: str) -> VariantSummary:
 
     bundle_path = Path(meta["bundle_path"])
     n_total = meta["n_total"]
+    n_with_ground_truth = meta.get("n_with_ground_truth", 0)
 
     # Group by category
     groups: dict[str, list[dict]] = {}
@@ -63,13 +66,15 @@ def build_summary(scores_path: Path, variant: str) -> VariantSummary:
     def _agg(entries: list[dict], label: str) -> CategoryAggregate:
         faiths = [e["faithfulness"] for e in entries]
         relevs = [e["answer_relevance"] for e in entries]
-        precs = [e["context_precision"] for e in entries]
+        recalls = [e["context_recall"] for e in entries]
+        facts = [e["factual_correctness"] for e in entries]
         return CategoryAggregate(
             category=label,
             n=len(entries),
             faithfulness_mean=_mean_excluding_none(faiths),
             answer_relevance_mean=_mean_excluding_none(relevs),
-            context_precision_mean=_mean_excluding_none(precs),
+            context_recall_mean=_mean_excluding_none(recalls),
+            factual_correctness_mean=_mean_excluding_none(facts),
         )
 
     overall = _agg(raw_scores, "ALL")
@@ -80,19 +85,22 @@ def build_summary(scores_path: Path, variant: str) -> VariantSummary:
             by_category.append(_agg(groups[cat], cat))
 
     logger.info(
-        "Summary gebaut: %s | %d/%d gescort | faith=%.3f arel=%.3f cprec=%.3f",
+        "Summary gebaut: %s | %d/%d gescort"
+        " | faith=%.3f arel=%.3f crecall=%.3f fact=%.3f",
         variant,
         len(raw_scores),
         n_total,
         overall.faithfulness_mean or 0,
         overall.answer_relevance_mean or 0,
-        overall.context_precision_mean or 0,
+        overall.context_recall_mean or 0,
+        overall.factual_correctness_mean or 0,
     )
 
     return VariantSummary(
         variant=variant,
         n_total=n_total,
         n_scored=len(raw_scores),
+        n_with_ground_truth=n_with_ground_truth,
         overall=overall,
         by_category=by_category,
         bundle_path=bundle_path,
@@ -119,7 +127,11 @@ def write_markdown(summary: VariantSummary, output_path: Path) -> Path:
     lines.append("")
     lines.append(f"**Bundle:** `{summary.bundle_path}`")
     lines.append(f"**Scores:** `{summary.scores_path}`")
-    lines.append(f"**Anzahl Fragen:** {summary.n_total} ({summary.n_scored} erfolgreich gescort)")
+    lines.append(
+        f"**Anzahl Fragen:** {summary.n_total} "
+        f"({summary.n_scored} erfolgreich gescort, "
+        f"{summary.n_with_ground_truth} mit Ground-Truth)"
+    )
     lines.append("")
 
     lines.append("## Gesamtergebnis")
@@ -129,22 +141,27 @@ def write_markdown(summary: VariantSummary, output_path: Path) -> Path:
     o = summary.overall
     lines.append(f"| Faithfulness | {_fmt(o.faithfulness_mean)} | {o.n} |")
     lines.append(f"| Answer Relevance | {_fmt(o.answer_relevance_mean)} | {o.n} |")
-    lines.append(f"| Context Precision | {_fmt(o.context_precision_mean)} | {o.n} |")
+    lines.append(f"| Context Recall | {_fmt(o.context_recall_mean)} | {o.n} |")
+    lines.append(
+        f"| Factual Correctness | {_fmt(o.factual_correctness_mean)} | {o.n} |"
+    )
     lines.append("")
 
     if summary.by_category:
         lines.append("## Pro Kategorie")
         lines.append("")
         lines.append(
-            "| Kategorie | n | Faithfulness | Answer Relevance | Context Precision |"
+            "| Kategorie | n | Faithfulness | Answer Relevance"
+            " | Context Recall | Factual Correctness |"
         )
-        lines.append("|---|---|---|---|---|")
+        lines.append("|---|---|---|---|---|---|")
         for cat in summary.by_category:
             lines.append(
                 f"| {cat.category} | {cat.n} "
                 f"| {_fmt(cat.faithfulness_mean)} "
                 f"| {_fmt(cat.answer_relevance_mean)} "
-                f"| {_fmt(cat.context_precision_mean)} |"
+                f"| {_fmt(cat.context_recall_mean)} "
+                f"| {_fmt(cat.factual_correctness_mean)} |"
             )
         lines.append("")
 
@@ -155,8 +172,11 @@ def write_markdown(summary: VariantSummary, output_path: Path) -> Path:
         "Answer Relevance": sum(
             1 for s in summary.by_category if s.answer_relevance_mean is None
         ),
-        "Context Precision": sum(
-            1 for s in summary.by_category if s.context_precision_mean is None
+        "Context Recall": sum(
+            1 for s in summary.by_category if s.context_recall_mean is None
+        ),
+        "Factual Correctness": sum(
+            1 for s in summary.by_category if s.factual_correctness_mean is None
         ),
     }
     missing = [k for k, v in none_counts.items() if v > 0]

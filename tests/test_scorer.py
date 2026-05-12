@@ -1,6 +1,7 @@
-"""Tests für den RAGAS-Scorer (AP-4.3)."""
+"""Tests für den RAGAS-Scorer (AP-4.3 / AP-7)."""
 
 import json
+import logging
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -17,7 +18,6 @@ from rag.evaluate.scorer import (
     score_bundle,
 )
 
-
 # ---------------------------------------------------------------------------
 # Hilfsfunktionen
 # ---------------------------------------------------------------------------
@@ -29,7 +29,12 @@ def _make_bundle_entry(
     error: str | None = None,
 ) -> dict:
     if error is not None:
-        return {"question_id": q_id, "category": category, "result": None, "error": error}
+        return {
+            "question_id": q_id,
+            "category": category,
+            "result": None,
+            "error": error,
+        }
     return {
         "question_id": q_id,
         "category": category,
@@ -42,7 +47,11 @@ def _make_bundle_entry(
                 {"text": "Kontext A", "id": "c1", "metadata": {}, "similarity": 0.9},
                 {"text": "Kontext B", "id": "c2", "metadata": {}, "similarity": 0.8},
             ],
-            "metadata": {"input_tokens": 100, "output_tokens": 50, "duration_seconds": 1.0},
+            "metadata": {
+                "input_tokens": 100,
+                "output_tokens": 50,
+                "duration_seconds": 1.0,
+            },
         },
     }
 
@@ -58,7 +67,8 @@ def _make_mock_ragas_result(
     n: int,
     faith: float = 0.8,
     arel: float = 0.7,
-    cprec: float = 0.6,
+    crecall: float = 0.6,
+    cfact: float = 0.5,
 ) -> MagicMock:
     """Synthetisches RAGAS-EvaluationResult-Mock mit n Zeilen."""
     import pandas as pd
@@ -67,7 +77,8 @@ def _make_mock_ragas_result(
         {
             "faithfulness": [faith] * n,
             "answer_relevancy": [arel] * n,
-            "llm_context_precision_without_reference": [cprec] * n,
+            "context_recall": [crecall] * n,
+            "factual_correctness": [cfact] * n,
         }
     )
     mock = MagicMock()
@@ -91,6 +102,7 @@ def test_score_bundle_creates_output(tmp_path: Path) -> None:
     with (
         patch("rag.evaluate.scorer._configure_judge", return_value=MagicMock()),
         patch("rag.evaluate.scorer.evaluate", return_value=mock_result),
+        patch("rag.evaluate.scorer.load_testset", return_value=[]),
     ):
         score_bundle(bundle, out)
 
@@ -120,10 +132,10 @@ def test_score_bundle_filters_error_entries(tmp_path: Path) -> None:
     with (
         patch("rag.evaluate.scorer._configure_judge", return_value=MagicMock()),
         patch("rag.evaluate.scorer.evaluate", side_effect=fake_evaluate),
+        patch("rag.evaluate.scorer.load_testset", return_value=[]),
     ):
         score_bundle(bundle, out)
 
-    # Nur 2 Samples dürfen im Dataset gewesen sein
     assert len(captured[0].samples) == 2
 
 
@@ -141,12 +153,28 @@ def test_score_bundle_raises_when_all_errors(tmp_path: Path) -> None:
 def test_build_ragas_dataset_schema() -> None:
     """Mapping von Bundle-Einträgen auf SingleTurnSample-Felder ist korrekt."""
     entries = [_make_bundle_entry("Q001"), _make_bundle_entry("Q002")]
-    dataset = _build_ragas_dataset(entries)
+    gt = {"Q001": "Referenz 1", "Q002": "Referenz 2"}
+    dataset = _build_ragas_dataset(entries, gt)
     assert len(dataset.samples) == 2
     s = dataset.samples[0]
     assert s.user_input == "Frage Q001?"
     assert s.response == "Antwort zu Q001."
     assert s.retrieved_contexts == ["Kontext A", "Kontext B"]
+
+
+def test_build_ragas_dataset_passes_reference() -> None:
+    """Ground-Truth wird als reference an SingleTurnSample übergeben."""
+    entries = [_make_bundle_entry("Q001")]
+    gt = {"Q001": "Korrekte Antwort."}
+    dataset = _build_ragas_dataset(entries, gt)
+    assert dataset.samples[0].reference == "Korrekte Antwort."
+
+
+def test_build_ragas_dataset_empty_reference_when_no_ground_truth() -> None:
+    """Fehlendes ground_truth führt zu leerem reference-String."""
+    entries = [_make_bundle_entry("Q001")]
+    dataset = _build_ragas_dataset(entries, {})
+    assert dataset.samples[0].reference == ""
 
 
 def test_extract_scores_preserves_order() -> None:
@@ -155,7 +183,9 @@ def test_extract_scores_preserves_order() -> None:
         _make_bundle_entry("Q010", "Recency"),
         _make_bundle_entry("Q020", "Visuals"),
     ]
-    mock_result = _make_mock_ragas_result(2, faith=0.9, arel=0.8, cprec=0.7)
+    mock_result = _make_mock_ragas_result(
+        2, faith=0.9, arel=0.8, crecall=0.7, cfact=0.6
+    )
     scores = _extract_scores(mock_result, entries)
     assert len(scores) == 2
     assert scores[0].question_id == "Q010"
@@ -165,24 +195,60 @@ def test_extract_scores_preserves_order() -> None:
     assert scores[1].answer_relevance == pytest.approx(0.8)
 
 
+def test_extract_scores_new_metrics() -> None:
+    """context_recall und factual_correctness werden korrekt extrahiert."""
+    entries = [_make_bundle_entry("Q001")]
+    mock_result = _make_mock_ragas_result(
+        1, faith=0.8, arel=0.7, crecall=0.65, cfact=0.55
+    )
+    scores = _extract_scores(mock_result, entries)
+    assert scores[0].context_recall == pytest.approx(0.65)
+    assert scores[0].factual_correctness == pytest.approx(0.55)
+
+
 def test_persist_scores_writes_metadata(tmp_path: Path) -> None:
-    """JSON enthält metadata mit bundle_path, judge_model, scored_at."""
+    """JSON enthält metadata mit bundle_path, judge_model, scored_at, n_with_gt."""
     scores = [
         RagasScores(
             question_id="Q001",
             category="Chunking",
             faithfulness=0.8,
             answer_relevance=0.7,
-            context_precision=0.6,
+            context_recall=0.6,
+            factual_correctness=0.5,
         )
     ]
     bundle = tmp_path / "responses_test.jsonl"
     out = tmp_path / "ragas_test.json"
-    _persist_scores(scores, out, bundle, "gpt-4o", n_skipped_errors=1)
+    _persist_scores(
+        scores, out, bundle, "gpt-4o", n_skipped_errors=1, n_with_ground_truth=1
+    )
 
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["metadata"]["judge_model"] == "gpt-4o"
     assert "bundle_path" in payload["metadata"]
     assert "scored_at" in payload["metadata"]
-    assert payload["metadata"]["n_total"] == 2  # 1 score + 1 skipped
+    assert payload["metadata"]["n_total"] == 2
     assert payload["metadata"]["n_skipped_errors"] == 1
+    assert payload["metadata"]["n_with_ground_truth"] == 1
+
+
+def test_score_bundle_warns_when_no_ground_truth(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Wenn kein ground_truth vorhanden ist, erscheint eine Warnung im Log."""
+    bundle = tmp_path / "bundle.jsonl"
+    out = tmp_path / "scores.json"
+    entries = [_make_bundle_entry("Q001")]
+    _write_bundle(bundle, entries)
+
+    mock_result = _make_mock_ragas_result(1)
+    with caplog.at_level(logging.WARNING, logger="rag.evaluate.scorer"):
+        with (
+            patch("rag.evaluate.scorer._configure_judge", return_value=MagicMock()),
+            patch("rag.evaluate.scorer.evaluate", return_value=mock_result),
+            patch("rag.evaluate.scorer.load_testset", return_value=[]),
+        ):
+            score_bundle(bundle, out)
+
+    assert any("kein ground_truth" in r.message for r in caplog.records)

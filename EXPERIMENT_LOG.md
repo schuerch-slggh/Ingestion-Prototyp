@@ -4,6 +4,37 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-12 – AP-7: Scorer auf referenz-gestützte RAGAS-Metriken umgestellt
+
+**Geänderte Metriken:**
+- Entfernt: `LLMContextPrecisionWithoutReference` (kein ground_truth nötig)
+- Hinzugefügt: `LLMContextRecall` + `FactualCorrectness` (referenz-gestützt)
+- Beibehalten: `Faithfulness` + `ResponseRelevancy`
+
+**Geänderte Dateien:**
+- `src/rag/evaluate/scorer.py`:
+  - `RagasScores`: `context_precision` → `context_recall` + `factual_correctness`
+  - `score_bundle()`: lädt Testset, baut `ground_truth_by_id`-Lookup,
+    warnt wenn Einträge ohne Ground-Truth
+  - `_build_ragas_dataset()`: übergibt `reference` an `SingleTurnSample`
+  - `_persist_scores()`: speichert `n_with_ground_truth` in Metadaten
+- `src/rag/evaluate/reporter.py`:
+  - `CategoryAggregate`: `context_precision_mean` → `context_recall_mean` +
+    `factual_correctness_mean`
+  - `VariantSummary`: neues Feld `n_with_ground_truth`
+  - `write_markdown()`: 4-spaltige Pro-Kategorie-Tabelle
+
+**Tests:**
+- `tests/test_scorer.py`: 6 → 11 Tests (3 neue + bestehende angepasst)
+- `tests/test_reporter.py`: bestehende Tests auf neues Schema angepasst
+- 41/41 Tests grün, Ruff sauber
+
+**Hinweis:** Bestehende Score-JSONs (V0–V2) verwenden noch altes Schema
+(`context_precision`). Für neue Evaluations-Runs muss `04_evaluate.py --score`
+erneut ausgeführt werden, um referenz-gestützte Metriken zu erhalten.
+
+---
+
 ## 2026-05-12 – AP-6.4: Test-Set-Schema um Ground-Truth erweitert
 
 - `src/rag/evaluate/testset.py`: `TestQuestion` um Feld `ground_truth: str = ""`
