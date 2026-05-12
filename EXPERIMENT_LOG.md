@@ -4,6 +4,40 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-12 – AP-8: V3 Recency-Re-Ranking nach Grofsky (2025)
+
+- `src/rag/retrieve/recency_reranker.py`: Post-RRF Re-Ranking
+  * `final_score = α · rrf_score + (1-α) · recency_score`
+  * α = 0.8, Decay-Rate λ = 1/1316 (Halbwertszeit ~912 Tage)
+  * Recency nur für Forum (`post_date`) und Ticket (`processed_date`)
+  * Handbuch, Modulbeschreibung, Schulung: recency = 1.0 (keine Abwertung)
+  * Pre-Rerank-Pool: 10 Kandidaten aus V2-Hybrid-Retriever, daraus Top-5
+- `src/rag/retrieve/retriever.py`: `_retrieve_hybrid_with_recency()` ergänzt,
+  Dispatch für `variant="v3"` aktiviert
+- `src/rag/config.py`: Konstanten V3_ALPHA, V3_DECAY_RATE,
+  V3_PRE_RERANK_TOP_K, V3_RECENCY_DATE_FIELDS
+- `src/rag/pipeline_factory.py`: V3-Chunker auf chunk_documents_v2 gesetzt
+- `tests/test_recency_reranker.py`: 8 Tests grün
+- `tests/test_retriever_v3.py`: 2 Integration-Tests grün
+- V3 nutzt V2-Index (ChromaDB + BM25), kein eigener Indexlauf nötig
+
+**Smoke-Test V3 (Query "Probleme mit dem Tagesabschluss"):**
+
+| Rang | Source | Datum | RRF | Recency | Final |
+| --- | --- | --- | --- | --- | --- |
+| 1 | modulbeschreibung | – | 0.0161 | 1.0000 | 0.2129 |
+| 2 | handbuch | – | 0.0159 | 1.0000 | 0.2127 |
+| 3 | ticket | 2023-12-15 | 0.0156 | 0.5128 | 0.1151 |
+| 4 | ticket | 2023-02-20 | 0.0164 | 0.4089 | 0.0949 |
+| 5 | ticket | 2022-05-09 | 0.0154 | 0.3287 | 0.0781 |
+
+Beobachtung: Ältere Tickets werden durch Recency-Abwertung hinter
+nicht-datierte Handbuch/Modulbeschreibungs-Chunks zurückgestuft.
+Der Effekt ist mit α=0.8 moderat – relevante RRF-Scores überwiegen
+nach wie vor. V3-Smoke-Eval auf Test-Set folgt in separatem AP.
+
+---
+
 ## 2026-05-12 – AP-7: Scorer auf referenz-gestützte RAGAS-Metriken umgestellt
 
 **Geänderte Metriken:**

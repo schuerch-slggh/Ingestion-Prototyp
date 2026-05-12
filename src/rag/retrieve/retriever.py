@@ -2,11 +2,12 @@
 
 V0/V1: Embedding-Suche (Cosine-Similarity via ChromaDB).
 V2:    Hybrid-Suche (Embedding + BM25 + Reciprocal Rank Fusion).
+V3:    V2-Hybrid + Recency-Re-Ranking nach Grofsky (2025).
 """
 
 import logging
 
-from rag.config import TOP_K, V2_BM25_INDEX_PATH
+from rag.config import TOP_K, V2_BM25_INDEX_PATH, V3_PRE_RERANK_TOP_K
 from rag.index.bm25_index import search_bm25
 from rag.index.embeddings import embed_query
 from rag.index.vectorstore import get_or_create_collection
@@ -32,6 +33,7 @@ def retrieve_chunks(
     Returns:
         Liste von Chunk-Dicts mit Schlüsseln 'id', 'text', 'metadata',
         'similarity'. V2 ergänzt 'rrf_score' und 'rrf_rank'.
+        V3 ergänzt zusätzlich 'recency_score', 'final_score', 'final_rank'.
     """
     k = top_k if top_k is not None else TOP_K
     logger.info(
@@ -42,6 +44,8 @@ def retrieve_chunks(
     )
     if variant == "v2":
         return _retrieve_hybrid(query, variant, k)
+    if variant == "v3":
+        return _retrieve_hybrid_with_recency(query, k)
     return _retrieve_embedding(query, variant, k)
 
 
@@ -163,5 +167,44 @@ def _retrieve_hybrid(
         len(final_chunks),
         len(embed_results),
         len(bm25_results),
+    )
+    return final_chunks
+
+
+# ── V3: Hybrid + Recency-Re-Ranking ──────────────────────────────────────────
+
+
+def _retrieve_hybrid_with_recency(
+    query: str,
+    top_k: int,
+) -> list[dict]:
+    """V3-Retrieval: V2-Hybrid + Recency-Re-Ranking nach Grofsky (2025).
+
+    Holt einen erweiterten Pool (V3_PRE_RERANK_TOP_K) aus dem V2-Hybrid-
+    Retriever und re-ranked nach:
+        final_score = α · rrf_score + (1-α) · recency_score.
+
+    Args:
+        query: Anfrage-Text.
+        top_k: Anzahl der finalen Chunks nach Re-Ranking.
+
+    Returns:
+        Top-K Chunks nach final_score, mit 'recency_score', 'final_score'
+        und 'final_rank'.
+    """
+    from rag.retrieve.recency_reranker import apply_recency_reranking
+
+    pre_rerank_k = max(V3_PRE_RERANK_TOP_K, top_k)
+    candidates = _retrieve_hybrid(query, "v2", pre_rerank_k)
+
+    final_chunks = apply_recency_reranking(candidates, top_k=top_k)
+
+    for rank, chunk in enumerate(final_chunks, start=1):
+        chunk["final_rank"] = rank
+
+    logger.info(
+        "%d Chunks nach V3-Recency-Re-Ranking (Pool: %d)",
+        len(final_chunks),
+        len(candidates),
     )
     return final_chunks

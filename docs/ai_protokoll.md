@@ -6,6 +6,39 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 18 – 2026-05-12
+
+### Prompts
+
+**Prompt 1 (AP-8: V3 Recency-Re-Ranking nach Grofsky):**
+> V3-Pipeline-Variante als Post-RRF Re-Ranking implementieren.
+> final_score = α·rrf_score + (1-α)·recency, α=0.8, λ=1/1316.
+> Neues Modul recency_reranker.py, V3-Dispatch in retriever.py,
+> 8+2 Tests, Mini-Smoke-Test, EXPERIMENT_LOG.
+
+### Aktionen & Erkenntnisse
+
+**config.py**: V3_ALPHA=0.8, V3_DECAY_RATE=1/1316, V3_PRE_RERANK_TOP_K=10,
+V3_RECENCY_DATE_FIELDS ergänzt.
+
+**recency_reranker.py** (neu):
+- `_parse_date()`: ISO-String → date | None (defensive, kein Crash bei Fehler)
+- `_compute_recency_score()`: 1.0 für nicht-datierte Quellen, exp(-Δt·λ) für
+  Forum (post_date) und Ticket (processed_date)
+- `apply_recency_reranking()`: berechnet final_score, sortiert, gibt Top-K zurück
+
+**retriever.py**: `_retrieve_hybrid_with_recency(query, top_k)` hinzugefügt,
+das intern `_retrieve_hybrid(query, "v2", pre_k)` aufruft (kein eigener Index).
+Dispatch `variant == "v3"` in `retrieve_chunks()` aktiviert.
+
+**pipeline_factory.py**: V3-NotImplementedError durch chunk_documents_v2 ersetzt.
+
+**Smoke-Test**: Query "Probleme mit dem Tagesabschluss" zeigt korrekte
+Recency-Gewichtung: Handbuch/Modulbeschreibung (recency=1.0) überholen
+ältere Tickets (recency ~0.33–0.51). 55/55 Tests grün, Ruff sauber.
+
+---
+
 ## Konversation 17 – 2026-05-12
 
 ### Prompts

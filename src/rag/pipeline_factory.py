@@ -35,7 +35,7 @@ def get_chunker(variant: str) -> Callable:
         from rag.index.chunking_v2 import chunk_documents_v2
         return chunk_documents_v2
     if variant == "v3":
-        raise NotImplementedError(
-            f"Chunker für Variante '{variant}' wird in einem späteren AP implementiert."
-        )
+        # V3 nutzt denselben Chunker und Index wie V2
+        from rag.index.chunking_v2 import chunk_documents_v2
+        return chunk_documents_v2
     raise ValueError(f"Unbekannte Variante: '{variant}'")

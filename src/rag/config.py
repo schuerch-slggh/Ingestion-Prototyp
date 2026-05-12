@@ -59,6 +59,15 @@ RANDOM_SEED: int = 42
 V2_KEYWORDS_CACHE_PATH: Path = DATA_DIR / "cache" / "v2_keywords.jsonl"
 V2_BM25_INDEX_PATH: Path = DATA_DIR / "index" / "v2" / "bm25.pkl"
 
+# ── V3 Recency-Re-Ranking (Grofsky 2025) ────────────────────────────────────
+V3_ALPHA: float = 0.8
+V3_DECAY_RATE: float = 1.0 / 1316.0  # Halbwertszeit ~912 Tage, R(1825) ~ 0.25
+V3_PRE_RERANK_TOP_K: int = 10
+V3_RECENCY_DATE_FIELDS: dict[str, str] = {
+    "forum": "post_date",
+    "ticket": "processed_date",
+}
+
 # ── Variante ─────────────────────────────────────────────────
 VARIANT: str = os.getenv("VARIANT", "v0")
 
