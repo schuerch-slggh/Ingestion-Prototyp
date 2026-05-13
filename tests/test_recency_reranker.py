@@ -76,7 +76,7 @@ def test_compute_recency_today_forum_returns_1() -> None:
 
 
 def test_compute_recency_old_forum_decays() -> None:
-    """Forum-Chunk mit Datum 5 Jahre zurück ergibt Score ~0.25."""
+    """Forum-Chunk mit Datum 5 Jahre zurück ergibt Score ~0.5 (Halbwertszeit)."""
     chunk = {
         "metadata": {
             "source_type": "forum",
@@ -84,8 +84,8 @@ def test_compute_recency_old_forum_decays() -> None:
         }
     }
     score = _compute_recency_score(chunk, date(2026, 5, 12))
-    # 5 Jahre = 1826 Tage, exp(-1826/1316) ≈ 0.250
-    assert score == pytest.approx(0.250, abs=0.01)
+    # 5 Jahre = ~1826 Tage ≈ Halbwertszeit (1825 Tage) → exp(-ln2) ≈ 0.500
+    assert score == pytest.approx(0.500, abs=0.01)
 
 
 # ── Re-Ranking-Logik (2 Tests) ───────────────────────────────────────────────

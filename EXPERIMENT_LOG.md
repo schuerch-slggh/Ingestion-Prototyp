@@ -4,6 +4,15 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-12 – AP-8.1: V3 Halbwertszeit auf 1825 Tage angepasst
+
+- `src/rag/config.py`: V3_HALF_LIFE_DAYS = 1825.0 (5 Jahre),
+  V3_DECAY_RATE = ln(2) / 1825 (statt 1/1316).
+  Begründung: bei genau 5 Jahren ergibt sich R = 0.5 (intuitive Halbwertszeit).
+  Alter Wert (λ = 1/1316) lieferte R ≈ 0.25 nach 5 Jahren – zu aggressiv.
+
+---
+
 ## 2026-05-12 – AP-8: V3 Recency-Re-Ranking nach Grofsky (2025)
 
 - `src/rag/retrieve/recency_reranker.py`: Post-RRF Re-Ranking

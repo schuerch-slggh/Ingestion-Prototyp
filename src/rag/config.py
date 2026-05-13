@@ -4,6 +4,7 @@ Alle Pfade, Modellnamen und Parameter werden hier definiert.
 Kein anderes Modul soll Pfade oder Konstanten hart kodieren.
 """
 
+import math
 import os
 from pathlib import Path
 
@@ -61,7 +62,8 @@ V2_BM25_INDEX_PATH: Path = DATA_DIR / "index" / "v2" / "bm25.pkl"
 
 # ── V3 Recency-Re-Ranking (Grofsky 2025) ────────────────────────────────────
 V3_ALPHA: float = 0.8
-V3_DECAY_RATE: float = 1.0 / 1316.0  # Halbwertszeit ~912 Tage, R(1825) ~ 0.25
+V3_HALF_LIFE_DAYS: float = 1825.0  # 5 Jahre; R(1825) = 0.5
+V3_DECAY_RATE: float = math.log(2) / V3_HALF_LIFE_DAYS
 V3_PRE_RERANK_TOP_K: int = 10
 V3_RECENCY_DATE_FIELDS: dict[str, str] = {
     "forum": "post_date",
