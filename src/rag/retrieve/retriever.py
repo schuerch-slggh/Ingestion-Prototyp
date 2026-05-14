@@ -7,7 +7,12 @@ V3:    V2-Hybrid + Recency-Re-Ranking nach Grofsky (2025).
 
 import logging
 
-from rag.config import TOP_K, V2_BM25_INDEX_PATH, V3_PRE_RERANK_TOP_K
+from rag.config import (
+    TOP_K,
+    V2_BM25_INDEX_PATH,
+    V3_PRE_RERANK_TOP_K,
+    V4_BM25_INDEX_PATH,
+)
 from rag.index.bm25_index import search_bm25
 from rag.index.embeddings import embed_query
 from rag.index.vectorstore import get_or_create_collection
@@ -129,8 +134,9 @@ def _retrieve_hybrid(
     # 1. Embedding-Suche
     embed_results = _retrieve_embedding(query, variant, top_k)
 
-    # 2. BM25-Suche
-    bm25_results = search_bm25(query, V2_BM25_INDEX_PATH, top_k=top_k)
+    # 2. BM25-Suche (V4 hat eigenen Index, alle anderen nutzen V2-Index)
+    bm25_path = V4_BM25_INDEX_PATH if variant == "v4" else V2_BM25_INDEX_PATH
+    bm25_results = search_bm25(query, bm25_path, top_k=top_k)
 
     # 3. RRF-Fusion
     embed_rank_by_id = {r["id"]: i + 1 for i, r in enumerate(embed_results)}

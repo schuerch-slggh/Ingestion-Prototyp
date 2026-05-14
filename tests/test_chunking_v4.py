@@ -162,6 +162,53 @@ def test_chunk_v4_separates_v4_schulung_from_others(
     assert "other" in chunk_ids
 
 
+def test_chunk_documents_v4_uses_v4_keywords_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """V4-Chunker übergibt V4_KEYWORDS_CACHE an enrich_with_keywords."""
+    import fitz
+
+    captured_cache_paths: list = []
+
+    def mock_enrich(chunks: list[dict], cache_path=None) -> list[dict]:
+        captured_cache_paths.append(cache_path)
+        return chunks
+
+    tmp_pdf = tmp_path / "test.pdf"
+    doc = fitz.Document()
+    doc.new_page()
+    doc.save(str(tmp_pdf))
+    doc.close()
+
+    monkeypatch.setattr(
+        "rag.index.chunking_v4._load_image_descriptions_cache", lambda *a: {}
+    )
+    monkeypatch.setattr(
+        "rag.index.chunking_v4.chunk_documents_v2",
+        lambda entries: [],
+    )
+    monkeypatch.setattr(
+        "rag.index.chunking_v4._integrate_images_into_page_text",
+        lambda *a, **kw: "Seite 1 Text",
+    )
+    monkeypatch.setattr(
+        "rag.index.chunking_v4._enrich_with_metadata",
+        lambda chunks, entries: chunks,
+    )
+    monkeypatch.setattr("rag.index.chunking_v4.enrich_with_keywords", mock_enrich)
+    monkeypatch.setattr("rag.index.chunking_v4.V4_VLM_SOURCE_PDF", tmp_pdf)
+
+    entries = [_make_v4_entry([{"page_number": 1, "text": "Test"}])]
+    chunk_documents_v4(entries)
+
+    from rag.config import V4_KEYWORDS_CACHE
+
+    assert V4_KEYWORDS_CACHE in captured_cache_paths, (
+        f"V4_KEYWORDS_CACHE nicht in enrich_with_keywords übergeben. "
+        f"Gefundene Pfade: {captured_cache_paths}"
+    )
+
+
 def test_v4_image_marker_format() -> None:
     """Format des Marker-Templates ist korrekt."""
     from rag.config import V4_IMAGE_MARKER_TEMPLATE

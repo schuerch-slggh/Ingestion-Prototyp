@@ -6,6 +6,62 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 20 – 2026-05-14
+
+### Prompts
+
+**Prompt 1 (Fortsetzung AP-12 nach Context-Komprimierung):**
+> Session fortgesetzt nach Context-Komprimierung. AP-12 Schritte 9–12:
+> Smoke-Eval-Responses inspizieren, Sanity-Beurteilung, EXPERIMENT_LOG
+> aktualisieren, commit feat: V4 indexing and smoke eval (AP-12).
+
+### Aktionen & Erkenntnisse
+
+**Schritt 9 – Responses inspiziert:**
+- Q036 (Visuals): 0 V4-Schulungsunterlage-Chunks unter Top-5, alle aus Handbuch.
+  Antwort korrekt: 75% JPEG-Komprimierung.
+- Q042 (Visuals): Page-0001-Chunk mit 2 `[Bild: ...]`-Markern abgerufen –
+  V4-Bildintegration funktioniert. Aber Titelseite statt Mandantenwechsel-Seite
+  abgerufen → Retrieval-Miss.
+- Q001/Q002 (Chunking): identische Qualität wie V2, korrekte Antworten.
+
+**Schritt 10 – Sanity-Beurteilung:**
+- V4-Bildintegration korrekt implementiert: [Bild:]-Marker sind in abgerufenen Chunks
+  sichtbar (Q042 page_0001 belegt).
+- Retrieval für Visuals-Fragen noch nicht präzise genug: Thematischer Embedding-Match
+  bevorzugt Titelseite statt inhaltlich relevanter Seite.
+
+**Schritt 11 – EXPERIMENT_LOG.md:** AP-12-Eintrag mit Indexlauf-Statistiken
+(12'382 Chunks, $0.009 Keywords, $0.69 Embeddings) und Smoke-Eval-Scores ergänzt.
+
+**Schritt 12 – Commit und Push:** `feat: V4 indexing and smoke eval (AP-12)`.
+
+---
+
+## Konversation 19 – 2026-05-14
+
+### Prompts
+
+**Prompt 1 (Analyse: Forum-Handbuch-Widersprüche):**
+> Finde 2 möglichst alte Forum-Einträge, deren inhaltliche Aussagen mit Aussagen aus dem
+> Handbuch nicht übereinstimmen (veraltet, widersprochen, oder von der aktuellen Doku
+> abweichend). Vorgehen: Struktur lesen, älteste Einträge finden, Kandidaten wählen,
+> im Handbuch nach Schlüsselbegriffen suchen, 2 beste Paare ausgeben.
+
+### Aktionen & Erkenntnisse
+
+Explorative Analyse ohne Code-Änderungen. Gelesene Dateien:
+- `data/gold/forum.jsonl` (erste 50 Zeilen, Datum-Feld: `metadata.post_date`)
+- `data/gold/handbuecher.jsonl` (alle 8 Einträge per Python-Suche)
+
+Älteste Forum-Einträge: 2013-10-30. Zwei klare Widersprüche gefunden:
+1. **forum_42** (2013): Lizenz-Eingabe unter "Hilfe/Programmversion/Registrierung"
+   → Handbuch v25.2: "Hilfe / Programm / Lizenzierung"
+2. **forum_40** (2013): SL.mobile Browser-Liste ohne Edge
+   → Handbuch v25.3 Mobile: Edge explizit ergänzt
+
+---
+
 ## Konversation 18 – 2026-05-12
 
 ### Prompts

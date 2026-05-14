@@ -21,6 +21,7 @@ import fitz  # PyMuPDF
 from rag.config import (
     V4_IMAGE_DESCRIPTIONS_CACHE,
     V4_IMAGE_MARKER_TEMPLATE,
+    V4_KEYWORDS_CACHE,
     V4_SCHULUNG_PDF_NAME,
     V4_VLM_SOURCE_PDF,
 )
@@ -207,7 +208,9 @@ def chunk_documents_v4(entries: list[dict]) -> list[dict]:
             entry, image_descriptions, V4_VLM_SOURCE_PDF
         )
         entry_chunks = _enrich_with_metadata(entry_chunks, [entry])
-        entry_chunks = enrich_with_keywords(entry_chunks)
+        entry_chunks = enrich_with_keywords(
+            entry_chunks, cache_path=V4_KEYWORDS_CACHE
+        )
         chunks_v4_schulung.extend(entry_chunks)
 
     all_chunks = chunks_others + chunks_v4_schulung

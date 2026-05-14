@@ -4,6 +4,67 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-14 – AP-12: V4-Indexlauf und V4-Smoke-Eval
+
+**Code-Änderungen:**
+- `src/rag/config.py`: `V4_KEYWORDS_CACHE`, `V4_BM25_INDEX_PATH` ergänzt
+- `src/rag/index/chunking_v4.py`: `enrich_with_keywords` nutzt `V4_KEYWORDS_CACHE`
+- `src/rag/retrieve/retriever.py`: V4-Dispatch auf `_retrieve_hybrid` mit V4-BM25-Index
+- `scripts/Pipeline/02_index.py`: BM25-Aufbau für V4 (`V4_BM25_INDEX_PATH`)
+- `scripts/Pipeline/04_evaluate.py`: `--question-ids` Flag für Subset-Override
+- `src/rag/evaluate/runner.py`: `_select_dry_run_subset` mit `override_ids`-Parameter
+- `tests/test_chunking_v4.py`: Test `test_chunk_documents_v4_uses_v4_keywords_cache`
+- `tests/test_keyword_generator.py`: Test `test_enrich_with_keywords_uses_custom_cache_path`
+- `data/eval/testset_v1.jsonl`: JSON-Escape-Fehler in Q020 behoben (`\D`, `\P`)
+
+**V4-Indexlauf-Statistik:**
+
+| Aspekt | Wert |
+| --- | --- |
+| Total Chunks | 12'382 |
+| davon V4 Schulung (mit Bildern) | 76 |
+| V4 Keywords (neu generiert) | 76 Einträge |
+| Keywords-Kosten | ~$0.009 (gpt-4o-mini) |
+| Embedding-Kosten | ~$0.69 (text-embedding-3-large) |
+| Dauer | ~8 Minuten |
+
+V4-BM25-Index: `data/index/v4/bm25.pkl` (3.2 MB, basiert auf V4-Keywords-Cache).
+Separate Keyword-Caches: `data/cache/v2_keywords.jsonl` (Forum/Ticket/Handbuch/Modulbeschr.)
+und `data/cache/v4_keywords.jsonl` (76 V4-Schulungsunterlagen-Chunks).
+
+**V4-Smoke-Eval (Q036, Q042, Q001, Q002):**
+
+Bundle: `runs/eval/v4/responses_2026-05-14T15-04-03.jsonl`
+Scores:  `runs/eval/v4/ragas_2026-05-14T15-04-03.json`
+Summary: `runs/eval/v4/summary_2026-05-14T15-04-03.md`
+
+| Frage | Kategorie | GT? | Faithfulness | AnsRel | CtxRecall | FactCorr |
+| --- | --- | --- | --- | --- | --- | --- |
+| Q036 | Visuals | ✓ | 0.667 | 0.903 | 1.000 | – |
+| Q042 | Visuals | – | 1.000 | 0.000 | – | – |
+| Q001 | Chunking | ✓ | 1.000 | 0.911 | 0.750 | – |
+| Q002 | Chunking | ✓ | 1.000 | 0.912 | 0.750 | – |
+| **Gesamt** | | | **0.917** | **0.681** | **0.833** | **0.000** |
+
+*FactCorrectness=0.000: alle Einträge ohne Ground-Truth → als 0.0 gemittelt (N=0).*
+
+**Befunde:**
+
+- **V4-Bildintegration funktioniert** (Schritt 9): Q042-Chunk `page_0001` enthält
+  zwei `[Bild: ...]`-Marker (Cover-Bild und Kontaktinfos). Marker sind im abgerufenen
+  Chunk sichtbar und werden vom Generator korrekt verarbeitet.
+- **Q042 AnsRel = 0.000**: Richtige Seite (Mandantenwechsel) wurde nicht abgerufen –
+  Page 1 (Titelseite) hatte höchste Embedding-Ähnlichkeit. Retrieval-Miss, nicht
+  Bildintegrations-Fehler.
+- **Q036 Faithfulness = 0.667**: Antwort korrekt (75% Komprimierung), aber nur 2/3
+  Aussagen direkt belegt. Keine V4-Schulungsunterlage-Chunks unter Top-5 – Frage
+  adressiert Handbuch-Inhalt, nicht Bildmaterial.
+- **Q001/Q002 unverändert** gegenüber V2: Erwartet, da beide Fragen Handbuch/Ticket-
+  Quellen betreffen, die V4 identisch zu V2 behandelt.
+- **Kosten Smoke-Eval** (Generator gpt-4.1): ~$0.021 (8'226 In-Tokens, 498 Out-Tokens).
+
+---
+
 ## 2026-05-14 – AP-11: V4-Chunker mit Position-aware Bildintegration
 
 - `src/rag/index/chunking_v4.py`: Neues Modul mit

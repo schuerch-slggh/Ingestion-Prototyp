@@ -144,6 +144,32 @@ def test_enrich_with_keywords_serializes_to_metadata(
     assert result == ",".join(keywords)
 
 
+def test_enrich_with_keywords_uses_custom_cache_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """enrich_with_keywords() schreibt in custom cache_path, nicht in V2-Cache."""
+    custom_cache = tmp_path / "custom_keywords.jsonl"
+    v2_cache = tmp_path / "v2_keywords.jsonl"
+
+    def _mock_call_llm(
+        messages: list, schema: dict
+    ) -> tuple[list[str], int, int]:
+        return ["MWST", "Auftrag", "Buchung", "Beleg", "Stammdaten"], 50, 10
+
+    monkeypatch.setattr(
+        "rag.index.keyword_generator._call_llm", _mock_call_llm
+    )
+
+    chunks = [_make_chunk("forum__custom_001")]
+    enrich_with_keywords(chunks, cache_path=custom_cache)
+
+    assert custom_cache.exists(), "Custom-Cache wurde nicht geschrieben"
+    assert not v2_cache.exists(), "V2-Cache wurde fälschlicherweise angefasst"
+    raw_lines = custom_cache.read_text(encoding="utf-8").splitlines()
+    entries = [json.loads(line) for line in raw_lines if line.strip()]
+    assert entries[0]["chunk_id"] == "forum__custom_001"
+
+
 # ── Retry-Logik (3 Tests) ─────────────────────────────────────────────────────
 
 

@@ -145,17 +145,42 @@ def _aggregate_stats(entries: list[BundleEntry]) -> dict:
     }
 
 
-def _select_dry_run_subset(questions: list[TestQuestion]) -> list[TestQuestion]:
-    """Selektiert 5 Fragen für den Dry-Run, stratifiziert nach Kategorie.
+def _select_dry_run_subset(
+    questions: list[TestQuestion],
+    override_ids: list[str] | None = None,
+) -> list[TestQuestion]:
+    """Selektiert Fragen für den Dry-Run.
 
-    Strategie: erste Frage jeder Kategorie (4 Stück) plus zweite
-    Chunking-Frage. Deterministisch.
+    Falls override_ids gegeben, werden genau diese IDs selektiert.
+    Sonst stratifiziert (erste Frage je Kategorie, 2 Chunking-Fragen).
+
+    Args:
+        questions: Alle Test-Fragen aus dem Test-Set.
+        override_ids: Optionale Liste von Frage-IDs. Falls angegeben,
+            werden nur diese Fragen zurückgegeben (Reihenfolge aus
+            override_ids beibehalten).
 
     Returns:
-        Liste von 5 TestQuestion-Objekten in fester Reihenfolge:
-        Q001 (1. Chunking), Q002 (2. Chunking), 1. Recency,
-        1. Visuals, 1. CrossSource.
+        Selektierte Teilmenge von Fragen.
     """
+    if override_ids:
+        id_set = set(override_ids)
+        by_id = {q.id: q for q in questions}
+        result = []
+        for qid in override_ids:
+            if qid in by_id:
+                result.append(by_id[qid])
+            else:
+                logger.warning(
+                    "Override-ID nicht im Test-Set gefunden: %s", qid
+                )
+        logger.info(
+            "Dry-Run Override: %d von %d IDs gefunden",
+            len(result),
+            len(id_set),
+        )
+        return result
+
     subset: list[TestQuestion] = []
     chunking_added = 0
 

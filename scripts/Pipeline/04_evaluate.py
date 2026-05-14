@@ -5,7 +5,7 @@ Aufruf:
     python scripts/Pipeline/04_evaluate.py --variant v0          # Runner explizit
     python scripts/Pipeline/04_evaluate.py --dry-run             # Runner Dry-Run
     python scripts/Pipeline/04_evaluate.py --score               # Score neuestes Bundle
-    python scripts/Pipeline/04_evaluate.py --score --bundle PATH # Score spezifisches Bundle
+    python scripts/Pipeline/04_evaluate.py --score --bundle PATH  # Score spezif. Bundle
     python scripts/Pipeline/04_evaluate.py --variant v0 --score  # Runner + Score
 """
 
@@ -74,6 +74,14 @@ def main() -> None:
         help="Runner überspringen, nur Scorer auf bestehendem Bundle",
     )
     parser.add_argument(
+        "--question-ids",
+        type=str,
+        default=None,
+        help="Komma-getrennte Frage-IDs, die das Dry-Run-Subset überschreiben "
+             "(z. B. --question-ids Q036,Q042,Q001,Q002). "
+             "Nur gültig mit --dry-run.",
+    )
+    parser.add_argument(
         "--verbose", action="store_true", help="DEBUG-Logging aktivieren"
     )
     args = parser.parse_args()
@@ -98,7 +106,12 @@ def main() -> None:
         logger.info("Test-Set geladen: %d Fragen", len(questions))
 
         if args.dry_run:
-            questions = runner._select_dry_run_subset(questions)
+            override_ids = (
+                [qid.strip() for qid in args.question_ids.split(",")]
+                if args.question_ids
+                else None
+            )
+            questions = runner._select_dry_run_subset(questions, override_ids)
             logger.info("Dry-Run: %d Fragen selektiert", len(questions))
 
         ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%S")
