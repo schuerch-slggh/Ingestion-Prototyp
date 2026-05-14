@@ -38,4 +38,7 @@ def get_chunker(variant: str) -> Callable:
         # V3 nutzt denselben Chunker und Index wie V2
         from rag.index.chunking_v2 import chunk_documents_v2
         return chunk_documents_v2
+    if variant == "v4":
+        from rag.index.chunking_v4 import chunk_documents_v4
+        return chunk_documents_v4
     raise ValueError(f"Unbekannte Variante: '{variant}'")

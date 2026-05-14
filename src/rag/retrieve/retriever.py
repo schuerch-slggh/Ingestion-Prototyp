@@ -46,6 +46,9 @@ def retrieve_chunks(
         return _retrieve_hybrid(query, variant, k)
     if variant == "v3":
         return _retrieve_hybrid_with_recency(query, k)
+    if variant == "v4":
+        # V4 nutzt Hybrid-Suche wie V2, aber auf dem V4-Index
+        return _retrieve_hybrid(query, variant, k)
     return _retrieve_embedding(query, variant, k)
 
 

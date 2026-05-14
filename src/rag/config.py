@@ -83,6 +83,8 @@ V4_VLM_SOURCE_PDF: Path = (
     / "Schulungsunterlagen Auftrag Einsteiger.pdf"
 )
 V4_IMAGE_DESCRIPTIONS_CACHE: Path = DATA_DIR / "cache" / "v4_image_descriptions.jsonl"
+V4_SCHULUNG_PDF_NAME: str = "Schulungsunterlagen Auftrag Einsteiger.pdf"
+V4_IMAGE_MARKER_TEMPLATE: str = "[Bild: {description}]"
 
 # ── Variante ─────────────────────────────────────────────────
 VARIANT: str = os.getenv("VARIANT", "v0")

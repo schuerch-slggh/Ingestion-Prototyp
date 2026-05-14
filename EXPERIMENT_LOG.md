@@ -4,6 +4,36 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-14 – AP-11: V4-Chunker mit Position-aware Bildintegration
+
+- `src/rag/index/chunking_v4.py`: Neues Modul mit
+  * `chunk_documents_v4()` als Hauptfunktion (V2-Architektur + Multimodalität)
+  * `chunk_schulungsunterlage_v4_with_images()` mit Position-aware Bildintegration
+  * `_integrate_images_into_page_text()` – PyMuPDF Bounding-Box-basierte
+    räumliche Sortierung von Text- und Bildelementen
+  * `_load_image_descriptions_cache()` – Cache-Wiederverwendung aus AP-10
+- `src/rag/config.py`: V4_SCHULUNG_PDF_NAME, V4_IMAGE_MARKER_TEMPLATE ergänzt
+- `src/rag/pipeline_factory.py`: V4-Dispatch ergänzt
+- `src/rag/retrieve/retriever.py`: V4-Dispatch ergänzt (nutzt Hybrid-Retrieval)
+- `tests/test_chunking_v4.py`: 6 neue Tests (alle grün)
+- V4 = V2-Architektur + Multimodalität für 1 Dokument
+
+**Format der Bildintegration:**
+`[Bild: <vlm_description>]` als Klartext-Marker an Position des Bildes
+(vereinfachtes MMORE-Pattern nach Sallinen et al., 2025)
+
+**Quellen-Behandlung:**
+- forum, ticket, handbuch, modulbeschreibung, andere Schulungen: identisch zu V2
+- "Schulungsunterlagen Auftrag Einsteiger.pdf": NEU mit Bildbeschreibungen
+
+**Sanity-Test:**
+76 Seiten-Chunks erzeugt, 64 davon mit `[Bild: ...]`-Markern. Beispiel-Chunk
+auf Seite 1 enthält Cover-Bild-Beschreibung direkt im Fliesstext.
+
+**Vorbereitung für AP-12:** V4-Indexlauf und V4-Smoke-Eval.
+
+---
+
 ## 2026-05-14 – AP-10: V4 VLM-Bildbeschreibungen
 
 - `src/rag/index/vlm_image_describer.py`: Neues Modul mit
