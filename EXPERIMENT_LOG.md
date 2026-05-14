@@ -4,6 +4,35 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-14 – AP-10: V4 VLM-Bildbeschreibungen
+
+- `src/rag/index/vlm_image_describer.py`: Neues Modul mit
+  * `describe_images_from_pdf()` als Hauptfunktion
+  * `_call_vlm()` mit Retry-Logik (5 Versuche, 2/5/15/30/60s Backoff)
+  * `_build_image_id()` für eindeutige IDs (schulung_auftrag_einsteiger_p{p}_img{i})
+  * JSONL-Cache mit Idempotenz (Crash-Resistenz)
+- `src/rag/config.py`: V4_VLM_* Konstanten ergänzt (Modell, Detail, Retry)
+- `scripts/Pipeline/02b_describe_v4_images.py`: Voll-Lauf-Skript
+- `tests/test_vlm_image_describer.py`: 6 neue Tests grün
+- `data/cache/v4_image_descriptions.jsonl`: Cache mit allen Beschreibungen
+
+**Voll-Lauf-Statistik:**
+
+| Aspekt | Wert |
+| --- | --- |
+| Bilder im PDF | 283 |
+| V4-relevant (>=300 px) | 171 |
+| Neu beschrieben | 171 |
+| Cache-Hits | 0 |
+| Input-Tokens total | 121'864 |
+| Output-Tokens total | 14'921 |
+| Kosten | $0.45 |
+| Laufzeit | ~7 Minuten |
+
+VLM: gpt-4o, detail=high. Vorbereitung für AP-11 (V4-Chunker) abgeschlossen.
+
+---
+
 ## 2026-05-12 – AP-8.1: V3 Halbwertszeit auf 1825 Tage angepasst
 
 - `src/rag/config.py`: V3_HALF_LIFE_DAYS = 1825.0 (5 Jahre),

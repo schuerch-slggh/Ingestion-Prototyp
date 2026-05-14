@@ -70,6 +70,20 @@ V3_RECENCY_DATE_FIELDS: dict[str, str] = {
     "ticket": "processed_date",
 }
 
+# ── V4 VLM Image Description ─────────────────────────────────────────────────
+V4_VLM_MODEL: str = "gpt-4o"
+V4_VLM_DETAIL: str = "high"
+V4_VLM_TEMPERATURE: float = 0.2
+V4_VLM_MAX_TOKENS: int = 300
+V4_VLM_RETRY_MAX_ATTEMPTS: int = 5
+V4_VLM_RETRY_BACKOFF_SECONDS: tuple[int, ...] = (2, 5, 15, 30, 60)
+V4_VLM_MIN_PIXEL_THRESHOLD: int = 300
+V4_VLM_SOURCE_PDF: Path = (
+    RAW_DIR / "schulungsunterlagen"
+    / "Schulungsunterlagen Auftrag Einsteiger.pdf"
+)
+V4_IMAGE_DESCRIPTIONS_CACHE: Path = DATA_DIR / "cache" / "v4_image_descriptions.jsonl"
+
 # ── Variante ─────────────────────────────────────────────────
 VARIANT: str = os.getenv("VARIANT", "v0")
 
