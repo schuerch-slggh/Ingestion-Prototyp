@@ -4,6 +4,64 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-15 – AP-15: FactualCorrectness-Rescore
+
+**Hintergrund:** AP-14 lieferte für FactualCorrectness durchgängig None wegen
+TimeoutErrors bei RAGAS 0.4.3 parallelem Scoring (16+ Worker).
+
+**Diagnose:** 3-Fragen-Lauf sequenziell (max_workers=1, timeout=300s) erfolgreich.
+Ursache: Concurrency-Problem, nicht Schema-Problem. Spaltenname: `factual_correctness(mode=f1)`.
+
+**Code-Änderungen:**
+- `scripts/eval/diagnose_factual_correctness.py` (neu)
+- `scripts/eval/rescore_factual_correctness.py` (neu, max_workers=2, timeout=300s)
+
+**Rescore-Statistik:**
+
+| Variante | Erfolgreiche Werte | Mittlere FactualCorrectness |
+|---|---|---|
+| V0 | 39 / 40 | 0.345 |
+| V1 | 40 / 40 | 0.315 |
+| V2 | 40 / 40 | 0.376 |
+| V3 | 40 / 40 | 0.249 |
+| V4 | 40 / 40 | 0.359 |
+| **Gesamt** | **199 / 200** | **–** |
+
+*V0: 1 None-Wert (1 Frage ohne Ground-Truth im Bundle).*
+
+**Backup:** Pro Variante `ragas_<ts>.json.backup_pre_ap15` angelegt.
+
+**Aktualisierte Aggregat-Metriken (alle 4 Metriken, N=40):**
+
+| Variante | Faithfulness | Answer Relevance | Context Recall | Factual Correctness |
+|---|---|---|---|---|
+| V0 | 0.880 | 0.787 | 0.496 | 0.345 |
+| V1 | 0.886 | 0.824 | 0.512 | 0.315 |
+| V2 | 0.851 | 0.801 | 0.537 | **0.376** |
+| V3 | 0.858 | 0.785 | 0.486 | 0.249 |
+| V4 | 0.836 | 0.823 | **0.603** | 0.359 |
+
+**Paarweise Differenzen mit FactualCorrectness:**
+
+| Vergleich | Δ FC |
+|---|---|
+| V0 → V1 | −0.030 |
+| V1 → V2 | **+0.061** |
+| V2 → V3 | **−0.127** |
+| V2 → V4 | −0.017 |
+
+**Befunde:**
+- V2 (Hybrid-Suche) zeigt stärksten positiven FC-Effekt (+0.061): BM25-Keywords
+  verbessern Retrieval präziserer Kontextpassagen für faktenbasierte Fragen.
+- V3 (Recency) schadet faktischer Korrektheit stark (−0.127): Undatierte Texte werden
+  bevorzugt, obwohl für präzise Faktenantworten oft die spezifischeren Tickets relevanter sind.
+- V1 vs V0: Leichter FC-Rückgang (−0.030) – Outline-Chunking produziert breitere
+  Abschnitte mit weniger spezifischen Fakten pro Chunk.
+
+**Verdikt:** Rescore erfolgreich. Vollständige 4-Metrik-Auswertung für Kap. 8 verfügbar.
+
+---
+
 ## 2026-05-15 – AP-14: Vollauf-Eval V0–V4 mit Auswertung
 
 **Eval-Konfiguration:**

@@ -6,6 +6,40 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 23 – 2026-05-15
+
+### Prompts
+
+**Prompt 1 – AP-15 FactualCorrectness-Rescore:**
+> Vollständige AP-15-Spezifikation: Diagnose, Rescore mit konservativen
+> Parametern, Aggregat-Aktualisierung, EXPERIMENT_LOG, Commit.
+
+### Aktionen & Erkenntnisse
+
+**Schritt 1 – Diagnose-Skript:**
+- `scripts/eval/diagnose_factual_correctness.py` erstellt und ausgeführt.
+- 3/3 Scores erfolgreich: Q001=0.53, Q002=0.38, Q003=0.19.
+- Spaltenname: `factual_correctness(mode=f1)`, mode=f1 ist Default.
+- Diagnose: Concurrency-Problem (nicht Schema), max_workers=1 reicht.
+
+**Schritt 2 – Spaltenname:** `factual_correctness(mode=f1)` bestätigt via
+`FactualCorrectness().name` + `mode`.
+
+**Schritt 3 – Vollauf-Rescore:**
+- `scripts/eval/rescore_factual_correctness.py` erstellt (max_workers=2, timeout=300s).
+- 199/200 Werte erfolgreich (V0: 39/40, alle anderen 40/40).
+- Backup-Dateien `*.json.backup_pre_ap15` pro Variante angelegt.
+
+**Schritt 4 – Aggregat neu:** `aggregate_full_run.py` neu ausgeführt.
+Alle 4 Metriken in aggregate_metrics.md/csv und Diagrammen.
+
+**Hauptbefunde (FC):**
+- V2 beste FactualCorrectness (0.376): Hybrid-Suche holt präzisere Faktenquellen
+- V3 schlechteste (0.249): Recency Re-Ranking verdrängt faktenreiche Tickets
+- V1 leicht schlechter als V0 (0.315 vs 0.345): Outline-Chunks breiter, weniger spezifisch
+
+---
+
 ## Konversation 22 – 2026-05-15
 
 ### Prompts
