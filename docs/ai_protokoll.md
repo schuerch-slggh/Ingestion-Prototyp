@@ -6,6 +6,43 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 21 – 2026-05-15
+
+### Prompts
+
+**Prompt 1 (Fortsetzung AP-13 nach Context-Komprimierung):**
+> Session-Fortsetzung. AP-13 Schritte 7–10: Retriever-Pfad-Verifikation via Logging,
+> Pytest-Testsuite, Verifikationsbericht schreiben, EXPERIMENT_LOG + ai_protokoll
+> aktualisieren, commit chore: pipeline functional verification (AP-13).
+
+### Aktionen & Erkenntnisse
+
+**Schritt 7 – Retriever-Pfad-Verifikation:**
+- Python-Skript via Tempfile ausgeführt (PowerShell f-string-Workaround).
+- V0/V1: Embedding-only bestätigt (`top similarity: 0.3470/0.3709`).
+- V2: Hybrid-RRF bestätigt (`Hybrid-Retrieval (embed=3, bm25=3)`).
+- V3: Recency-Pool-Mechanismus bestätigt (`Pool: 10` → `3 Chunks nach V3-Recency-Re-Ranking`).
+- V4: Separater BM25-Index bestätigt (12 382 Chunks, eigener BM25).
+
+**Schritt 8 – Pytest:**
+- 2 Tests initial failed: `test_select_dry_run_subset_returns_5` und
+  `test_select_dry_run_subset_covers_all_categories`.
+- Ursache: Q027 (Zeile 31) enthielt unescapte Backslashes im Windows-Pfad
+  `\SelectLine Tools\Diverse\PDF-Printer`. Fix: Regex `\\(?!["\\/bfnrtu])` → `\\\\`.
+- Nach Fix: **146/146 passed** in 5.88 s.
+
+**Schritt 9 – Verifikationsbericht:**
+- Neues Verzeichnis `docs/verification/` erstellt.
+- Bericht `AP13_pipeline_verification_2026-05-15.md` mit allen 8 Schritten,
+  Tabellen und Befunden erstellt.
+
+**Schritt 10 – Logs und Commit:**
+- `EXPERIMENT_LOG.md`: AP-13-Eintrag eingefügt.
+- `docs/ai_protokoll.md`: Konversation 21 ergänzt.
+- Commit: `chore: pipeline functional verification (AP-13)`.
+
+---
+
 ## Konversation 20 – 2026-05-14
 
 ### Prompts

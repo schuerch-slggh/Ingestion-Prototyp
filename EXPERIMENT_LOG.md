@@ -4,6 +4,42 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-15 – AP-13: Pipeline Functional Verification
+
+**Ziel:** Systematische Prüfung aller V0–V4 Varianten vor dem Vollauf.
+
+**Code-Änderungen:**
+- `data/eval/testset_v1.jsonl`: Zeile 31 (Q027) – unescapte Backslashes in
+  Windows-Pfad (`\SelectLine Tools\Diverse\PDF-Printer`) per Regex repariert.
+
+**Verifikations-Report:** `docs/verification/AP13_pipeline_verification_2026-05-15.md`
+
+**Chunk-Zählung (alle Varianten):**
+
+| Variante | Chunks |
+| --- | --- |
+| V0 | 11 789 |
+| V1 | 12 381 |
+| V2 | 12 381 |
+| V3 | 12 381 |
+| V4 | 12 382 |
+
+**Retrieval-Pfad-Logging (Query: "Wie konfiguriere ich den Mandanten?"):**
+
+| Variante | Log-Signatur | Status |
+| --- | --- | --- |
+| V0 | `top similarity: 0.3470` | ✓ Embedding-only |
+| V1 | `top similarity: 0.3709` | ✓ Embedding-only |
+| V2 | `Hybrid-Retrieval (embed=3, bm25=3)` | ✓ RRF aktiv |
+| V3 | `Pool: 10` → `V3-Recency-Re-Ranking` | ✓ Recency aktiv |
+| V4 | `Hybrid-Retrieval (embed=3, bm25=3)` | ✓ Eigener BM25 |
+
+**Pytest-Ergebnis:** `146 passed, 0 failed` (nach Testset-Fix Q027)
+
+**Befund:** Alle Pipeline-Varianten V0–V4 funktional verifiziert.
+
+---
+
 ## 2026-05-14 – AP-12: V4-Indexlauf und V4-Smoke-Eval
 
 **Code-Änderungen:**
