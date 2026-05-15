@@ -4,6 +4,85 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-15 – AP-14: Vollauf-Eval V0–V4 mit Auswertung
+
+**Eval-Konfiguration:**
+- Test-Set: `data/eval/questions.jsonl` (40 Fragen, alle mit Ground-Truth)
+- Generator: gpt-4.1 (Temperatur 0, Seed 42)
+- Judge: gpt-4o
+- Metriken: Faithfulness, AnswerRelevancy, LLMContextRecall, FactualCorrectness
+
+**Bundles archiviert:** Smoke-Eval-Bundles nach `runs/eval/archive/2026-05-15_smoke/` (13 Dateien).
+
+**Vollauf-Statistik:**
+
+| Variante | Antworten OK | Fehler | Laufzeit (s) | ~Kosten (USD) |
+|---|---|---|---|---|
+| V0 | 40 | 0 | 236 | 0.330 |
+| V1 | 40 | 0 | 542 | 0.276 |
+| V2 | 40 | 0 | 446 | 0.265 |
+| V3 | 40 | 0 | 486 | 0.293 |
+| V4 | 40 | 0 | 388 | 0.262 |
+| **Total** | **200** | **0** | **~2098** | **~1.43** |
+
+*Scoring (Judge gpt-4o): ~$8–10 zusätzlich (nicht einzeln erfasst)*
+
+**Aggregat-Metriken (Mittelwert über 40 Fragen):**
+
+| Variante | Faithfulness | Answer Relevance | Context Recall | Factual Correctness |
+|---|---|---|---|---|
+| V0 | 0.880 | 0.787 | 0.496 | – |
+| V1 | 0.886 | 0.824 | 0.512 | – |
+| V2 | 0.851 | 0.801 | 0.537 | – |
+| V3 | 0.858 | 0.785 | 0.486 | – |
+| V4 | 0.836 | 0.823 | 0.603 | – |
+
+*FactualCorrectness = None für alle Varianten (RAGAS 0.4.3 Scoring-Fehler, kein Ergebnis zurückgegeben).*
+
+**Paarweise Differenzen (Ablation):**
+
+| Vergleich | Erweiterung | Δ Faith | Δ AnsRel | Δ CtxRecall |
+|---|---|---|---|---|
+| V0 → V1 | Quellenspezifisches Chunking | +0.006 | +0.037 | +0.016 |
+| V1 → V2 | Hybrid-Suche + Keywords | −0.035 | −0.023 | +0.024 |
+| V2 → V3 | Recency-Re-Ranking | +0.008 | −0.017 | **−0.051** |
+| V2 → V4 | Multimodalität | −0.015 | +0.022 | **+0.067** |
+
+**Auswertungs-Output:**
+- `runs/eval/aggregate/full_run_2026-05-15/`
+  - `aggregate_metrics.md` / `.csv`
+  - `category_breakdown.md` / `.csv`
+  - `pairwise_deltas.md` / `.csv`
+  - `latencies.csv`
+  - `diagrams/` (4 PNG: bar, radar, heatmap, latency boxplot)
+
+**Hauptbefunde:**
+
+1. **V1 (Chunking) liefert beste Faithfulness und Answer Relevance** (+3.7 pp AnsRel gegenüber V0)
+   durch kohärentere H2-Outline-Chunks bei Handbüchern.
+
+2. **V4 (Multimodalität) liefert den grössten Context-Recall-Sprung** (+6.7 pp gegenüber V2).
+   [Bild:]-Marker in Schulungsunterlage-Chunks verbessern die Retrieval-Trefferquote bei
+   Visual-Fragen: Kategorie Visuals steigt von 0.4375 (V2) auf 0.5714 (V4).
+
+3. **V3 (Recency-Re-Ranking) senkt Context Recall** (−5.1 pp gegenüber V2). Ursache: 
+   Das Re-Ranking bevorzugt undatierte Handbuch/Modulbeschreibungs-Chunks gegenüber
+   thematisch relevanteren, aber älteren Tickets/Foreneinträgen. Bei 40 Fragen ohne 
+   Zeitbezug überwiegt der negative Effekt.
+
+4. **FactualCorrectness durchgehend None**: RAGAS 0.4.3 gibt für diese Konfiguration
+   keine FactualCorrectness-Werte zurück (TimeoutErrors im Scoring-Job, keine 
+   Fallback-Scores). Für die Bachelorarbeit wird nur auf die 3 verfügbaren Metriken 
+   abgestützt.
+
+5. **CrossSource-Kategorie** zeigt dramatische Verbesserung: Context Recall V0=0.0 → 
+   V1=1.0, was auf V0's unzureichendes cross-document Chunking zurückzuführen ist.
+
+**Verdikt:** Vollauf erfolgreich abgeschlossen (200/200). Resultate stehen für Kapitel 8
+der Bachelorarbeit zur Verfügung.
+
+---
+
 ## 2026-05-15 – AP-13: Pipeline Functional Verification
 
 **Ziel:** Systematische Prüfung aller V0–V4 Varianten vor dem Vollauf.

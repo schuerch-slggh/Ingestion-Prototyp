@@ -22,7 +22,7 @@ INTERIM_DIR = DATA_DIR / "silver"    # Bereinigt
 GOLD_DIR = DATA_DIR / "gold"         # Einheitliches Zwischenformat (JSONL)
 
 # ── Evaluation (variantenunabhängig) ─────────────────────────
-TESTSET_PATH: Path = DATA_DIR / "eval" / "testset_v1.jsonl"
+TESTSET_PATH: Path = DATA_DIR / "eval" / "questions.jsonl"
 
 # RAGAS-Judge-Konfiguration (siehe Kap. 7 der Arbeit)
 RAGAS_JUDGE_MODEL: str = "gpt-4o"

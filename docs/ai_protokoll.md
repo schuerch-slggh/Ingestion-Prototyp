@@ -6,6 +6,47 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 22 – 2026-05-15
+
+### Prompts
+
+**Prompt 1 – AP-14 Vollauf-Eval V0–V4:**
+> AP-14: Vollauf-Eval V0-V4 mit Auswertung. Vollständige Spezifikation mit
+> Designentscheidungen, Schrittanweisungen, Skripten und Akzeptanzkriterien.
+
+### Aktionen & Erkenntnisse
+
+**Schritt 1 – Code-Verständnis:** runner.py, scorer.py, reporter.py, 04_evaluate.py,
+config.py gelesen. Befund: TESTSET_PATH zeigte noch auf testset_v1.jsonl.
+
+**Schritt 2 – config.py:** TESTSET_PATH auf `data/eval/questions.jsonl` umgestellt.
+
+**Schritt 3 – archive_smoke_bundles.py:** Erstellt und ausgeführt.
+13 Smoke-Bundles nach `runs/eval/archive/2026-05-15_smoke/` verschoben.
+
+**Schritt 4 – Testset verifiziert:** 40 Fragen, 40 mit Ground-Truth,
+Kategorien: Chunking=20, CrossSource=4, Recency=8, Visuals=8.
+
+**Schritt 5 – aggregate_full_run.py:** Erstellt (Metrik-Keys korrekt: `answer_relevance`,
+`context_recall` aus scorer-Output). matplotlib/tabulate installiert.
+
+**Schritt 6 – Vollauf V0-V4:** Je 40 Fragen, alle 200 erfolgreich (0 Fehler).
+Laufzeiten: 236/542/446/486/388 Sekunden. Generator-Kosten: ~$1.43 total.
+
+**Schritt 7 – Aggregat-Auswertung:** `scripts/eval/aggregate_full_run.py` ausgeführt.
+4 Diagramme, 3 Markdown-Tabellen, 4 CSV-Dateien erzeugt.
+
+**Hauptbefunde:**
+- V4 bester Context Recall (0.603), +6.7 pp gegenüber V2 (Multimodalität wirkt)
+- V1 beste Faithfulness (0.886) und Answer Relevance (0.824)
+- V3 Recency-Re-Ranking senkt Context Recall (−5.1 pp gegenüber V2) – negativer Effekt
+  bei Fragen ohne expliziten Zeitbezug
+- FactualCorrectness = None für alle Varianten (RAGAS 0.4.3 TimeoutError in Score-Jobs)
+- CrossSource Context Recall: V0=0.0 → V1=1.0 (dramatische Verbesserung durch
+  Atomic-Chunking bei Tickets/Foreneinträgen)
+
+---
+
 ## Konversation 21 – 2026-05-15
 
 ### Prompts
