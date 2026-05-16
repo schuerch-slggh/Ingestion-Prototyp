@@ -44,7 +44,7 @@ def _extract_answer_record(entry: dict) -> dict:
         return {"error": entry["error"], "answer": None, "retrieved_chunk_ids": [], "n_retrieved": 0}
 
     result = entry["result"]
-    chunk_ids = [c.get("chunk_id") for c in result.get("retrieved_chunks", [])]
+    chunk_ids = [c.get("id") for c in result.get("retrieved_chunks", [])]
     return {
         "error": None,
         "answer": result.get("answer", ""),
