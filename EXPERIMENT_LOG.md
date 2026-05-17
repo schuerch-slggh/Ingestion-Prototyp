@@ -4,6 +4,48 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-17 – AP-19: Diagnose der RAGAS-Scoring-Ausfälle
+
+**Hintergrund:** AP-18 zeigte 168 fehlende Scores. Die ursprüngliche Hedging-Hypothese
+wurde durch AP-18 widerlegt (nur 6.5% Hedging). AP-19 testet vier Hypothesen (A: Markdown,
+B: Quellenangaben, C: Länge, D: Pydantic) anhand von drei gezielt ausgewählten Fällen.
+
+**Vorgehen:** `scripts/eval/diagnose_ragas_failures.py` – sequenzielles Rescore
+(max_workers=1, timeout=300s) für Q005/Q006/Q020 (V0) mit vollständigem Debug-Output.
+
+**Ergebnisse:**
+
+| Test-Fall | Antworttyp | Faithfulness | ContextRecall |
+|---|---|---|---|
+| Q005 | Numm. Liste, Quellenangaben, 875 Z. | 1.0 | 1.0 |
+| Q006 | Mehrstufige Liste, 2721 Z. | 0.97 | 1.0 |
+| Q020 | Hedging-Antwort, 517 Z. | 1.0 | 0.5 |
+
+Alle drei Test-Fälle liefern valide Scores beim sequenziellen Rescore.
+
+**Hypothesen-Check:**
+
+| Hypothese | Ergebnis |
+|---|---|
+| A – Markdown-Formatierung | Widerlegt |
+| B – Quellenangaben | Widerlegt |
+| C – Lange Antworten (>2000 Z.) | Widerlegt |
+| D – Pydantic-Validation | Widerlegt |
+
+**Tatsächliche Ursache: Concurrency/Timeout-Problem** (identisch zu AP-15):
+RAGAS 0.4.3 mit Standard-max_workers verursacht Rate-Limit-Timeouts beim parallelen
+Batch-Scoring → NaN. Sequenziell (max_workers=1) funktioniert alles einwandfrei.
+
+**Zusatz-Beobachtung:** Hedging-Antworten sind kein NaN-Treiber. Faithfulness=1.0
+für Q020 ist korrekt: keine falschen Claims → vollständig kontexttreu.
+
+**Artefakte:**
+- `scripts/eval/diagnose_ragas_failures.py`
+- `runs/eval/aggregate/ragas_diagnosis_20260517T164959Z.log`
+- `runs/eval/aggregate/ragas_diagnosis_findings.md`
+
+---
+
 ## 2026-05-17 – AP-18: Analyse fehlender RAGAS-Scores
 
 **Hintergrund:** Nach AP-15 (Rescore) und AP-17 (NaN-Transparenz) fehlte ein
