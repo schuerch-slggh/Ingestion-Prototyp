@@ -7,13 +7,17 @@
     "n_skipped_errors": 0,
     "n_with_ground_truth": 40,
     "factual_correctness_rescored_at": "2026-05-15T19:09:20.930828+00:00",
-    "factual_correctness_n_success": 40
+    "factual_correctness_n_success": 40,
+    "faithfulness_rescored_at": "2026-05-17T15:42:58.186121+00:00",
+    "context_recall_rescored_at": "2026-05-17T15:42:58.186121+00:00",
+    "faithfulness_n_scored": 39,
+    "context_recall_n_scored": 39
   },
   "scores": [
     {
       "question_id": "Q001",
       "category": "Chunking",
-      "faithfulness": null,
+      "faithfulness": 0.4444444444444444,
       "answer_relevance": 0.0,
       "context_recall": 0.0,
       "factual_correctness": 0.0
@@ -21,15 +25,15 @@
     {
       "question_id": "Q002",
       "category": "Chunking",
-      "faithfulness": null,
+      "faithfulness": 1.0,
       "answer_relevance": 0.8990177284925053,
-      "context_recall": 0.6666666666666666,
+      "context_recall": 0.3333333333333333,
       "factual_correctness": 0.0
     },
     {
       "question_id": "Q003",
       "category": "Chunking",
-      "faithfulness": null,
+      "faithfulness": 0.95,
       "answer_relevance": 0.9368479184682467,
       "context_recall": 0.0,
       "factual_correctness": 0.16
@@ -37,7 +41,7 @@
     {
       "question_id": "Q004",
       "category": "Chunking",
-      "faithfulness": 0.8333333333333334,
+      "faithfulness": 0.8571428571428571,
       "answer_relevance": 0.9432545777720706,
       "context_recall": 1.0,
       "factual_correctness": 0.0
@@ -45,9 +49,9 @@
     {
       "question_id": "Q005",
       "category": "Chunking",
-      "faithfulness": null,
+      "faithfulness": 1.0,
       "answer_relevance": 0.8517949577591462,
-      "context_recall": null,
+      "context_recall": 0.25,
       "factual_correctness": 0.36
     },
     {
@@ -63,7 +67,7 @@
       "category": "Chunking",
       "faithfulness": 1.0,
       "answer_relevance": 0.9703267541023203,
-      "context_recall": null,
+      "context_recall": 1.0,
       "factual_correctness": 0.81
     },
     {
@@ -71,31 +75,31 @@
       "category": "Chunking",
       "faithfulness": 0.9411764705882353,
       "answer_relevance": 0.9805025704831137,
-      "context_recall": null,
+      "context_recall": 0.3333333333333333,
       "factual_correctness": 0.18
     },
     {
       "question_id": "Q009",
       "category": "Chunking",
-      "faithfulness": null,
+      "faithfulness": 0.875,
       "answer_relevance": 0.0,
-      "context_recall": null,
+      "context_recall": 0.0,
       "factual_correctness": 0.2
     },
     {
       "question_id": "Q010",
       "category": "Chunking",
-      "faithfulness": 0.9583333333333334,
+      "faithfulness": 0.9444444444444444,
       "answer_relevance": 0.8985125769641087,
-      "context_recall": 1.0,
+      "context_recall": 0.5,
       "factual_correctness": 0.14
     },
     {
       "question_id": "Q011",
       "category": "Chunking",
-      "faithfulness": null,
+      "faithfulness": 1.0,
       "answer_relevance": 0.8746001795534647,
-      "context_recall": null,
+      "context_recall": 0.75,
       "factual_correctness": 0.3
     },
     {
@@ -103,13 +107,13 @@
       "category": "Chunking",
       "faithfulness": null,
       "answer_relevance": 0.8877234606937098,
-      "context_recall": null,
+      "context_recall": 0.0,
       "factual_correctness": 0.0
     },
     {
       "question_id": "Q013",
       "category": "Chunking",
-      "faithfulness": 0.8,
+      "faithfulness": 0.7,
       "answer_relevance": 0.8875643717940754,
       "context_recall": 1.0,
       "factual_correctness": 0.43
@@ -117,7 +121,7 @@
     {
       "question_id": "Q014",
       "category": "Chunking",
-      "faithfulness": null,
+      "faithfulness": 1.0,
       "answer_relevance": 0.948696358794173,
       "context_recall": 1.0,
       "factual_correctness": 0.57
@@ -125,17 +129,17 @@
     {
       "question_id": "Q015",
       "category": "Chunking",
-      "faithfulness": null,
+      "faithfulness": 1.0,
       "answer_relevance": 0.8861758328921885,
-      "context_recall": null,
+      "context_recall": 1.0,
       "factual_correctness": 0.6
     },
     {
       "question_id": "Q016",
       "category": "Chunking",
-      "faithfulness": null,
+      "faithfulness": 1.0,
       "answer_relevance": 0.9046794702134574,
-      "context_recall": null,
+      "context_recall": 1.0,
       "factual_correctness": 0.0
     },
     {
@@ -143,7 +147,7 @@
       "category": "Chunking",
       "faithfulness": 0.5714285714285714,
       "answer_relevance": 0.9165097901647301,
-      "context_recall": 0.0,
+      "context_recall": 0.5,
       "factual_correctness": 0.31
     },
     {
@@ -157,7 +161,7 @@
     {
       "question_id": "Q019",
       "category": "Chunking",
-      "faithfulness": null,
+      "faithfulness": 0.5625,
       "answer_relevance": 0.9143138004072872,
       "context_recall": 0.5,
       "factual_correctness": 0.16
@@ -167,21 +171,21 @@
       "category": "Chunking",
       "faithfulness": 0.8333333333333334,
       "answer_relevance": 0.8908736025736833,
-      "context_recall": null,
+      "context_recall": 0.0,
       "factual_correctness": 0.0
     },
     {
       "question_id": "Q021",
       "category": "CrossSource",
-      "faithfulness": null,
+      "faithfulness": 0.3333333333333333,
       "answer_relevance": 0.9138843021011269,
-      "context_recall": null,
+      "context_recall": 0.0,
       "factual_correctness": 0.35
     },
     {
       "question_id": "Q022",
       "category": "CrossSource",
-      "faithfulness": 0.8,
+      "faithfulness": 1.0,
       "answer_relevance": 0.8535091919831017,
       "context_recall": 1.0,
       "factual_correctness": 0.0
@@ -189,17 +193,17 @@
     {
       "question_id": "Q023",
       "category": "CrossSource",
-      "faithfulness": null,
+      "faithfulness": 1.0,
       "answer_relevance": 0.8582718797868011,
-      "context_recall": null,
+      "context_recall": 0.3333333333333333,
       "factual_correctness": 0.13
     },
     {
       "question_id": "Q024",
       "category": "CrossSource",
-      "faithfulness": null,
+      "faithfulness": 1.0,
       "answer_relevance": 0.8502685233695312,
-      "context_recall": null,
+      "context_recall": 1.0,
       "factual_correctness": 0.36
     },
     {
@@ -207,7 +211,7 @@
       "category": "Recency",
       "faithfulness": 1.0,
       "answer_relevance": 0.9595329638279061,
-      "context_recall": null,
+      "context_recall": 0.0,
       "factual_correctness": 0.22
     },
     {
@@ -215,7 +219,7 @@
       "category": "Recency",
       "faithfulness": 1.0,
       "answer_relevance": 0.8912780573847217,
-      "context_recall": null,
+      "context_recall": 0.0,
       "factual_correctness": 0.0
     },
     {
@@ -229,7 +233,7 @@
     {
       "question_id": "Q028",
       "category": "Recency",
-      "faithfulness": null,
+      "faithfulness": 0.8333333333333334,
       "answer_relevance": 0.0,
       "context_recall": 0.0,
       "factual_correctness": 0.15
@@ -253,7 +257,7 @@
     {
       "question_id": "Q031",
       "category": "Recency",
-      "faithfulness": null,
+      "faithfulness": 1.0,
       "answer_relevance": 0.8364056429669775,
       "context_recall": 1.0,
       "factual_correctness": 0.74
@@ -261,7 +265,7 @@
     {
       "question_id": "Q032",
       "category": "Recency",
-      "faithfulness": 0.7777777777777778,
+      "faithfulness": 0.6666666666666666,
       "answer_relevance": 0.9441149678332973,
       "context_recall": 0.0,
       "factual_correctness": 0.0
@@ -269,9 +273,9 @@
     {
       "question_id": "Q033",
       "category": "Visuals",
-      "faithfulness": null,
+      "faithfulness": 0.25,
       "answer_relevance": 0.9023458791867455,
-      "context_recall": null,
+      "context_recall": 1.0,
       "factual_correctness": 0.29
     },
     {
@@ -279,7 +283,7 @@
       "category": "Visuals",
       "faithfulness": 0.25,
       "answer_relevance": 0.8121428879397108,
-      "context_recall": null,
+      "context_recall": 1.0,
       "factual_correctness": 0.57
     },
     {
@@ -295,7 +299,7 @@
       "category": "Visuals",
       "faithfulness": 1.0,
       "answer_relevance": 0.9133057629915807,
-      "context_recall": 0.5,
+      "context_recall": 1.0,
       "factual_correctness": 0.24
     },
     {
@@ -317,7 +321,7 @@
     {
       "question_id": "Q039",
       "category": "Visuals",
-      "faithfulness": 0.5,
+      "faithfulness": 0.25,
       "answer_relevance": 0.0,
       "context_recall": 0.0,
       "factual_correctness": 0.0

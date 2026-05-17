@@ -7,11 +7,11 @@ Zellen mit `–` / `nan` haben keine validen Scores für diese Kombination.
 
 | Variante   |   Chunking |   CrossSource |   Recency |   Visuals |
 |:-----------|-----------:|--------------:|----------:|----------:|
-| V0         |     1.0000 |        1.0000 |    0.8889 |    0.7729 |
-| V1         |     0.9599 |        0.6250 |    0.9167 |    0.8112 |
-| V2         |     0.9519 |      nan      |    0.9444 |    0.6893 |
-| V3         |     0.8820 |        0.8000 |    0.9630 |    0.7468 |
-| V4         |     0.9158 |        0.6282 |    0.9141 |    0.7153 |
+| V0         |     0.9879 |        0.9181 |    1.0000 |    0.7812 |
+| V1         |     0.9677 |        0.8727 |    0.9688 |    0.7827 |
+| V2         |     0.9122 |        0.9427 |    0.9335 |    0.8083 |
+| V3         |     0.8779 |        0.8333 |    0.9375 |    0.6534 |
+| V4         |     0.8966 |        0.6643 |    0.9034 |    0.7406 |
 
 ## Answer Relevance
 
@@ -27,11 +27,11 @@ Zellen mit `–` / `nan` haben keine validen Scores für diese Kombination.
 
 | Variante   |   Chunking |   CrossSource |   Recency |   Visuals |
 |:-----------|-----------:|--------------:|----------:|----------:|
-| V0         |     0.6204 |        0.0000 |    0.3889 |    0.5000 |
-| V1         |     0.5682 |        1.0000 |    0.4405 |    0.4375 |
-| V2         |     0.6917 |        0.3333 |    0.4667 |    0.4375 |
-| V3         |     0.6515 |        1.0000 |    0.2000 |    0.3333 |
-| V4         |     0.7000 |        0.5000 |    0.4000 |    0.5714 |
+| V0         |     0.7375 |        0.4167 |    0.4792 |    0.4375 |
+| V1         |     0.7000 |        0.4444 |    0.3854 |    0.4375 |
+| V2         |     0.6833 |        0.5833 |    0.4271 |    0.4375 |
+| V3         |     0.5583 |        0.5833 |    0.1429 |    0.5625 |
+| V4         |     0.6711 |        0.5833 |    0.4688 |    0.6250 |
 
 ## Factual Correctness
 
@@ -45,42 +45,11 @@ Zellen mit `–` / `nan` haben keine validen Scores für diese Kombination.
 
 ## Anmerkungen zu fehlenden Scores (sparse Zellen)
 
-- **V0/Chunking/Faithfulness**: 5/20 valide Werte (Mittelwert aus 5 Fragen)
-- **V0/CrossSource/Faithfulness**: 1/4 valide Werte (Mittelwert aus 1 Fragen)
-- **V0/Recency/Faithfulness**: 3/8 valide Werte (Mittelwert aus 3 Fragen)
-- **V0/Visuals/Faithfulness**: 7/8 valide Werte (Mittelwert aus 7 Fragen)
-- **V1/Chunking/Faithfulness**: 9/20 valide Werte (Mittelwert aus 9 Fragen)
-- **V1/CrossSource/Faithfulness**: 1/4 valide Werte (Mittelwert aus 1 Fragen)
-- **V1/Recency/Faithfulness**: 4/8 valide Werte (Mittelwert aus 4 Fragen)
-- **V1/Visuals/Faithfulness**: 7/8 valide Werte (Mittelwert aus 7 Fragen)
-- **V2/Chunking/Faithfulness**: 10/20 valide Werte (Mittelwert aus 10 Fragen)
-- **V2/CrossSource/Faithfulness**: 0/4 valide Werte – RAGAS konnte keinen Score berechnen (Antworten ohne prüfbare Aussagen)
-- **V2/Recency/Faithfulness**: 3/8 valide Werte (Mittelwert aus 3 Fragen)
-- **V3/Chunking/Faithfulness**: 9/20 valide Werte (Mittelwert aus 9 Fragen)
-- **V3/CrossSource/Faithfulness**: 1/4 valide Werte (Mittelwert aus 1 Fragen)
-- **V3/Recency/Faithfulness**: 6/8 valide Werte (Mittelwert aus 6 Fragen)
-- **V3/Visuals/Faithfulness**: 7/8 valide Werte (Mittelwert aus 7 Fragen)
-- **V4/Chunking/Faithfulness**: 11/20 valide Werte (Mittelwert aus 11 Fragen)
-- **V4/CrossSource/Faithfulness**: 3/4 valide Werte (Mittelwert aus 3 Fragen)
-- **V4/Recency/Faithfulness**: 6/8 valide Werte (Mittelwert aus 6 Fragen)
-- **V4/Visuals/Faithfulness**: 6/8 valide Werte (Mittelwert aus 6 Fragen)
+- **V0/Recency/Faithfulness**: 7/8 valide Werte (Mittelwert aus 7 Fragen)
+- **V2/Chunking/Faithfulness**: 19/20 valide Werte (Mittelwert aus 19 Fragen)
+- **V3/Chunking/Faithfulness**: 19/20 valide Werte (Mittelwert aus 19 Fragen)
 - **V4/Chunking/Answer Relevance**: 19/20 valide Werte (Mittelwert aus 19 Fragen)
-- **V0/Chunking/Context Recall**: 9/20 valide Werte (Mittelwert aus 9 Fragen)
-- **V0/CrossSource/Context Recall**: 1/4 valide Werte (Mittelwert aus 1 Fragen)
-- **V0/Recency/Context Recall**: 6/8 valide Werte (Mittelwert aus 6 Fragen)
-- **V0/Visuals/Context Recall**: 7/8 valide Werte (Mittelwert aus 7 Fragen)
-- **V1/Chunking/Context Recall**: 11/20 valide Werte (Mittelwert aus 11 Fragen)
-- **V1/CrossSource/Context Recall**: 1/4 valide Werte (Mittelwert aus 1 Fragen)
-- **V1/Recency/Context Recall**: 7/8 valide Werte (Mittelwert aus 7 Fragen)
-- **V2/Chunking/Context Recall**: 10/20 valide Werte (Mittelwert aus 10 Fragen)
-- **V2/CrossSource/Context Recall**: 2/4 valide Werte (Mittelwert aus 2 Fragen)
-- **V2/Recency/Context Recall**: 5/8 valide Werte (Mittelwert aus 5 Fragen)
-- **V3/Chunking/Context Recall**: 11/20 valide Werte (Mittelwert aus 11 Fragen)
-- **V3/CrossSource/Context Recall**: 1/4 valide Werte (Mittelwert aus 1 Fragen)
-- **V3/Recency/Context Recall**: 5/8 valide Werte (Mittelwert aus 5 Fragen)
-- **V3/Visuals/Context Recall**: 6/8 valide Werte (Mittelwert aus 6 Fragen)
-- **V4/Chunking/Context Recall**: 15/20 valide Werte (Mittelwert aus 15 Fragen)
-- **V4/CrossSource/Context Recall**: 2/4 valide Werte (Mittelwert aus 2 Fragen)
-- **V4/Recency/Context Recall**: 5/8 valide Werte (Mittelwert aus 5 Fragen)
-- **V4/Visuals/Context Recall**: 7/8 valide Werte (Mittelwert aus 7 Fragen)
+- **V1/CrossSource/Context Recall**: 3/4 valide Werte (Mittelwert aus 3 Fragen)
+- **V3/Recency/Context Recall**: 7/8 valide Werte (Mittelwert aus 7 Fragen)
+- **V4/Chunking/Context Recall**: 19/20 valide Werte (Mittelwert aus 19 Fragen)
 - **V0/Chunking/Factual Correctness**: 19/20 valide Werte (Mittelwert aus 19 Fragen)
