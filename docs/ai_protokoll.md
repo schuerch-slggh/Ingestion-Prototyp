@@ -6,6 +6,34 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 24 – 2026-05-17
+
+### Prompts
+
+**Prompt 1 – AP-18 Analyse fehlender Scores:**
+> Vollständige AP-18-Spezifikation: `analyze_missing_scores.py` erstellen,
+> Fragen ohne gültige RAGAS-Scores pro Variante/Metrik identifizieren,
+> Markdown-Bericht erzeugen, EXPERIMENT_LOG + Protokoll + Commit.
+
+### Aktionen & Erkenntnisse
+
+**Schritt 1 – Skript erstellt:** `scripts/eval/analyze_missing_scores.py`
+- `collect_missing()`: lädt Bundle + ragas_*.json, findet None/NaN pro Metrik.
+- `render_report()`: Übersichtstabelle + Detailabschnitte mit Frage-ID, Kategorie,
+  n_retrieved, GT-Verfügbarkeit, Antwort-Ausschnitt.
+- Bug aus Spec korrigiert: `c.get("chunk_id")` → `c.get("id")` (wie in AP-16).
+
+**Schritt 2 – Ausführung:** Lief ohne Fehler. 168 fehlende Score-Einträge gesamt.
+Bericht: `runs/eval/aggregate/missing_scores_analysis_20260517T143043Z.md`
+
+**Hauptbefunde:**
+- Faithfulness und Context Recall haben die meisten Lücken.
+- V4 hat die wenigsten fehlenden Faithfulness-Werte (14/40).
+- Answer Relevance nahezu vollständig (nur V4: 1/40 fehlt).
+- Context Recall fehlt strukturbedingt bei Fragen ohne Ground-Truth.
+
+---
+
 ## Konversation 23 – 2026-05-15
 
 ### Prompts

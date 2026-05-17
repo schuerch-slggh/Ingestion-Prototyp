@@ -4,6 +4,40 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-17 – AP-18: Analyse fehlender RAGAS-Scores
+
+**Hintergrund:** Nach AP-15 (Rescore) und AP-17 (NaN-Transparenz) fehlte ein
+systematischer Überblick, welche konkreten Fragen pro Variante und Metrik keinen
+gültigen Score haben.
+
+**Code-Änderungen:** `scripts/eval/analyze_missing_scores.py` (neu)
+- `collect_missing(variant, questions_by_id)`: lädt Bundle + ragas_*.json,
+  identifiziert alle None/NaN-Scores pro Metrik.
+- `render_report(stats_by_variant)`: erzeugt Markdown mit Übersichtstabelle
+  (Variante × Metrik) und Detailabschnitt pro Variante/Metrik.
+- Ausgabe: `runs/eval/aggregate/missing_scores_analysis_<ts>.md`
+
+**Befunde (fehlende Scores):**
+
+| Variante | Faithfulness | Answer Relevance | Context Recall | Factual Correctness |
+|---|---|---|---|---|
+| V0 | 24/40 | 0 | 17/40 | 1/40 |
+| V1 | 19/40 | 0 | 13/40 | 0 |
+| V2 | 19/40 | 0 | 15/40 | 0 |
+| V3 | 17/40 | 0 | 17/40 | 0 |
+| V4 | 14/40 | 1/40 | 11/40 | 0 |
+
+- Faithfulness fehlt am häufigsten (14–24/40 pro Variante): tritt auf wenn RAGAS
+  keine klaren Behauptungen im Text identifizieren kann (Listen-Antworten, hedging).
+- Context Recall fehlt flächendeckend (11–17/40): jede Frage ohne Ground-Truth
+  ist nicht scorebar.
+- V4 hat die wenigsten fehlenden Faithfulness-Scores (14/40): präzisere Antworten
+  durch Bildkontext.
+- Answer Relevance vollständig für V0–V3; V4 hat 1 fehlenden Wert.
+- FactualCorrectness: V0 noch 1 fehlender Wert (Frage ohne Ground-Truth im Bundle).
+
+---
+
 ## 2026-05-17 – AP-17: Korrektur der Aggregation für NaN-Werte
 
 **Hintergrund:** Die `category_breakdown.md` zeigte `nan`-Zellen ohne Erklärung.
