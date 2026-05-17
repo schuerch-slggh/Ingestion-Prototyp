@@ -4,6 +4,33 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-17 – AP-17: Korrektur der Aggregation für NaN-Werte
+
+**Hintergrund:** Die `category_breakdown.md` zeigte `nan`-Zellen ohne Erklärung.
+Die Arithmetik war bereits korrekt (None-Werte werden vor `mean()` gefiltert), aber
+sparse Zellen waren nicht transparent dokumentiert.
+
+**Befund (Inspektion):** V2/CrossSource/Faithfulness hat **0/4** valide Werte
+(nicht 3/4 wie in der Spezifikation vermutet). Context Recall ist ebenfalls
+flächendeckend sparse (z.B. V0/Chunking: 9/20, V0/CrossSource: 1/4).
+
+**Code-Änderungen:** `scripts/eval/aggregate_full_run.py`
+- `compute_category_breakdown` gibt nun ein Tupel (means_df, counts_df) zurück,
+  wobei counts_df pro Zelle `n_valid/n_total` erfasst.
+- `write_markdown_category` generiert eine Fussnoten-Sektion für alle Zellen
+  mit `n_valid < n_total` (sowohl 0-Wert-Zellen als auch Teilmengen).
+- Neues Artefakt: `category_breakdown_counts.csv`.
+
+**Resultat:** `category_breakdown.md` enthält jetzt eine vollständige
+Anmerkungssektion. Beispiele sparse Zellen:
+- V2/CrossSource/Faithfulness: 0/4 (NaN, korrekt)
+- V0–V3/CrossSource/Faithfulness: 1/4 (1 valider Wert)
+- V0/Chunking/Context Recall: 9/20
+
+**Neues Aggregat:** `runs/eval/aggregate/full_run_2026-05-17/`
+
+---
+
 ## 2026-05-15 – AP-15: FactualCorrectness-Rescore
 
 **Hintergrund:** AP-14 lieferte für FactualCorrectness durchgängig None wegen

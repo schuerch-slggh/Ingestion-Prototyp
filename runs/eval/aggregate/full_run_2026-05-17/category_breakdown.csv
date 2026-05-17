@@ -1,0 +1,21 @@
+Variante,Kategorie,Faithfulness,Answer Relevance,Context Recall,Factual Correctness
+V0,Chunking,1.0,0.8614,0.6204,0.4268
+V0,CrossSource,1.0,0.6532,0.0,0.305
+V0,Recency,0.8889,0.7685,0.3889,0.1575
+V0,Visuals,0.7729,0.687,0.5,0.36
+V1,Chunking,0.9599,0.849,0.5682,0.3585
+V1,CrossSource,0.625,0.8647,1.0,0.22
+V1,Recency,0.9167,0.8891,0.4405,0.2375
+V1,Visuals,0.8112,0.6751,0.4375,0.3312
+V2,Chunking,0.9519,0.8472,0.6917,0.497
+V2,CrossSource,,0.6408,0.3333,0.2425
+V2,Recency,0.9444,0.8813,0.4667,0.1963
+V2,Visuals,0.6893,0.6862,0.4375,0.32
+V3,Chunking,0.882,0.8196,0.6515,0.2675
+V3,CrossSource,0.8,0.869,1.0,0.21
+V3,Recency,0.963,0.6725,0.2,0.2137
+V3,Visuals,0.7468,0.7676,0.3333,0.2575
+V4,Chunking,0.9158,0.8466,0.7,0.4335
+V4,CrossSource,0.6282,0.9026,0.5,0.2225
+V4,Recency,0.9141,0.8711,0.4,0.1963
+V4,Visuals,0.7153,0.6793,0.5714,0.405

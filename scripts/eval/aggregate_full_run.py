@@ -81,31 +81,50 @@ def compute_aggregates(all_data: dict[str, tuple]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def compute_category_breakdown(all_data: dict) -> pd.DataFrame:
-    """Berechnet pro Variante und Kategorie den Mittelwert pro Metrik."""
-    rows = []
+def compute_category_breakdown(
+    all_data: dict,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Berechnet pro Variante und Kategorie den Mittelwert pro Metrik.
+
+    Returns:
+        Tupel (means_df, counts_df) – means_df enthält Mittelwerte,
+        counts_df enthält (n_valid, n_total) als String "n/N" pro Zelle,
+        um sparse Zellen transparent zu machen.
+    """
+    rows_mean = []
+    rows_count = []
+
     for variant in VARIANTS:
         if variant not in all_data:
             continue
         _, scores = all_data[variant]
 
-        cat_scores: dict[str, dict[str, list]] = defaultdict(
+        # Sammle alle Werte und Gesamtzählungen pro Kategorie
+        cat_all: dict[str, dict[str, list]] = defaultdict(
+            lambda: {key: [] for key, _ in METRICS}
+        )
+        cat_valid: dict[str, dict[str, list]] = defaultdict(
             lambda: {key: [] for key, _ in METRICS}
         )
         for s in scores:
             cat = s.get("category", "unknown")
             for key, _ in METRICS:
+                cat_all[cat][key].append(s.get(key))
                 if s.get(key) is not None:
-                    cat_scores[cat][key].append(s[key])
+                    cat_valid[cat][key].append(s[key])
 
-        for cat, metric_lists in cat_scores.items():
-            row = {"Variante": variant.upper(), "Kategorie": cat}
+        for cat in cat_all:
+            row_mean = {"Variante": variant.upper(), "Kategorie": cat}
+            row_count = {"Variante": variant.upper(), "Kategorie": cat}
             for key, label in METRICS:
-                values = metric_lists.get(key, [])
-                row[label] = round(mean(values), 4) if values else None
-            rows.append(row)
+                valid = cat_valid[cat].get(key, [])
+                total = len(cat_all[cat].get(key, []))
+                row_mean[label] = round(mean(valid), 4) if valid else None
+                row_count[label] = f"{len(valid)}/{total}"
+            rows_mean.append(row_mean)
+            rows_count.append(row_count)
 
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows_mean), pd.DataFrame(rows_count)
 
 
 def compute_latencies(all_data: dict) -> pd.DataFrame:
@@ -164,13 +183,20 @@ def write_markdown_aggregate(aggregate: pd.DataFrame, path: Path) -> None:
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def write_markdown_category(category_df: pd.DataFrame, path: Path) -> None:
+def write_markdown_category(
+    category_df: pd.DataFrame, counts_df: pd.DataFrame, path: Path
+) -> None:
     lines = [
         "# Kategorieweise Aufschlüsselung",
         "",
         "Mittelwert der RAGAS-Metriken pro Variante und Kategorie.",
+        "Zellen mit `–` / `nan` haben keine validen Scores für diese Kombination.",
         "",
     ]
+
+    # Sammle sparse Zellen für Fussnoten (n_valid < n_total)
+    footnotes: list[str] = []
+
     for _, label in METRICS:
         if label not in category_df.columns:
             continue
@@ -181,6 +207,34 @@ def write_markdown_category(category_df: pd.DataFrame, path: Path) -> None:
         )
         lines.append(pivot.to_markdown(floatfmt=".4f"))
         lines.append("")
+
+        # Sparse-Zellen für diese Metrik erfassen
+        if label in counts_df.columns:
+            for _, row in counts_df.iterrows():
+                count_str = row[label]
+                n_valid, n_total = (int(x) for x in count_str.split("/"))
+                if 0 < n_valid < n_total:
+                    footnotes.append(
+                        f"- **{row['Variante']}/{row['Kategorie']}/{label}**: "
+                        f"{n_valid}/{n_total} valide Werte "
+                        f"(Mittelwert aus {n_valid} Fragen)"
+                    )
+                elif n_valid == 0 and n_total > 0:
+                    footnotes.append(
+                        f"- **{row['Variante']}/{row['Kategorie']}/{label}**: "
+                        f"0/{n_total} valide Werte – RAGAS konnte keinen Score "
+                        f"berechnen (Antworten ohne prüfbare Aussagen)"
+                    )
+
+    if footnotes:
+        # Deduplizieren (gleiche Zelle kann mehrfach auftauchen)
+        seen: set[str] = set()
+        unique_notes = [n for n in footnotes if not (n in seen or seen.add(n))]
+        lines.append("## Anmerkungen zu fehlenden Scores (sparse Zellen)")
+        lines.append("")
+        lines.extend(unique_notes)
+        lines.append("")
+
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -347,9 +401,10 @@ def main() -> None:
     write_markdown_aggregate(aggregate, OUTPUT_DIR / "aggregate_metrics.md")
     logger.info("Aggregat: %s", OUTPUT_DIR / "aggregate_metrics.md")
 
-    category_df = compute_category_breakdown(all_data)
+    category_df, counts_df = compute_category_breakdown(all_data)
     category_df.to_csv(OUTPUT_DIR / "category_breakdown.csv", index=False)
-    write_markdown_category(category_df, OUTPUT_DIR / "category_breakdown.md")
+    counts_df.to_csv(OUTPUT_DIR / "category_breakdown_counts.csv", index=False)
+    write_markdown_category(category_df, counts_df, OUTPUT_DIR / "category_breakdown.md")
     logger.info("Kategorien: %s", OUTPUT_DIR / "category_breakdown.md")
 
     deltas = compute_pairwise_deltas(aggregate)
