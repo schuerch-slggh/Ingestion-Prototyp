@@ -4,6 +4,54 @@ Pro Eintrag: Datum, Variante, Änderung, beobachteter Effekt.
 
 ---
 
+## 2026-05-17 – AP-20: Vollauf-Rescore von Faithfulness und Context Recall
+
+**Hintergrund:** AP-19 hat diagnostisch nachgewiesen, dass alle 168 fehlenden
+RAGAS-Werte aus AP-14 ein Concurrency-Artefakt von RAGAS 0.4.3 sind, nicht ein
+Pipeline-Befund. AP-20 holt den Rescore mit konservativen Parametern nach.
+
+**Code-Änderungen:**
+- `scripts/eval/rescore_faithfulness_recall.py`: max_workers=2, timeout=300s,
+  max_retries=5, Backup `*.json.backup_pre_ap20` pro Variante.
+
+**Rescore-Statistik:**
+
+| Variante | Faithfulness erfolgreich | Context Recall erfolgreich |
+|---|---|---|
+| V0 | 39 / 40 | 40 / 40 |
+| V1 | 40 / 40 | 39 / 40 |
+| V2 | 39 / 40 | 40 / 40 |
+| V3 | 39 / 40 | 39 / 40 |
+| V4 | 40 / 40 | 39 / 40 |
+
+Erfolgsquote: 97.5–100% pro Metrik/Variante (Akzeptanzkriterium ≥90% erfüllt).
+Die verbleibenden NaN-Werte (je 1) entstehen vermutlich bei Antworten mit
+ausschliesslichem Hedging-Text ohne extrahierbare Claims/Statements.
+
+**Neue Aggregat-Werte (Mittelwerte über alle 40 Fragen):**
+
+| Variante | Faithfulness | Answer Relevance | Context Recall | Factual Correctness |
+|---|---|---|---|---|
+| V0 | 0.941 | 0.787 | 0.594 | 0.345 |
+| V1 | 0.921 | 0.824 | 0.562 | 0.315 |
+| V2 | 0.898 | 0.801 | 0.573 | 0.376 |
+| V3 | 0.840 | 0.785 | 0.487 | 0.249 |
+| V4 | 0.844 | 0.823 | 0.611 | 0.359 |
+
+**Interpretationen:**
+- Faithfulness sinkt mit steigender Variante: V0 naive Baseline ist am treuesten
+  (einfachere Antworten, weniger Risiko für Halluzinationen); V3 Recency-Reranking
+  holt informationnsfernere Chunks → mehr ungedeckte Claims.
+- Context Recall: V4 bestes Ergebnis (0.611), Multimodalität hilft bei
+  Schulungsunterlagen-Fragen. V3 schlechtester Recall (0.487): Recency-Reranking
+  verschiebt Top-Chunks weg von inhaltlich relevanten zu zeitlich aktuellen.
+- Answer Relevance: V1 und V4 gleichauf (0.82) – gute Frage-Antwort-Passung.
+- Factual Correctness: V2 beste FC (0.376): Hybrid-Suche findet präzise Faktenquellen.
+
+**Artefakte:** `runs/eval/aggregate/full_run_2026-05-17/` (Diagramme, CSVs, Markdown)
+
+---
+
 ## 2026-05-17 – AP-19: Diagnose der RAGAS-Scoring-Ausfälle
 
 **Hintergrund:** AP-18 zeigte 168 fehlende Scores. Die ursprüngliche Hedging-Hypothese
