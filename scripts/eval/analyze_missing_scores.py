@@ -86,7 +86,7 @@ def collect_missing(
         chunk_ids = [c.get("id") for c in retrieved_chunks]
         n_retrieved = len(chunk_ids)
         answer = result.get("answer", "") or ""
-        answer_snippet = (answer[:120] + "…") if len(answer) > 120 else answer
+        query = result.get("query", "") or ""
 
         q = questions_by_id.get(qid)
         category = score_rec.get("category", q.category if q else "unknown")
@@ -98,7 +98,8 @@ def collect_missing(
                         "question_id": qid,
                         "category": category,
                         "n_retrieved": n_retrieved,
-                        "answer_snippet": answer_snippet,
+                        "question": query,
+                        "answer": answer,
                         "bundle_error": bundle_entry.get("error"),
                         "has_ground_truth": bool(
                             q and q.ground_truth and q.ground_truth.strip()
@@ -187,38 +188,35 @@ def render_report(stats_by_variant: list[dict]) -> str:
 
             lines.append(f"#### {label} ({len(missing)} fehlend)")
             lines.append("")
-            lines.append(
-                "| Frage-ID | Kategorie | n_retrieved | GT? | Antwort-Ausschnitt |"
-            )
-            lines.append("|---|---|---|---|---|")
+
             for m in sorted(missing, key=lambda x: x["question_id"]):
                 gt_marker = "ja" if m["has_ground_truth"] else "**nein**"
-                snippet = m["answer_snippet"].replace("|", "\\|")
+                lines.append(
+                    f"**{m['question_id']}** | Kategorie: {m['category']} | "
+                    f"n_retrieved: {m['n_retrieved']} | Ground-Truth: {gt_marker}"
+                )
+                lines.append("")
                 if m["bundle_error"]:
-                    snippet = f"[Fehler: {m['bundle_error']}]"
-                lines.append(
-                    f"| {m['question_id']} | {m['category']} "
-                    f"| {m['n_retrieved']} | {gt_marker} | {snippet} |"
-                )
-            lines.append("")
-
-            no_retrieval = [m for m in missing if m["n_retrieved"] == 0]
-            if no_retrieval:
-                ids = ", ".join(m["question_id"] for m in no_retrieval)
-                lines.append(
-                    f"> **Hinweis:** {len(no_retrieval)} Frage(n) ohne "
-                    f"retrieved Chunks (n_retrieved=0): {ids}"
-                )
+                    lines.append(f"> **Bundle-Fehler:** {m['bundle_error']}")
+                else:
+                    lines.append(f"*Frage:* {m['question']}")
+                    lines.append("")
+                    lines.append("*Generierte Antwort:*")
+                    lines.append("")
+                    lines.append("```")
+                    lines.append(m["answer"] if m["answer"] else "(keine Antwort)")
+                    lines.append("```")
                 lines.append("")
 
-            no_gt = [m for m in missing if not m["has_ground_truth"]]
-            if no_gt and key == "factual_correctness":
-                ids = ", ".join(m["question_id"] for m in no_gt)
-                lines.append(
-                    f"> **Hinweis:** {len(no_gt)} Frage(n) ohne Ground-Truth "
-                    f"(FactualCorrectness nicht scorebar): {ids}"
-                )
-                lines.append("")
+            if key == "factual_correctness":
+                no_gt = [m for m in missing if not m["has_ground_truth"]]
+                if no_gt:
+                    ids = ", ".join(m["question_id"] for m in no_gt)
+                    lines.append(
+                        f"> **Hinweis:** {len(no_gt)} Frage(n) ohne Ground-Truth "
+                        f"(FactualCorrectness nicht scorebar): {ids}"
+                    )
+                    lines.append("")
 
     return "\n".join(lines)
 
