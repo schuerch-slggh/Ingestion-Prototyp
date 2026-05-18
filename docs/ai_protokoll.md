@@ -6,6 +6,27 @@ Es wird am Beginn jeder Konversation mit Claude um neue Einträge erweitert.
 
 ---
 
+## Konversation 25 – 2026-05-18
+
+### Prompts
+
+**Prompt 1 – Delta-Auswertung category_breakdown.csv:**
+> Erweitere `category_breakdown.csv` mit einer Delta-Auswertung über die Pipelines
+> in den verschiedenen Kategorien. V1 vs V0, V2 vs V1, V3 vs V2, V4 vs V2.
+> Veränderungen in Prozent mit einer Nachkommastelle.
+
+### Aktionen & Erkenntnisse
+
+**Änderungen:**
+- `runs/eval/aggregate/full_run_2026-05-17/category_breakdown.csv`: 16 Delta-Zeilen
+  angehängt (ΔV0→V1, ΔV1→V2, ΔV2→V3, ΔV2→V4 je 4 Kategorien).
+- `scripts/eval/aggregate_full_run.py`: Funktionen `_fmt_pct()` und
+  `compute_category_deltas()` ergänzt; `main()` erstellt künftig die Delta-Zeilen
+  automatisch und speichert sie mit in `category_breakdown.csv`.
+- Formel: (target − base) / base × 100, Vorzeichen explizit, 1 Dezimalstelle.
+
+---
+
 ## Konversation 24 – 2026-05-17
 
 ### Prompts

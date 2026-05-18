@@ -144,6 +144,45 @@ def compute_latencies(all_data: dict) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def _fmt_pct(value: float) -> str:
+    """Formatiert einen Prozentwert mit Vorzeichen und einer Nachkommastelle."""
+    if value == 0.0:
+        return "0.0%"
+    return f"+{value:.1f}%" if value > 0 else f"{value:.1f}%"
+
+
+def compute_category_deltas(category_df: pd.DataFrame) -> pd.DataFrame:
+    """Berechnet prozentuale Veränderungen zwischen Varianten pro Kategorie.
+
+    Vergleiche: V0→V1, V1→V2, V2→V3, V2→V4.
+    Formel: (target − base) / base × 100, gerundet auf 1 Dezimalstelle.
+
+    Returns:
+        DataFrame mit Delta-Zeilen; Variante-Spalte enthält z.B. 'ΔV0→V1'.
+        Metrik-Werte sind Strings der Form '+X.X%' / '-X.X%' / '0.0%'.
+    """
+    comparisons = [("V0", "V1"), ("V1", "V2"), ("V2", "V3"), ("V2", "V4")]
+    metric_labels = [label for _, label in METRICS]
+    df_idx = category_df.set_index(["Variante", "Kategorie"])
+    rows = []
+    for base, target in comparisons:
+        delta_label = f"Δ{base}→{target}"
+        for cat in category_df["Kategorie"].unique():
+            row: dict = {"Variante": delta_label, "Kategorie": cat}
+            for ml in metric_labels:
+                try:
+                    b = df_idx.loc[(base, cat), ml]
+                    t = df_idx.loc[(target, cat), ml]
+                    if b is not None and t is not None and float(b) != 0:
+                        row[ml] = _fmt_pct((float(t) - float(b)) / float(b) * 100)
+                    else:
+                        row[ml] = None
+                except KeyError:
+                    row[ml] = None
+            rows.append(row)
+    return pd.DataFrame(rows)
+
+
 def compute_pairwise_deltas(aggregate: pd.DataFrame) -> pd.DataFrame:
     """Berechnet Differenzen V0->V1, V1->V2, V2->V3, V2->V4."""
     comparisons = [
@@ -402,7 +441,9 @@ def main() -> None:
     logger.info("Aggregat: %s", OUTPUT_DIR / "aggregate_metrics.md")
 
     category_df, counts_df = compute_category_breakdown(all_data)
-    category_df.to_csv(OUTPUT_DIR / "category_breakdown.csv", index=False)
+    delta_df = compute_category_deltas(category_df)
+    combined_category_df = pd.concat([category_df, delta_df], ignore_index=True)
+    combined_category_df.to_csv(OUTPUT_DIR / "category_breakdown.csv", index=False)
     counts_df.to_csv(OUTPUT_DIR / "category_breakdown_counts.csv", index=False)
     write_markdown_category(category_df, counts_df, OUTPUT_DIR / "category_breakdown.md")
     logger.info("Kategorien: %s", OUTPUT_DIR / "category_breakdown.md")
